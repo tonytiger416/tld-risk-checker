@@ -1,6 +1,6 @@
 import type { CategoryResult, RiskFlag } from '../types';
 import { COUNTRY_NAMES, COUNTRY_ALPHA2, COUNTRY_ALPHA3, CAPITAL_CITIES } from '../data/countries';
-import { CONTINENT_NAMES, GEOGRAPHIC_REGIONS, NOTABLE_SUBNATIONAL } from '../data/geographic';
+import { CONTINENT_NAMES, UN_M49_SUBREGIONS, GEOGRAPHIC_REGIONS, NOTABLE_SUBNATIONAL, MAJOR_CITIES } from '../data/geographic';
 
 export function checkGeographic(s: string): CategoryResult {
   const flags: RiskFlag[] = [];
@@ -65,27 +65,51 @@ export function checkGeographic(s: string): CategoryResult {
     });
   }
 
-  // 6. Geographic region
-  if (GEOGRAPHIC_REGIONS.has(s)) {
+  // 6. UN M.49 official sub-region (HIGH — AGB §7.5.2 requires government/intergovernmental support)
+  if (UN_M49_SUBREGIONS.has(s)) {
     flags.push({
       code: 'GEO-006',
-      severity: 'MEDIUM',
-      title: `".${s}" is a recognised geographic region or sub-region name`,
-      detail: 'Geographic region names can attract objections from governments or communities who consider these names to represent a geographic identifier.',
-      guidebookRef: 'AGB Section 4.3.3, pp. 207–209',
-      recommendation: 'Assess whether the relevant governments would support or object to your application.',
+      severity: 'HIGH',
+      title: `".${s}" is an official UN M.49 geographic sub-region`,
+      detail: `The United Nations Statistical Division M.49 geographic classification formally designates ".${s}" as a sub-regional geographic name. Under the AGB, applications for UN M.49 geographic region names require a letter of support or non-objection from a relevant inter-governmental body (e.g. a UN agency or regional organisation). This is a high-risk, high-cost requirement that most applicants cannot satisfy.`,
+      guidebookRef: 'AGB Section 4.3.3, pp. 207–209; UN M.49 geographic regions',
+      recommendation: 'Engage an ICANN specialist immediately. You will need coordinated governmental support from multiple nations in the region. This is extremely difficult to obtain in practice.',
     });
   }
 
-  // 7. Notable sub-national name
-  if (NOTABLE_SUBNATIONAL.has(s)) {
+  // 7. Other recognised geographic region descriptor
+  if (GEOGRAPHIC_REGIONS.has(s)) {
     flags.push({
       code: 'GEO-007',
       severity: 'MEDIUM',
+      title: `".${s}" is a recognised geographic region or descriptor`,
+      detail: 'This string is a widely recognised geographic region name or descriptor. It can attract objections from governments or communities who consider this name to represent a geographic identifier affecting their interests.',
+      guidebookRef: 'AGB Section 4.3.3, pp. 207–209',
+      recommendation: 'Assess whether the relevant governments or communities would support or object to your application.',
+    });
+  }
+
+  // 8. Notable sub-national name
+  if (NOTABLE_SUBNATIONAL.has(s)) {
+    flags.push({
+      code: 'GEO-008',
+      severity: 'MEDIUM',
       title: `".${s}" is a well-known sub-national geographic name (state, province, region)`,
-      detail: 'Sub-national geographic names may attract GAC Early Warnings or government objections, particularly for names that are strongly associated with a specific jurisdiction.',
+      detail: 'Sub-national geographic names may attract GAC Early Warnings or government objections, particularly for names strongly associated with a specific jurisdiction or that have a disputed political status.',
       guidebookRef: 'AGB Section 4.3.4, pp. 207–209',
-      recommendation: 'Consider whether you can obtain support from the relevant regional government.',
+      recommendation: 'Consider whether you can obtain support from the relevant regional or national government.',
+    });
+  }
+
+  // 9. Major world city
+  if (MAJOR_CITIES.has(s)) {
+    flags.push({
+      code: 'GEO-009',
+      severity: 'MEDIUM',
+      title: `".${s}" is a major world city`,
+      detail: `".${s}" is a widely recognised major city. City names can attract geographic objections from national or local governments under the AGB's geographic names policy, particularly where the city has strong national or cultural significance.`,
+      guidebookRef: 'AGB Section 4.3.2, pp. 205–209',
+      recommendation: 'Seek a letter of non-objection from the relevant city or national government. For .brand applications, demonstrate clear association between the brand and the city name.',
     });
   }
 

@@ -19,14 +19,16 @@ export function checkCollision(s: string): CategoryResult {
   // 2. High-collision strings
   const collisionInfo = HIGH_COLLISION_STRINGS.get(s);
   if (collisionInfo && !DEFERRED_STRINGS.has(s)) {
-    const sev = collisionInfo.level === 'high' ? 'HIGH' : 'MEDIUM';
+    const sev = collisionInfo.level === 'high' ? 'HIGH'
+      : collisionInfo.level === 'medium' ? 'MEDIUM'
+      : 'LOW';
     flags.push({
       code: 'COL-002',
       severity: sev,
-      title: `".${s}" has significant DNS collision risk`,
-      detail: collisionInfo.note + ` ICANN's Day-in-the-Life (DITL) data shows this string appears frequently in root zone queries, indicating widespread use in private/internal namespaces.`,
-      guidebookRef: 'AGB Section 5.8, pp. 211–216',
-      recommendation: 'Review ICANN\'s Name Collision Observatory data for this string. A Collision Occurrence Assessment (COA) may be required before delegation.',
+      title: `".${s}" has DNS collision risk — common in private namespaces`,
+      detail: collisionInfo.note + ` ICANN's Day-in-the-Life (DITL) data and NCAP Study Two research show this string appears in root zone queries from private/internal networks, creating collision risk when the TLD is delegated.`,
+      guidebookRef: 'AGB Section 5.8, pp. 211–216; ICANN NCAP Study Two (2023)',
+      recommendation: 'Check the ICANN Name Collision Observatory (https://newgtldprogram-nco.icann.org/) for query volume. A Collision Occurrence Assessment (COA) may be required before delegation.',
     });
   }
 

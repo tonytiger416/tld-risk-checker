@@ -1,5 +1,5 @@
 import type { CategoryResult, RiskFlag } from '../types';
-import { WELL_KNOWN_BRANDS, SENSITIVE_STRINGS } from '../data/brands';
+import { WELL_KNOWN_BRANDS, SENSITIVE_STRINGS, STOCK_EXCHANGES } from '../data/brands';
 
 // Brands that are also common English words — only flag on exact match, never as substring
 // (e.g. "american" in "americanstores" is intentional; flagging "fundamental" for "fund" is not)
@@ -73,7 +73,19 @@ export function checkTrademark(s: string, appType: 'open' | 'brand' = 'open'): C
     }
   }
 
-  // 4. TMCH reminder — always shown when no other flags (regardless of app type)
+  // 4. Stock exchange / financial market identifier
+  if (STOCK_EXCHANGES.has(s)) {
+    flags.push({
+      code: 'TM-004',
+      severity: 'HIGH',
+      title: `".${s}" is a recognised stock exchange or financial market identifier`,
+      detail: `".${s}" is an identifier for a major stock exchange or financial market. These entities hold strong trademark registrations and operate under heavy regulatory oversight. Applying for this string would very likely result in a Legal Rights Objection from the exchange operator and potential regulatory scrutiny from securities regulators.`,
+      guidebookRef: 'AGB Section 3.5, pp. 124–126; AGB Section 4.2, pp. 196–199',
+      recommendation: 'Do not apply for this string unless you are the exchange operator or have an explicit licensing agreement. The LRO risk is very high and securities regulators may also object.',
+    });
+  }
+
+  // 5. TMCH reminder — always shown when no other flags (regardless of app type)
   const hasMeaningfulFlags = flags.some(f => f.severity === 'HIGH' || f.severity === 'MEDIUM');
   if (!hasMeaningfulFlags) {
     flags.push({
