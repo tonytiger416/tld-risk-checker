@@ -77,13 +77,13 @@ export function assess(raw: string, appType: AppType = 'open'): TLDRiskReport {
   }
 
   const appWeightedAvg = appTotalWeight > 0 ? appWeightedSum / appTotalWeight : 0;
-  const applicationRiskScore = Math.round(Math.max(appWeightedAvg, maxBlockerScore * 0.9));
+  const applicationRiskScore = isHardBlocked ? 100 : Math.round(Math.max(appWeightedAvg, maxBlockerScore * 0.9));
   const applicationRiskLevel = levelFromScore(applicationRiskScore);
 
   // ---- Competitive Demand score (STRING_CONTENTION category score, 0–100) ----
   const contentionCat = categories.find(c => COMPETITIVE_DEMAND_CATEGORIES.has(c.category));
-  const competitiveDemandScore = contentionCat?.score ?? 0;
-  const competitiveDemandLevel = contentionCat?.level ?? 'CLEAR';
+  const competitiveDemandScore = isHardBlocked ? 100 : (contentionCat?.score ?? 0);
+  const competitiveDemandLevel = isHardBlocked ? 'HIGH' : (contentionCat?.level ?? 'CLEAR');
 
   // ---- Legacy overall score (kept for internal use) ----
   // Combines both dimensions for the top-level coloured border
