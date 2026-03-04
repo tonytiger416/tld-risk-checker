@@ -49,6 +49,15 @@ interface ParsedAnalysis {
   competitiveLandscape: string;
 }
 
+// Strip markdown bold/italic asterisks from plain text display
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/`(.*?)`/g, '$1')
+    .trim();
+}
+
 function parseAnalysis(raw: string): ParsedAnalysis {
   const recMatch = raw.match(/##\s*RECOMMENDATION\s*([\s\S]*?)(?=##\s*COMPETITIVE LANDSCAPE|$)/i);
   const compMatch = raw.match(/##\s*COMPETITIVE LANDSCAPE\s*([\s\S]*?)$/i);
@@ -56,14 +65,30 @@ function parseAnalysis(raw: string): ParsedAnalysis {
   const recSection = recMatch ? recMatch[1].trim() : '';
   const compSection = compMatch ? compMatch[1].trim() : '';
 
-  const firstLine = recSection.split('\n')[0].trim().toUpperCase();
-  const verdict = KNOWN_VERDICTS.find(v => firstLine.startsWith(v)) ?? null;
-  const bodyLines = recSection.split('\n').slice(1).join('\n').trim();
+  // Search through first 5 lines for a verdict — Claude sometimes adds preamble
+  const lines = recSection.split('\n');
+  let verdict: Verdict | null = null;
+  let verdictLineIdx = -1;
+
+  for (let i = 0; i < Math.min(5, lines.length); i++) {
+    const upper = lines[i].trim().toUpperCase();
+    const found = KNOWN_VERDICTS.find(v => upper === v);
+    if (found) {
+      verdict = found;
+      verdictLineIdx = i;
+      break;
+    }
+  }
+
+  // Body is everything after the verdict line (or the whole section if no verdict found)
+  const bodyLines = verdictLineIdx >= 0
+    ? lines.slice(verdictLineIdx + 1).join('\n').trim()
+    : recSection;
 
   return {
     verdict,
-    recommendationBody: bodyLines,
-    competitiveLandscape: compSection,
+    recommendationBody: stripMarkdown(bodyLines),
+    competitiveLandscape: stripMarkdown(compSection),
   };
 }
 
