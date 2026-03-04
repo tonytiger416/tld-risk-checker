@@ -19,19 +19,12 @@ const HEADER_BG: Record<RiskLevel, string> = {
   CLEAR:  'bg-green-600',
 };
 
-type Tab = 'overview' | 'details' | 'recommendations' | 'ai';
-
-const TAB_LABELS: Record<Tab, string> = {
-  overview:        'Overview',
-  details:         'Category Details',
-  recommendations: 'Recommendations',
-  ai:              'AI Analysis',
-};
+type Tab = 'overview' | 'details' | 'recommendations';
 
 export function RiskReport({ report }: { report: TLDRiskReport }) {
   const [tab, setTab] = useState<Tab>('overview');
 
-  // Cache AI analysis text so it survives tab switches without re-calling the API
+  // Cache AI analysis text so switching tabs doesn't re-call the API
   const aiCacheRef = useRef<Record<string, string>>({});
 
   return (
@@ -70,24 +63,17 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
 
       {/* Tabs */}
       <div className="flex border-b border-slate-200 bg-white/60 backdrop-blur">
-        {(['overview', 'details', 'recommendations', 'ai'] as Tab[]).map(t => (
+        {(['overview', 'details', 'recommendations'] as Tab[]).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`flex-1 py-3 text-xs sm:text-sm font-semibold transition-colors ${
+            className={`flex-1 py-3 text-sm font-semibold capitalize transition-colors ${
               tab === t
                 ? 'text-slate-900 border-b-2 border-slate-900 bg-white/80'
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            {t === 'ai' ? (
-              <span className="flex items-center justify-center gap-1">
-                ✨ <span className="hidden sm:inline">AI Analysis</span><span className="sm:hidden">AI</span>
-              </span>
-            ) : (
-              <span className="hidden sm:inline">{TAB_LABELS[t]}</span>
-            )}
-            {t !== 'ai' && <span className="sm:hidden">{t === 'overview' ? 'Overview' : t === 'details' ? 'Details' : 'Recs'}</span>}
+            {t === 'overview' ? 'Overview' : t === 'details' ? 'Category Details' : 'Recommendations'}
           </button>
         ))}
       </div>
@@ -96,6 +82,13 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
         {/* OVERVIEW TAB */}
         {tab === 'overview' && (
           <div className="space-y-5">
+            {/* AI Analysis — auto-runs on mount, cached on tab switch */}
+            <AIAnalysisPanel
+              report={report}
+              cachedText={aiCacheRef.current[report.normalized] ?? ''}
+              onCacheUpdate={(text) => { aiCacheRef.current[report.normalized] = text; }}
+            />
+
             {/* Radar chart */}
             <div className="bg-white rounded-xl border border-slate-200 p-4">
               <h3 className="text-sm font-semibold text-slate-600 mb-2">Risk Profile</h3>
@@ -175,15 +168,6 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
               <strong className="text-slate-700">Disclaimer:</strong> This tool provides a preliminary risk assessment based on publicly available criteria from the ICANN 2026 Round Applicant Guidebook (V1-2025.12.16). It does not constitute legal advice or a definitive ICANN evaluation. Always engage qualified legal and technical counsel before submitting an application.
             </div>
           </div>
-        )}
-
-        {/* AI ANALYSIS TAB */}
-        {tab === 'ai' && (
-          <AIAnalysisPanel
-            report={report}
-            cachedText={aiCacheRef.current[report.normalized] ?? ''}
-            onCacheUpdate={(text) => { aiCacheRef.current[report.normalized] = text; }}
-          />
         )}
       </div>
     </div>

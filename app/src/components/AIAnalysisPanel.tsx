@@ -50,18 +50,14 @@ interface ParsedAnalysis {
 }
 
 function parseAnalysis(raw: string): ParsedAnalysis {
-  // Split on ## headings
   const recMatch = raw.match(/##\s*RECOMMENDATION\s*([\s\S]*?)(?=##\s*COMPETITIVE LANDSCAPE|$)/i);
   const compMatch = raw.match(/##\s*COMPETITIVE LANDSCAPE\s*([\s\S]*?)$/i);
 
   const recSection = recMatch ? recMatch[1].trim() : '';
   const compSection = compMatch ? compMatch[1].trim() : '';
 
-  // Extract verdict from first line of recommendation section
   const firstLine = recSection.split('\n')[0].trim().toUpperCase();
   const verdict = KNOWN_VERDICTS.find(v => firstLine.startsWith(v)) ?? null;
-
-  // Body is everything after the first line
   const bodyLines = recSection.split('\n').slice(1).join('\n').trim();
 
   return {
@@ -76,12 +72,12 @@ function parseAnalysis(raw: string): ParsedAnalysis {
 // ---------------------------------------------------------------------------
 function friendlyError(err: Error): string {
   const msg = err.message;
-  if (msg === 'NO_KEY') return 'AI analysis is not configured for this deployment. Contact your administrator.';
-  if (msg.includes('401') || msg.includes('authentication')) return 'Invalid API key. Check the VITE_CLAUDE_API_KEY setting in Vercel.';
+  if (msg === 'NO_KEY') return 'AI analysis is not configured. Add VITE_CLAUDE_API_KEY in Vercel project settings.';
+  if (msg.includes('401') || msg.includes('authentication')) return 'Invalid API key. Check VITE_CLAUDE_API_KEY in Vercel.';
   if (msg.includes('429') || msg.includes('rate')) return 'Rate limit reached — wait a moment and try again.';
   if (msg.includes('529') || msg.includes('overload')) return 'Claude is temporarily busy. Try again in a few seconds.';
-  if (msg.includes('fetch') || msg.includes('network') || msg.includes('Failed')) return 'Network error — check your internet connection and try again.';
-  return `Unexpected error: ${msg}`;
+  if (msg.includes('fetch') || msg.includes('network') || msg.includes('Failed')) return 'Network error — check your internet connection.';
+  return `Error: ${msg}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -93,28 +89,19 @@ interface Props {
   onCacheUpdate: (text: string) => void;
 }
 
-type GenState = 'idle' | 'generating' | 'done' | 'error';
+type GenState = 'generating' | 'done' | 'error';
 
 export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
   const hasApiKey = !!(import.meta.env.VITE_CLAUDE_API_KEY as string | undefined);
 
-  // Initialise from cache if available
-  const [genState, setGenState] = useState<GenState>(cachedText ? 'done' : 'idle');
+  const [genState, setGenState] = useState<GenState>(cachedText ? 'done' : 'generating');
   const [displayText, setDisplayText] = useState(cachedText);
   const [errorMsg, setErrorMsg] = useState('');
   const accumulatedRef = useRef('');
+  // Prevent double-invocation in React StrictMode
+  const startedRef = useRef(false);
 
-  // When the report changes (new assessment), reset if the cache is empty
-  useEffect(() => {
-    if (!cachedText) {
-      setGenState('idle');
-      setDisplayText('');
-      setErrorMsg('');
-      accumulatedRef.current = '';
-    }
-  }, [report.normalized, cachedText]);
-
-  async function handleGenerate() {
+  async function doGenerate() {
     setGenState('generating');
     setDisplayText('');
     setErrorMsg('');
@@ -137,34 +124,46 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
     );
   }
 
+  // Auto-trigger on mount when there is no cached result
+  useEffect(() => {
+    if (cachedText) return;          // already have a result — show it
+    if (!hasApiKey) return;          // nothing we can do without a key
+    if (startedRef.current) return;  // already started (StrictMode guard)
+    startedRef.current = true;
+    doGenerate();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ---- No API key configured ----
   if (!hasApiKey) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="text-4xl mb-3">🔑</div>
-        <p className="text-sm font-semibold text-slate-700">AI analysis is not configured</p>
-        <p className="text-xs text-slate-500 mt-1 max-w-xs">
-          Add a <code className="bg-slate-100 px-1 rounded">VITE_CLAUDE_API_KEY</code> environment variable in your Vercel project settings and redeploy.
+      <div className="rounded-xl border border-dashed border-slate-300 px-5 py-6 text-center">
+        <p className="text-sm font-semibold text-slate-600">AI analysis not configured</p>
+        <p className="text-xs text-slate-400 mt-1">
+          Add <code className="bg-slate-100 px-1 rounded">VITE_CLAUDE_API_KEY</code> in Vercel → Project Settings → Environment Variables, then redeploy.
         </p>
       </div>
     );
   }
 
-  // ---- Idle — ready to generate ----
-  if (genState === 'idle') {
+  // ---- Generating — live streaming text ----
+  if (genState === 'generating') {
     return (
-      <div className="flex flex-col items-center justify-center py-10 text-center">
-        <div className="text-4xl mb-3">✨</div>
-        <p className="text-sm font-semibold text-slate-700 mb-1">AI-powered strategic analysis</p>
-        <p className="text-xs text-slate-500 mb-5 max-w-xs">
-          Claude will synthesise all {report.categories.length} risk categories and give you a clear apply recommendation and competitive outlook.
-        </p>
-        <button
-          onClick={handleGenerate}
-          className="px-5 py-2.5 bg-[#1e3a5f] hover:bg-[#2a4a73] text-white text-sm font-semibold rounded-xl transition-colors"
-        >
-          Generate AI Analysis
-        </button>
+      <div className="bg-white rounded-xl border border-slate-200 p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="inline-flex gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#1e3a5f] animate-bounce" style={{ animationDelay: '0ms' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#1e3a5f] animate-bounce" style={{ animationDelay: '150ms' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#1e3a5f] animate-bounce" style={{ animationDelay: '300ms' }} />
+          </span>
+          <span className="text-xs text-slate-500 font-medium">Generating AI analysis for .{report.normalized}…</span>
+        </div>
+        {displayText && (
+          <div className="text-xs text-slate-500 leading-relaxed whitespace-pre-wrap font-mono bg-slate-50 rounded-lg p-3 min-h-[80px]">
+            {displayText}
+            <span className="inline-block w-0.5 h-3.5 bg-slate-400 ml-0.5 animate-pulse align-text-bottom" />
+          </div>
+        )}
       </div>
     );
   }
@@ -172,49 +171,41 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
   // ---- Error ----
   if (genState === 'error') {
     return (
-      <div className="flex flex-col items-center justify-center py-10 text-center">
-        <div className="text-4xl mb-3">⚠️</div>
-        <p className="text-sm font-semibold text-red-700 mb-1">Analysis failed</p>
-        <p className="text-xs text-slate-500 mb-5 max-w-xs">{errorMsg}</p>
-        <button
-          onClick={handleGenerate}
-          className="px-5 py-2.5 bg-[#1e3a5f] hover:bg-[#2a4a73] text-white text-sm font-semibold rounded-xl transition-colors"
-        >
-          Try Again
-        </button>
-      </div>
-    );
-  }
-
-  // ---- Generating — show raw streaming text ----
-  if (genState === 'generating') {
-    return (
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <span className="inline-flex gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#1e3a5f] animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="w-1.5 h-1.5 rounded-full bg-[#1e3a5f] animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="w-1.5 h-1.5 rounded-full bg-[#1e3a5f] animate-bounce" style={{ animationDelay: '300ms' }} />
-          </span>
-          <span className="text-xs text-slate-500 font-medium">Analysing .{report.normalized}…</span>
-        </div>
-        <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 text-sm text-slate-700 leading-relaxed whitespace-pre-wrap font-mono text-xs min-h-[120px]">
-          {displayText}
-          <span className="inline-block w-0.5 h-4 bg-slate-500 ml-0.5 animate-pulse align-text-bottom" />
+      <div className="bg-white rounded-xl border border-red-200 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-red-700 mb-0.5">AI analysis failed</p>
+            <p className="text-xs text-slate-500">{errorMsg}</p>
+          </div>
+          <button
+            onClick={() => { startedRef.current = false; doGenerate(); }}
+            className="flex-shrink-0 text-xs text-slate-500 hover:text-slate-800 border border-slate-200 hover:border-slate-300 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );
   }
 
-  // ---- Done — parse and display structured output ----
+  // ---- Done — structured output ----
   const parsed = parseAnalysis(displayText);
   const verdictStyle = parsed.verdict ? VERDICT_STYLE[parsed.verdict] : null;
 
   return (
-    <div className="space-y-4">
-      {/* Recommendation section */}
+    <div className="space-y-3">
+      {/* Recommendation */}
       <div className="bg-white rounded-xl border border-slate-200 p-4">
-        <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">Recommendation</h3>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-widest">AI Recommendation</h3>
+          <button
+            onClick={() => { startedRef.current = false; doGenerate(); }}
+            className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+            title="Regenerate"
+          >
+            ↻ Regenerate
+          </button>
+        </div>
 
         {parsed.verdict && verdictStyle ? (
           <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm font-bold mb-3 ${verdictStyle.bg} ${verdictStyle.border} ${verdictStyle.text}`}>
@@ -223,42 +214,29 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
           </div>
         ) : null}
 
-        {parsed.recommendationBody ? (
+        {parsed.recommendationBody && (
           <p className="text-sm text-slate-700 leading-relaxed">{parsed.recommendationBody}</p>
-        ) : (
-          <p className="text-sm text-slate-500 italic">No reasoning provided.</p>
         )}
       </div>
 
-      {/* Competitive landscape section */}
+      {/* Competitive Landscape */}
       {parsed.competitiveLandscape && (
         <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">Competitive Landscape</h3>
+          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Competitive Landscape</h3>
           <p className="text-sm text-slate-700 leading-relaxed">{parsed.competitiveLandscape}</p>
         </div>
       )}
 
-      {/* Fallback: show raw text if parsing produced nothing */}
+      {/* Fallback: raw text if parsing found nothing */}
       {!parsed.verdict && !parsed.recommendationBody && !parsed.competitiveLandscape && (
         <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
           {displayText}
         </div>
       )}
 
-      {/* Regenerate button */}
-      <div className="flex justify-end">
-        <button
-          onClick={handleGenerate}
-          className="text-xs text-slate-400 hover:text-slate-600 transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-100"
-        >
-          ↻ Regenerate
-        </button>
-      </div>
-
-      {/* Disclaimer */}
-      <div className="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-xs text-slate-500">
-        <strong className="text-slate-600">AI Disclaimer:</strong> This analysis is generated by Claude and synthesises the automated risk assessment above. It does not constitute legal advice. Always engage qualified ICANN counsel before submitting an application.
-      </div>
+      <p className="text-xs text-slate-400 px-1">
+        ✨ AI-generated analysis · Not legal advice · Always consult qualified ICANN counsel before applying.
+      </p>
     </div>
   );
 }
