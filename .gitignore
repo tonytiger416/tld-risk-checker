@@ -1,0 +1,12 @@
+# Dependencies
+app/node_modules/
+
+# Build output
+app/dist/
+
+# System files
+.DS_Store
+
+# Env files
+.env
+.env.local
