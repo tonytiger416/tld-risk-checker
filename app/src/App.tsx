@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { assess, normalizeString } from './engine/assess';
-import type { TLDRiskReport } from './engine/types';
+import type { TLDRiskReport, AppType } from './engine/types';
 import { RiskReport } from './components/RiskReport';
 import { RiskBadge } from './components/RiskBadge';
 
@@ -9,6 +9,7 @@ const MAX_STRINGS = 5;
 export default function App() {
   const [inputValue, setInputValue] = useState('');
   const [tags, setTags] = useState<string[]>([]);
+  const [appType, setAppType] = useState<AppType>('open');
   const [reports, setReports] = useState<TLDRiskReport[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeReport, setActiveReport] = useState<string | null>(null);
@@ -27,10 +28,7 @@ export default function App() {
       if (tags.includes(part) || newTags.includes(part)) continue;
       newTags.push(part);
     }
-    if (newTags.length > 0) {
-      setTags(prev => [...prev, ...newTags]);
-      setError('');
-    }
+    if (newTags.length > 0) { setTags(prev => [...prev, ...newTags]); setError(''); }
     setInputValue('');
   }
 
@@ -42,32 +40,20 @@ export default function App() {
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if ((e.key === 'Enter' || e.key === ',' || e.key === ' ') && inputValue.trim()) {
-      e.preventDefault();
-      addTag(inputValue);
+      e.preventDefault(); addTag(inputValue);
     }
-    if (e.key === 'Backspace' && !inputValue && tags.length > 0) {
-      removeTag(tags[tags.length - 1]);
-    }
+    if (e.key === 'Backspace' && !inputValue && tags.length > 0) removeTag(tags[tags.length - 1]);
   }
 
   function handlePaste(e: React.ClipboardEvent<HTMLInputElement>) {
-    e.preventDefault();
-    addTag(e.clipboardData.getData('text'));
+    e.preventDefault(); addTag(e.clipboardData.getData('text'));
   }
 
   async function runAssessment() {
-    if (tags.length === 0) {
-      setError('Please enter at least one TLD string.');
-      return;
-    }
-    setLoading(true);
-    setError('');
-    setReports([]);
-    setActiveReport(null);
-
-    // Small delay to allow UI to update, then run synchronously
+    if (tags.length === 0) { setError('Please enter at least one TLD string.'); return; }
+    setLoading(true); setError(''); setReports([]); setActiveReport(null);
     await new Promise(r => setTimeout(r, 50));
-    const results = tags.map(t => assess(t));
+    const results = tags.map(t => assess(t, appType));
     setReports(results);
     setActiveReport(results[0].normalized);
     setLoading(false);
@@ -77,7 +63,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      {/* Header */}
       <header className="bg-[#1e3a5f] text-white shadow-lg">
         <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
           <div>
@@ -85,19 +70,44 @@ export default function App() {
             <p className="text-blue-200 text-sm mt-0.5">ICANN 2026 Round — Applicant Guidebook Risk Assessment</p>
           </div>
           <div className="text-right text-xs text-blue-300 hidden sm:block">
-            <div>Based on AGB V1-2025.12.16</div>
-            <div className="mt-0.5">10 risk categories · 1,436 existing TLDs</div>
+            <div>AGB V1-2025.12.16 · 11 risk categories</div>
+            <div className="mt-0.5">1,436 existing TLDs · IGO/INGO protection checks</div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-8 space-y-8">
-        {/* Input section */}
+      <main className="max-w-6xl mx-auto px-6 py-8 space-y-6">
         <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-          <h2 className="text-lg font-bold text-slate-800 mb-1">Enter Candidate TLD Strings</h2>
-          <p className="text-sm text-slate-500 mb-4">
-            Type a string and press <kbd className="px-1.5 py-0.5 bg-slate-100 rounded text-xs font-mono border">Enter</kbd> or comma to add. Up to {MAX_STRINGS} strings per assessment. Do not include the leading dot.
+          <h2 className="text-lg font-bold text-slate-800 mb-1">Assess Candidate TLD Strings</h2>
+          <p className="text-sm text-slate-500 mb-5">
+            Type a string and press <kbd className="px-1.5 py-0.5 bg-slate-100 rounded text-xs font-mono border">Enter</kbd> or comma to add. Up to {MAX_STRINGS} strings. Do not include the leading dot.
           </p>
+
+          {/* Application Type */}
+          <div className="mb-5">
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Application Type</label>
+            <div className="flex gap-3">
+              {(['open', 'brand'] as AppType[]).map(t => (
+                <button
+                  key={t}
+                  onClick={() => setAppType(t)}
+                  className={`flex-1 py-3 px-4 rounded-xl border-2 text-sm font-semibold transition-all text-left ${
+                    appType === t ? 'border-[#1e3a5f] bg-[#1e3a5f] text-white' : 'border-slate-200 text-slate-600 hover:border-slate-300 bg-slate-50'
+                  }`}
+                >
+                  <div className="font-bold">{t === 'open' ? 'Open Generic TLD' : '.Brand TLD'}</div>
+                  <div className={`text-xs mt-0.5 ${appType === t ? 'text-blue-200' : 'text-slate-400'}`}>
+                    {t === 'open' ? 'e.g. .shop, .cloud — open registration' : 'e.g. .yourcompany — single registrant'}
+                  </div>
+                </button>
+              ))}
+            </div>
+            {appType === 'brand' && (
+              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-2">
+                <strong>.Brand mode:</strong> Trademark scoring is adjusted assuming you are the rights holder. All other checks — IGO protections, geographic names, DNS collision — apply in full.
+              </p>
+            )}
+          </div>
 
           {/* Tag input */}
           <div
@@ -105,18 +115,9 @@ export default function App() {
             onClick={() => inputRef.current?.focus()}
           >
             {tags.map(tag => (
-              <span
-                key={tag}
-                className="inline-flex items-center gap-1 bg-[#1e3a5f] text-white text-sm font-semibold rounded-lg px-3 py-1"
-              >
+              <span key={tag} className="inline-flex items-center gap-1 bg-[#1e3a5f] text-white text-sm font-semibold rounded-lg px-3 py-1">
                 .{tag}
-                <button
-                  onClick={e => { e.stopPropagation(); removeTag(tag); }}
-                  className="ml-1 text-white/60 hover:text-white leading-none text-base"
-                  aria-label={`Remove .${tag}`}
-                >
-                  ×
-                </button>
+                <button onClick={e => { e.stopPropagation(); removeTag(tag); }} className="ml-1 text-white/60 hover:text-white leading-none text-base" aria-label={`Remove .${tag}`}>×</button>
               </span>
             ))}
             {tags.length < MAX_STRINGS && (
@@ -137,7 +138,7 @@ export default function App() {
           {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
 
           <div className="flex items-center justify-between mt-4">
-            <span className="text-xs text-slate-400">{tags.length}/{MAX_STRINGS} strings</span>
+            <span className="text-xs text-slate-400">{tags.length}/{MAX_STRINGS} strings · {appType === 'brand' ? '.Brand' : 'Open Generic'}</span>
             <button
               onClick={runAssessment}
               disabled={loading || tags.length === 0}
@@ -148,43 +149,38 @@ export default function App() {
           </div>
         </section>
 
-        {/* Results */}
         {reports.length > 0 && (
-          <section className="space-y-6">
-            {/* Summary bar */}
+          <section className="space-y-5">
             {reports.length > 1 && (
               <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-                <h2 className="text-sm font-semibold text-slate-500 mb-3 uppercase tracking-wide">Assessment Summary</h2>
+                <h2 className="text-xs font-semibold text-slate-500 mb-3 uppercase tracking-widest">Assessment Summary</h2>
                 <div className="flex flex-wrap gap-2">
                   {reports.map(r => (
                     <button
                       key={r.normalized}
                       onClick={() => setActiveReport(r.normalized)}
                       className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 transition-all text-sm font-semibold ${
-                        activeReport === r.normalized
-                          ? 'border-[#1e3a5f] bg-[#1e3a5f] text-white shadow'
-                          : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300'
+                        activeReport === r.normalized ? 'border-[#1e3a5f] bg-[#1e3a5f] text-white shadow' : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300'
                       }`}
                     >
                       <span>.{r.normalized}</span>
-                      <RiskBadge level={r.overallLevel} />
+                      {r.isHardBlocked
+                        ? <span className="text-xs bg-red-600 text-white rounded px-1.5 py-0.5 font-bold tracking-wide">⛔ BLOCKED</span>
+                        : <RiskBadge level={r.overallLevel} />
+                      }
                     </button>
                   ))}
                 </div>
               </div>
             )}
-
-            {/* Active report */}
-            {activeReportData && (
-              <RiskReport report={activeReportData} />
-            )}
+            {activeReportData && <RiskReport report={activeReportData} />}
           </section>
         )}
       </main>
 
       <footer className="mt-16 border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-400">
-        <p>TLD Risk Checker · Based on ICANN New gTLD Program: 2026 Round Applicant Guidebook (V1-2025.12.16)</p>
-        <p className="mt-1">For internal use only. This tool does not constitute legal advice or an official ICANN evaluation.</p>
+        <p>TLD Risk Checker · ICANN New gTLD Program: 2026 Round Applicant Guidebook (V1-2025.12.16)</p>
+        <p className="mt-1">For internal use only. Preliminary assessment only — not legal advice or an official ICANN evaluation.</p>
       </footer>
     </div>
   );

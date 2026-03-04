@@ -25,12 +25,29 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
 
   return (
     <div className={`rounded-2xl border-2 overflow-hidden shadow-sm ${BG[report.overallLevel]}`}>
+
+      {/* Hard Blocked Banner */}
+      {report.isHardBlocked && (
+        <div className="bg-red-700 text-white px-6 py-3 flex items-center gap-3">
+          <span className="text-2xl">⛔</span>
+          <div>
+            <p className="font-bold text-sm">HARD BLOCKED — DO NOT APPLY</p>
+            <p className="text-xs text-red-200 mt-0.5">This string is permanently ineligible. No amount of effort, legal action, or resources can change this outcome. Remove it from your candidate list.</p>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className={`${HEADER_BG[report.overallLevel]} px-6 py-4 text-white`}>
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-widest opacity-80">Candidate TLD</span>
-            <h2 className="text-3xl font-bold tracking-tight mt-0.5">.{report.normalized}</h2>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs font-semibold uppercase tracking-widest opacity-80">Candidate TLD</span>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${report.appType === 'brand' ? 'bg-white/20 text-white' : 'bg-white/10 text-white/80'}`}>
+                {report.appType === 'brand' ? '.Brand' : 'Open Generic'}
+              </span>
+            </div>
+            <h2 className="text-3xl font-bold tracking-tight">.{report.normalized}</h2>
           </div>
           <div className="text-right">
             <div className="text-xs opacity-80 mb-1">Overall Risk Score</div>
