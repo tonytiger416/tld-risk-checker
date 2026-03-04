@@ -60,7 +60,8 @@ STRING: .${report.normalized}
 APPLICATION TYPE: ${report.appType === 'brand' ? '.Brand TLD (single registrant — client is the rights holder)' : 'Open Generic TLD (open registration to the public)'}
 HARD BLOCKED: ${report.isHardBlocked ? 'YES — this string cannot proceed under any circumstances' : 'No'}
 
-OVERALL RISK SCORE: ${report.overallScore}/100 (${report.overallLevel})
+APPLICATION RISK SCORE: ${report.applicationRiskScore}/100 (${report.applicationRiskLevel}) — likelihood the application can succeed through ICANN evaluation
+COMPETITIVE DEMAND SCORE: ${report.competitiveDemandScore}/100 (${report.competitiveDemandLevel}) — how contested this string will be; HIGH = auction likely
 
 CATEGORY SCORES:
 ${categoryLines}

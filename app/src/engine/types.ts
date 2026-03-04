@@ -43,6 +43,30 @@ export const BLOCKER_CATEGORIES = new Set<RiskCategory>([
   'IGO_PROTECTED',
 ]);
 
+// ---------------------------------------------------------------------------
+// Category groupings — used by UI and scoring engine to separate the two
+// distinct dimensions of assessment
+// ---------------------------------------------------------------------------
+
+/** Categories that determine whether an application can succeed through ICANN */
+export const APPLICATION_RISK_CATEGORIES = new Set<RiskCategory>([
+  'RESERVED_BLOCKED',
+  'IGO_PROTECTED',
+  'STRING_SIMILARITY',
+  'GEOGRAPHIC_NAMES',
+  'DNS_COLLISION',
+  'TRADEMARK_RIGHTS',
+  'OBJECTION_GROUNDS',
+  'REGULATED_SECTORS',
+  'IDN_RISKS',
+  'EVALUATION_CRITERIA',
+]);
+
+/** Categories that determine how contested/expensive the application will be */
+export const COMPETITIVE_DEMAND_CATEGORIES = new Set<RiskCategory>([
+  'STRING_CONTENTION',
+]);
+
 export interface CategoryResult {
   category: RiskCategory;
   level: RiskLevel;
@@ -62,8 +86,17 @@ export interface TLDRiskReport {
   normalized: string;
   appType: AppType;
   assessedAt: string;
+
+  // Legacy combined score (kept for backward compat)
   overallLevel: RiskLevel;
   overallScore: number;
+
+  // Split scores — the two key dimensions
+  applicationRiskScore: number;   // 0–100 — can we get it through ICANN?
+  applicationRiskLevel: RiskLevel;
+  competitiveDemandScore: number; // 0–100 — how contested will it be?
+  competitiveDemandLevel: RiskLevel;
+
   isHardBlocked: boolean;
   categories: CategoryResult[];
   similarTLDs: SimilarTLD[];

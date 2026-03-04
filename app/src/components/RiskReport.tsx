@@ -1,9 +1,18 @@
 import { useState, useRef } from 'react';
 import type { TLDRiskReport, RiskLevel } from '../engine/types';
+import { APPLICATION_RISK_CATEGORIES, COMPETITIVE_DEMAND_CATEGORIES } from '../engine/types';
 import { RiskBadge } from './RiskBadge';
 import { RiskCategoryCard } from './RiskCategoryCard';
 import { RiskRadarChart } from './RadarChart';
 import { AIAnalysisPanel } from './AIAnalysisPanel';
+
+// Header background and card border driven by Application Risk level
+const HEADER_BG: Record<RiskLevel, string> = {
+  HIGH:   'bg-red-600',
+  MEDIUM: 'bg-amber-500',
+  LOW:    'bg-blue-600',
+  CLEAR:  'bg-green-600',
+};
 
 const BG: Record<RiskLevel, string> = {
   HIGH:   'border-red-300 bg-red-50',
@@ -12,11 +21,26 @@ const BG: Record<RiskLevel, string> = {
   CLEAR:  'border-green-300 bg-green-50',
 };
 
-const HEADER_BG: Record<RiskLevel, string> = {
-  HIGH:   'bg-red-600',
-  MEDIUM: 'bg-amber-500',
-  LOW:    'bg-blue-600',
-  CLEAR:  'bg-green-600',
+// Human-readable labels for the Competitive Demand score
+const DEMAND_LABEL: Record<RiskLevel, string> = {
+  HIGH:   'Auction Likely',
+  MEDIUM: 'Competition Expected',
+  LOW:    'Limited Interest',
+  CLEAR:  'Minimal Demand',
+};
+
+const DEMAND_COLOR: Record<RiskLevel, string> = {
+  HIGH:   'text-red-200',
+  MEDIUM: 'text-amber-200',
+  LOW:    'text-blue-200',
+  CLEAR:  'text-green-200',
+};
+
+const APP_RISK_COLOR: Record<RiskLevel, string> = {
+  HIGH:   'text-red-200',
+  MEDIUM: 'text-amber-200',
+  LOW:    'text-blue-200',
+  CLEAR:  'text-green-200',
 };
 
 type Tab = 'overview' | 'details' | 'recommendations';
@@ -27,8 +51,15 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
   // Cache AI analysis text so switching tabs doesn't re-call the API
   const aiCacheRef = useRef<Record<string, string>>({});
 
+  const appRiskLevel = report.applicationRiskLevel;
+  const demandLevel  = report.competitiveDemandLevel;
+
+  // Split categories into the two groups for the Details tab
+  const appRiskCategories = report.categories.filter(c => APPLICATION_RISK_CATEGORIES.has(c.category));
+  const demandCategories  = report.categories.filter(c => COMPETITIVE_DEMAND_CATEGORIES.has(c.category));
+
   return (
-    <div className={`rounded-2xl border-2 overflow-hidden shadow-sm ${BG[report.overallLevel]}`}>
+    <div className={`rounded-2xl border-2 overflow-hidden shadow-sm ${BG[appRiskLevel]}`}>
 
       {/* Hard Blocked Banner */}
       {report.isHardBlocked && (
@@ -41,9 +72,11 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
         </div>
       )}
 
-      {/* Header */}
-      <div className={`${HEADER_BG[report.overallLevel]} px-6 py-4 text-white`}>
-        <div className="flex items-center justify-between flex-wrap gap-3">
+      {/* Header — two scores side by side */}
+      <div className={`${HEADER_BG[appRiskLevel]} px-6 py-5 text-white`}>
+        <div className="flex items-start justify-between flex-wrap gap-4">
+
+          {/* Left — TLD identity */}
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xs font-semibold uppercase tracking-widest opacity-80">Candidate TLD</span>
@@ -53,10 +86,37 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
             </div>
             <h2 className="text-3xl font-bold tracking-tight">.{report.normalized}</h2>
           </div>
-          <div className="text-right">
-            <div className="text-xs opacity-80 mb-1">Overall Risk Score</div>
-            <div className="text-5xl font-black">{report.overallScore}</div>
-            <div className="text-xs opacity-70">out of 100</div>
+
+          {/* Right — Application Risk + Competitive Demand */}
+          <div className="flex items-stretch gap-px bg-white/20 rounded-xl overflow-hidden">
+
+            {/* Application Risk column */}
+            <div className="bg-black/20 px-5 py-3 text-right min-w-[130px]">
+              <div className="text-xs opacity-70 uppercase tracking-wider mb-1">Application Risk</div>
+              <div className="text-4xl font-black leading-none">{report.applicationRiskScore}</div>
+              <div className="text-xs opacity-50 mt-0.5">out of 100</div>
+              <div className={`mt-1.5 text-xs font-bold ${APP_RISK_COLOR[appRiskLevel]}`}>
+                {appRiskLevel === 'HIGH'   ? '● HIGH RISK'
+                : appRiskLevel === 'MEDIUM' ? '● MEDIUM RISK'
+                : appRiskLevel === 'LOW'    ? '● LOW RISK'
+                :                             '● CLEAR'}
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="w-px bg-white/10" />
+
+            {/* Competitive Demand column */}
+            <div className="bg-black/20 px-5 py-3 text-right min-w-[140px]">
+              <div className="text-xs opacity-70 uppercase tracking-wider mb-1">Competitive Demand</div>
+              <div className="text-4xl font-black leading-none">{report.competitiveDemandScore}</div>
+              <div className="text-xs opacity-50 mt-0.5">out of 100</div>
+              <div className={`mt-1.5 text-xs font-bold ${DEMAND_COLOR[demandLevel]}`}>
+                {demandLevel !== 'CLEAR' ? '● ' : '○ '}
+                {DEMAND_LABEL[demandLevel].toUpperCase()}
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -79,9 +139,11 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
       </div>
 
       <div className="p-5">
+
         {/* OVERVIEW TAB */}
         {tab === 'overview' && (
           <div className="space-y-5">
+
             {/* AI Analysis — auto-runs on mount, cached on tab switch */}
             <AIAnalysisPanel
               report={report}
@@ -138,13 +200,50 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
           </div>
         )}
 
-        {/* DETAILS TAB */}
+        {/* DETAILS TAB — two grouped sections */}
         {tab === 'details' && (
-          <div className="space-y-2">
-            <p className="text-xs text-slate-500 mb-3">Click any category to expand details and guidebook references.</p>
-            {report.categories.map(cat => (
-              <RiskCategoryCard key={cat.category} cat={cat} />
-            ))}
+          <div className="space-y-5">
+
+            {/* Application Risk section */}
+            <div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-px flex-1 bg-slate-200" />
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap px-1">
+                  Application Risk
+                </span>
+                <div className="h-px flex-1 bg-slate-200" />
+              </div>
+              <p className="text-xs text-slate-500 mb-3 px-1">
+                These categories determine whether your application can succeed through ICANN evaluation.
+                Click any row to expand details and guidebook references.
+              </p>
+              <div className="space-y-2">
+                {appRiskCategories.map(cat => (
+                  <RiskCategoryCard key={cat.category} cat={cat} />
+                ))}
+              </div>
+            </div>
+
+            {/* Competitive Demand section */}
+            <div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-px flex-1 bg-slate-200" />
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap px-1">
+                  Competitive Demand
+                </span>
+                <div className="h-px flex-1 bg-slate-200" />
+              </div>
+              <p className="text-xs text-slate-500 mb-3 px-1">
+                These signals determine how contested the string will be — how many competitors to expect
+                and whether an ICANN auction is likely.
+              </p>
+              <div className="space-y-2">
+                {demandCategories.map(cat => (
+                  <RiskCategoryCard key={cat.category} cat={cat} />
+                ))}
+              </div>
+            </div>
+
           </div>
         )}
 
@@ -169,6 +268,7 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
             </div>
           </div>
         )}
+
       </div>
     </div>
   );

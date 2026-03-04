@@ -1,5 +1,5 @@
 import type { TLDRiskReport, RiskLevel, CategoryResult, RiskFlag, AppType } from './types';
-import { BLOCKER_CATEGORIES } from './types';
+import { BLOCKER_CATEGORIES, APPLICATION_RISK_CATEGORIES, COMPETITIVE_DEMAND_CATEGORIES } from './types';
 import { checkReserved } from './checks/reserved';
 import { checkSimilarity } from './checks/similarity';
 import { checkGeographic } from './checks/geographic';
@@ -12,7 +12,8 @@ import { checkContention } from './checks/contention';
 import { checkEvaluation } from './checks/evaluation';
 import { checkIGO } from './checks/igo';
 
-const WEIGHTS: Record<string, number> = {
+// Weights for the Application Risk score (10 categories)
+const APPLICATION_RISK_WEIGHTS: Record<string, number> = {
   RESERVED_BLOCKED:    1.0,
   IGO_PROTECTED:       1.0,
   STRING_SIMILARITY:   0.9,
@@ -22,7 +23,6 @@ const WEIGHTS: Record<string, number> = {
   OBJECTION_GROUNDS:   0.7,
   REGULATED_SECTORS:   0.6,
   IDN_RISKS:           0.6,
-  STRING_CONTENTION:   0.5,
   EVALUATION_CRITERIA: 0.3,
 };
 
@@ -61,24 +61,47 @@ export function assess(raw: string, appType: AppType = 'open'): TLDRiskReport {
     c => BLOCKER_CATEGORIES.has(c.category) && c.level === 'HIGH'
   );
 
-  // Compute weighted overall score
-  let weightedSum = 0;
-  let totalWeight = 0;
+  // ---- Application Risk score (weighted average of risk categories) ----
+  let appWeightedSum = 0;
+  let appTotalWeight = 0;
   let maxBlockerScore = 0;
 
   for (const cat of categories) {
-    const w = WEIGHTS[cat.category] ?? 0.5;
-    weightedSum += cat.score * w;
-    totalWeight += w;
+    if (!APPLICATION_RISK_CATEGORIES.has(cat.category)) continue;
+    const w = APPLICATION_RISK_WEIGHTS[cat.category] ?? 0.5;
+    appWeightedSum += cat.score * w;
+    appTotalWeight += w;
     if (w >= 0.8 && cat.level === 'HIGH') {
       maxBlockerScore = Math.max(maxBlockerScore, cat.score);
     }
   }
 
-  const weightedAvg = totalWeight > 0 ? weightedSum / totalWeight : 0;
-  const overallScore = Math.round(Math.max(weightedAvg, maxBlockerScore * 0.9));
+  const appWeightedAvg = appTotalWeight > 0 ? appWeightedSum / appTotalWeight : 0;
+  const applicationRiskScore = Math.round(Math.max(appWeightedAvg, maxBlockerScore * 0.9));
+  const applicationRiskLevel = levelFromScore(applicationRiskScore);
+
+  // ---- Competitive Demand score (STRING_CONTENTION category score, 0–100) ----
+  const contentionCat = categories.find(c => COMPETITIVE_DEMAND_CATEGORIES.has(c.category));
+  const competitiveDemandScore = contentionCat?.score ?? 0;
+  const competitiveDemandLevel = contentionCat?.level ?? 'CLEAR';
+
+  // ---- Legacy overall score (kept for internal use) ----
+  // Combines both dimensions for the top-level coloured border
+  const allWeights: Record<string, number> = { ...APPLICATION_RISK_WEIGHTS, STRING_CONTENTION: 0.5 };
+  let totalWeightedSum = 0;
+  let totalWeight = 0;
+  for (const cat of categories) {
+    const w = allWeights[cat.category] ?? 0.5;
+    totalWeightedSum += cat.score * w;
+    totalWeight += w;
+  }
+  const overallScore = Math.round(Math.max(
+    totalWeight > 0 ? totalWeightedSum / totalWeight : 0,
+    maxBlockerScore * 0.9,
+  ));
   const overallLevel = levelFromScore(overallScore);
 
+  // ---- Flags and recommendations ----
   const allFlags: RiskFlag[] = categories.flatMap(c => c.flags);
   const levelOrder: Record<RiskLevel, number> = { HIGH: 3, MEDIUM: 2, LOW: 1, CLEAR: 0 };
   const topFlags = [...allFlags]
@@ -121,6 +144,10 @@ export function assess(raw: string, appType: AppType = 'open'): TLDRiskReport {
     assessedAt: new Date().toISOString(),
     overallLevel,
     overallScore,
+    applicationRiskScore,
+    applicationRiskLevel,
+    competitiveDemandScore,
+    competitiveDemandLevel,
     isHardBlocked,
     categories,
     similarTLDs,
