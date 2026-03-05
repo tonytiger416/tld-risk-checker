@@ -116,7 +116,7 @@ export default function App() {
               disabled={loading || tags.length === 0}
               className="px-6 py-2.5 bg-white hover:bg-[#e0f0ff] disabled:bg-[#0a2040] disabled:text-[#4a7898] disabled:cursor-not-allowed text-[#04101f] font-bold rounded-lg transition-colors text-sm tracking-wide font-mono"
             >
-              {loading ? 'Assessing...' : tags.length > 1 ? `Assess ${tags.length} Strings` : 'Assess Risk'}
+              {loading ? 'Assessing...' : 'Assess'}
             </button>
           </div>
         </section>
