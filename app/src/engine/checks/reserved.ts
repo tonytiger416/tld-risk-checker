@@ -1,6 +1,7 @@
 import type { CategoryResult, RiskFlag } from '../types';
 import { BLOCKED_NAMES, RESTRICTED_NAMES } from '../data/reserved-names';
 import { EXISTING_TLDS } from '../data/existing-tlds';
+import { AWARDED_NOT_DELEGATED } from '../data/prior-round';
 
 export function checkReserved(s: string): CategoryResult {
   const flags: RiskFlag[] = [];
@@ -30,7 +31,20 @@ export function checkReserved(s: string): CategoryResult {
     });
   }
 
-  // 3. Too short (< 2 characters after normalization)
+  // 3. Awarded in 2012 round but not yet delegated — effectively locked
+  const priorRound = AWARDED_NOT_DELEGATED.get(s);
+  if (priorRound) {
+    flags.push({
+      code: 'RES-009',
+      severity: 'HIGH',
+      title: `".${s}" was awarded in the 2012 ICANN round and has not been delegated`,
+      detail: priorRound.detail + (priorRound.auctionPrice ? ` Auction price: ${priorRound.auctionPrice}.` : '') + ` Current status: ${priorRound.status}.`,
+      guidebookRef: 'AGB Section 4.1.2, pp. 192–196; ICANN Registry Agreement database',
+      recommendation: `Do not apply for ".${s}" in the 2026 round. This string remains under ICANN contract or proceedings from the 2012 round. ICANN would not accept a new application while the prior-round award is unresolved. Remove it from your candidate list.`,
+    });
+  }
+
+  // 4. Too short (< 2 characters after normalization)
   if (s.length < 2) {
     flags.push({
       code: 'RES-003',
@@ -42,7 +56,7 @@ export function checkReserved(s: string): CategoryResult {
     });
   }
 
-  // 4. Exactly 2 characters (ccTLD space, very high risk)
+  // 5. Exactly 2 characters (ccTLD space, very high risk)
   if (s.length === 2 && /^[a-z]{2}$/.test(s)) {
     flags.push({
       code: 'RES-004',
