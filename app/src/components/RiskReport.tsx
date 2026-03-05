@@ -157,20 +157,23 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
               <RiskRadarChart categories={report.categories} />
             </div>
 
-            {/* Top flags */}
-            {report.topFlags.length > 0 && (
-              <div className="bg-white rounded-xl border border-slate-200 p-4">
-                <h3 className="text-sm font-semibold text-slate-600 mb-3">Top Issues</h3>
-                <div className="space-y-2">
-                  {report.topFlags.map(flag => (
-                    <div key={flag.code} className="flex items-start gap-2.5 text-sm">
-                      <RiskBadge level={flag.severity} />
-                      <span className="text-slate-700 flex-1">{flag.title}</span>
-                    </div>
-                  ))}
+            {/* Top flags — HIGH and MEDIUM only */}
+            {(() => {
+              const keyFlags = report.topFlags.filter(f => f.severity === 'HIGH' || f.severity === 'MEDIUM');
+              return keyFlags.length > 0 ? (
+                <div className="bg-white rounded-xl border border-slate-200 p-4">
+                  <h3 className="text-sm font-semibold text-slate-600 mb-3">Top Issues</h3>
+                  <div className="space-y-2">
+                    {keyFlags.map(flag => (
+                      <div key={flag.code} className="flex items-start gap-2.5 text-sm">
+                        <RiskBadge level={flag.severity} />
+                        <span className="text-slate-700 flex-1">{flag.title}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              ) : null;
+            })()}
 
             {/* Similar TLDs */}
             {report.similarTLDs.length > 0 && (
