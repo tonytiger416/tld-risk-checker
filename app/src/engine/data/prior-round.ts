@@ -14,10 +14,10 @@ export interface PriorRoundInfo {
 export const AWARDED_NOT_DELEGATED: Map<string, PriorRoundInfo> = new Map([
 
   ['web', {
-    winner: 'Nu Dot Co LLC',
+    winner: 'Nu Dot Co LLC (covertly backed by Verisign)',
     auctionPrice: '$135,000,000 USD',
-    status: 'Under ICANN IRP and litigation — not delegated as of 2026',
-    detail: '.web was awarded to Nu Dot Co LLC at ICANN auction in July 2016 — the highest price ever paid for a new gTLD ($135M). Verisign and Afilias challenged the auction process via ICANN\'s Independent Review Panel. The string has remained trapped in proceedings for nearly a decade and has not been delegated. A new 2026 application for this string would almost certainly be rejected by ICANN as it remains under contract from the prior round.',
+    status: 'Under active ICANN IRP (second panel) — not delegated as of 2026',
+    detail: '.web was awarded to Nu Dot Co LLC at ICANN auction on 27 July 2016 — the highest price ever paid for a new gTLD ($135M). Nu Dot Co was subsequently revealed to be covertly backed by Verisign, which had separately opposed the auction process. Afilias (now Altanovo) filed a first IRP challenging the auction; the IRP panel ruled in May 2021 that ICANN must make a formal decision. The ICANN Board decided in April 2023 that Nu Dot Co had not violated the rules. Altanovo filed a second IRP against ICANN in October 2023. That second IRP is actively ongoing as of early 2026, in pre-hearing phase with merits briefs due in mid-2025. The string has not been delegated and cannot be applied for in the 2026 round while the prior-round award and IRP remain unresolved.',
   }],
 
 ]);
