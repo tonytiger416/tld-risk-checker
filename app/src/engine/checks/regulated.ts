@@ -35,11 +35,11 @@ export function checkRegulated(s: string): CategoryResult {
 
   const highFlags = flags.filter(f => f.severity === 'HIGH');
   const medFlags = flags.filter(f => f.severity === 'MEDIUM');
-  const score = highFlags.length > 0 ? 70 : medFlags.length > 0 ? 45 : 0;
+  const score = highFlags.length > 0 ? 85 : medFlags.length > 0 ? 45 : 0;
 
   return {
     category: 'REGULATED_SECTORS',
-    level: score >= 65 ? 'HIGH' : score >= 40 ? 'MEDIUM' : score > 0 ? 'LOW' : 'CLEAR',
+    level: score >= 80 ? 'HIGH' : score >= 40 ? 'MEDIUM' : score > 0 ? 'LOW' : 'CLEAR',
     score,
     flags,
     summary: flags.length === 0

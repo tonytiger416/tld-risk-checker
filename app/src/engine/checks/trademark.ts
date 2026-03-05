@@ -100,11 +100,11 @@ export function checkTrademark(s: string, appType: 'open' | 'brand' = 'open'): C
 
   const highFlags = flags.filter(f => f.severity === 'HIGH');
   const medFlags = flags.filter(f => f.severity === 'MEDIUM');
-  const score = highFlags.length > 0 ? 90 : medFlags.length > 0 ? 50 : 10;
+  const score = highFlags.length > 0 ? 90 : medFlags.length > 0 ? 50 : 0;
 
   return {
     category: 'TRADEMARK_RIGHTS',
-    level: score >= 80 ? 'HIGH' : score >= 40 ? 'MEDIUM' : 'LOW',
+    level: score >= 80 ? 'HIGH' : score >= 40 ? 'MEDIUM' : score > 0 ? 'LOW' : 'CLEAR',
     score,
     flags,
     summary: highFlags.length > 0

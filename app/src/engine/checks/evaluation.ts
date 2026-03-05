@@ -41,10 +41,12 @@ export function checkEvaluation(_s: string): CategoryResult {
 
   flags.push(...infoFlags);
 
+  // These are universal requirements that apply to every string — not string-specific risks.
+  // Score 0 so they don't inflate the application risk score; flags still surface in the UI.
   return {
     category: 'EVALUATION_CRITERIA',
-    level: 'LOW',
-    score: 15,
+    level: 'CLEAR',
+    score: 0,
     flags,
     summary: 'Standard application requirements apply. Review the guidebook checklist before submitting.',
   };
