@@ -69,10 +69,6 @@ export default function App() {
             <h1 className="text-2xl font-bold tracking-tight">TLD Risk Checker</h1>
             <p className="text-blue-200 text-sm mt-0.5">ICANN 2026 Round — Applicant Guidebook Risk Assessment</p>
           </div>
-          <div className="text-right text-xs text-blue-300 hidden sm:block">
-            <div>AGB V1-2025.12.16 · 11 risk categories</div>
-            <div className="mt-0.5">1,436 existing TLDs · IGO/INGO protection checks</div>
-          </div>
         </div>
       </header>
 
