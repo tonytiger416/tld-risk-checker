@@ -46,6 +46,25 @@ Example:
 Write 3–4 sentences covering: realistic number of competing applicants based on 2012 history and current market signals, estimated auction reserve budget you should hold, your competitive positioning relative to likely opponents, and one specific strategic differentiator to develop in your application. Plain text only.`;
 
 // ---------------------------------------------------------------------------
+// Deterministically compute the verdict from engine scores
+// This is the source of truth — Claude must use this verdict exactly
+// ---------------------------------------------------------------------------
+type Verdict =
+  | 'STRONG APPLY'
+  | 'APPLY WITH STRATEGY'
+  | 'HIGH RISK – PROCEED WITH CAUTION'
+  | 'DO NOT APPLY';
+
+export function computeVerdict(report: TLDRiskReport): Verdict {
+  if (report.isHardBlocked || report.applicationRiskLevel === 'HIGH') return 'DO NOT APPLY';
+  if (report.applicationRiskLevel === 'MEDIUM') return 'HIGH RISK – PROCEED WITH CAUTION';
+  if (report.applicationRiskLevel === 'LOW') return 'APPLY WITH STRATEGY';
+  // CLEAR application risk
+  if (report.competitiveDemandLevel === 'HIGH') return 'APPLY WITH STRATEGY';
+  return 'STRONG APPLY';
+}
+
+// ---------------------------------------------------------------------------
 // Build the user message from a full TLDRiskReport
 // ---------------------------------------------------------------------------
 export function buildPrompt(report: TLDRiskReport): string {
@@ -72,6 +91,8 @@ export function buildPrompt(report: TLDRiskReport): string {
     ? report.recommendations.map(r => `  - ${r}`).join('\n')
     : '  No specific recommendations.';
 
+  const verdict = computeVerdict(report);
+
   return `Assess this TLD application and provide your expert opinion.
 
 STRING: .${report.normalized}
@@ -80,6 +101,16 @@ HARD BLOCKED: ${report.isHardBlocked ? 'YES — this string cannot proceed under
 
 APPLICATION RISK SCORE: ${report.applicationRiskScore}/100 (${report.applicationRiskLevel}) — likelihood the application can succeed through ICANN evaluation
 COMPETITIVE DEMAND SCORE: ${report.competitiveDemandScore}/100 (${report.competitiveDemandLevel}) — how contested this string will be; HIGH = auction likely
+
+REQUIRED VERDICT: ${verdict}
+You MUST use exactly "${verdict}" as the first line of your RECOMMENDATION section. Do not substitute, rephrase, or choose a different verdict — the verdict is fixed by the engine scores above. Your role is to explain the reasoning behind it.
+
+COMPETITIVE LANDSCAPE ALIGNMENT: Your competitive landscape section must reflect the engine's competitive demand level of ${report.competitiveDemandLevel}. ${
+  report.competitiveDemandLevel === 'HIGH'   ? 'This is a highly contested string — auction is likely. Reflect urgency around budget and strategy.' :
+  report.competitiveDemandLevel === 'MEDIUM' ? 'Moderate competition is expected. Reflect realistic contender count and positioning.' :
+  report.competitiveDemandLevel === 'LOW'    ? 'Limited applicant interest is expected. Reflect the relatively clear path but note any niche competitors.' :
+                                               'Minimal competitive demand. Reflect that contention is unlikely and auction budget is low priority.'
+}
 
 CATEGORY SCORES:
 ${categoryLines}

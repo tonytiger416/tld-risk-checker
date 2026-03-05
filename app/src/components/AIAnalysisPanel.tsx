@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import type { TLDRiskReport } from '../engine/types';
-import { streamAnalysis } from '../lib/claude';
+import { streamAnalysis, computeVerdict } from '../lib/claude';
 
 type Verdict =
   | 'STRONG APPLY'
@@ -192,7 +192,9 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
   }
 
   const parsed = parseAnalysis(displayText);
-  const verdictStyle = parsed.verdict ? VERDICT_STYLE[parsed.verdict] : null;
+  // Verdict is always derived from the engine — never from Claude's text
+  const verdict = computeVerdict(report);
+  const verdictStyle = VERDICT_STYLE[verdict];
 
   return (
     <div className="space-y-3">
@@ -210,14 +212,12 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
           </button>
         </div>
 
-        {parsed.verdict && verdictStyle && (
-          <div className={`inline-flex items-center gap-2.5 px-4 py-2 rounded border ${verdictStyle.border} mb-4`}>
-            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${verdictStyle.dot}`} />
-            <span className={`text-sm font-mono font-bold tracking-wider ${verdictStyle.text}`}>
-              {parsed.verdict}
-            </span>
-          </div>
-        )}
+        <div className={`inline-flex items-center gap-2.5 px-4 py-2 rounded border ${verdictStyle.border} mb-4`}>
+          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${verdictStyle.dot}`} />
+          <span className={`text-sm font-mono font-bold tracking-wider ${verdictStyle.text}`}>
+            {verdict}
+          </span>
+        </div>
 
         {parsed.recommendationBody && (
           <p className="text-sm text-[#d8eeff] leading-relaxed">{parsed.recommendationBody}</p>
