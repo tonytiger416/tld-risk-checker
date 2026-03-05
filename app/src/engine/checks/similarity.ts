@@ -208,10 +208,8 @@ export function checkSimilarity(s: string): { result: CategoryResult; similarTLD
     : topScore >= 50 ? 20             // mild similarity → LOW
     : 0;
 
-  // Plural/singular variants and phonetic matches carry inherent risk regardless
-  // of their visual score — ensure the category level reflects the flag severity
+  // Plural/singular variants carry inherent MEDIUM risk regardless of visual score
   if (pluralMatch && score < 45) score = 45;   // SIM-004 is MEDIUM → category must be ≥ MEDIUM
-  if (phoneticMatch && score < 20) score = 20; // SIM-003 is LOW   → category must be ≥ LOW
 
   return {
     result: {

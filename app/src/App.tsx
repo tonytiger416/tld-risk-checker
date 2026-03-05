@@ -162,7 +162,7 @@ export default function App() {
                       <span>.{r.normalized}</span>
                       {r.isHardBlocked
                         ? <span className="text-xs bg-red-600 text-white rounded px-1.5 py-0.5 font-bold tracking-wide">⛔ BLOCKED</span>
-                        : <RiskBadge level={r.overallLevel} />
+                        : <RiskBadge level={r.applicationRiskLevel} />
                       }
                     </button>
                   ))}

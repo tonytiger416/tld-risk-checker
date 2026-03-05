@@ -12,19 +12,6 @@ import { checkContention } from './checks/contention';
 import { checkEvaluation } from './checks/evaluation';
 import { checkIGO } from './checks/igo';
 
-// Weights for the Application Risk score (10 categories)
-const APPLICATION_RISK_WEIGHTS: Record<string, number> = {
-  RESERVED_BLOCKED:    1.0,
-  IGO_PROTECTED:       1.0,
-  STRING_SIMILARITY:   0.9,
-  GEOGRAPHIC_NAMES:    0.85,
-  DNS_COLLISION:       0.8,
-  TRADEMARK_RIGHTS:    0.7,
-  OBJECTION_GROUNDS:   0.7,
-  REGULATED_SECTORS:   0.6,
-  IDN_RISKS:           0.6,
-  EVALUATION_CRITERIA: 0.3,
-};
 
 function levelFromScore(score: number): RiskLevel {
   if (score >= 70) return 'HIGH';
@@ -61,40 +48,22 @@ export function assess(raw: string, appType: AppType = 'open'): TLDRiskReport {
     c => BLOCKER_CATEGORIES.has(c.category) && c.level === 'HIGH'
   );
 
-  // ---- Application Risk score (weighted average of risk categories) ----
-  let appWeightedSum = 0;
-  let appTotalWeight = 0;
-  let maxBlockerScore = 0;
+  // ---- Application Risk score ----
+  // Anchored to the single worst category finding, with a small additive bonus
+  // (+3 pts) for each additional fired category. This prevents dilution of a
+  // real finding by clean categories, and gives meaningful differentiation
+  // between strings with one concern vs strings with multiple concerns.
+  // A HIGH finding always drives the score to at least that category's raw score.
+  const firedAppCats = categories.filter(
+    c => APPLICATION_RISK_CATEGORIES.has(c.category) && c.score > 0
+  );
 
-  for (const cat of categories) {
-    if (!APPLICATION_RISK_CATEGORIES.has(cat.category)) continue;
-    const w = APPLICATION_RISK_WEIGHTS[cat.category] ?? 0.5;
-    appWeightedSum += cat.score * w;
-    appTotalWeight += w;
-    if (w >= 0.8 && cat.level === 'HIGH') {
-      maxBlockerScore = Math.max(maxBlockerScore, cat.score);
-    }
-  }
-
-  const appWeightedAvg = appTotalWeight > 0 ? appWeightedSum / appTotalWeight : 0;
-
-  // Floor rule — a single flag in any application risk category cannot be diluted
-  // to near-zero by clean scores in other categories. One real ICANN finding is a
-  // real problem, regardless of how clean everything else is.
-  const appCategoryHighest = categories
-    .filter(c => APPLICATION_RISK_CATEGORIES.has(c.category))
-    .reduce<RiskLevel>((worst, c) => {
-      const order: Record<RiskLevel, number> = { HIGH: 3, MEDIUM: 2, LOW: 1, CLEAR: 0 };
-      return order[c.level] > order[worst] ? c.level : worst;
-    }, 'CLEAR');
-
-  const appFloor = appCategoryHighest === 'HIGH'   ? 70
-                 : appCategoryHighest === 'MEDIUM' ? 35
-                 : appCategoryHighest === 'LOW'    ? 10
-                 : 0;
+  const maxCatScore = firedAppCats.reduce((m, c) => Math.max(m, c.score), 0);
+  const maxHighScore = firedAppCats.filter(c => c.level === 'HIGH').reduce((m, c) => Math.max(m, c.score), 0);
+  const additionalFired = Math.max(0, firedAppCats.length - 1);
 
   const applicationRiskScore = isHardBlocked ? 100
-    : Math.round(Math.max(appWeightedAvg, maxBlockerScore * 0.9, appFloor));
+    : Math.round(Math.min(99, Math.max(maxCatScore, maxHighScore) + additionalFired * 3));
   const applicationRiskLevel = levelFromScore(applicationRiskScore);
 
   // ---- Competitive Demand score (STRING_CONTENTION category score, 0–100) ----
@@ -102,21 +71,8 @@ export function assess(raw: string, appType: AppType = 'open'): TLDRiskReport {
   const competitiveDemandScore = isHardBlocked ? 100 : (contentionCat?.score ?? 0);
   const competitiveDemandLevel = isHardBlocked ? 'HIGH' : (contentionCat?.level ?? 'CLEAR');
 
-  // ---- Legacy overall score (kept for internal use) ----
-  // Combines both dimensions for the top-level coloured border
-  const allWeights: Record<string, number> = { ...APPLICATION_RISK_WEIGHTS, STRING_CONTENTION: 0.5 };
-  let totalWeightedSum = 0;
-  let totalWeight = 0;
-  for (const cat of categories) {
-    const w = allWeights[cat.category] ?? 0.5;
-    totalWeightedSum += cat.score * w;
-    totalWeight += w;
-  }
-  const overallScore = Math.round(Math.max(
-    totalWeight > 0 ? totalWeightedSum / totalWeight : 0,
-    maxBlockerScore * 0.9,
-    appFloor,
-  ));
+  // overallScore drives the card border colour — use the same formula as applicationRiskScore
+  const overallScore = applicationRiskScore;
   const overallLevel = levelFromScore(overallScore);
 
   // ---- Flags and recommendations ----
