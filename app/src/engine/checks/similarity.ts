@@ -120,11 +120,11 @@ export function checkSimilarity(s: string): { result: CategoryResult; similarTLD
     const t = topVisual.find(t => t.visualScore >= 75)!;
     flags.push({
       code: 'SIM-002',
-      severity: 'MEDIUM',
-      title: `Visually similar to existing TLD ".${t.tld}" — ${t.visualScore}% match`,
-      detail: `".${s}" has notable visual similarity to ".${t.tld}" under visually-weighted comparison. While this may not automatically fail string review, it warrants verification against ICANN's official NIST similarity tool before filing.`,
-      guidebookRef: 'AGB Section 7.3, pp. 236–247',
-      recommendation: `Test against ICANN's official string similarity checker. If the NIST score crosses the threshold, this will be flagged at Initial Evaluation.`,
+      severity: 'HIGH',
+      title: `Visually similar to existing TLD ".${t.tld}" — ${t.visualScore}% match (at or above ICANN rejection threshold)`,
+      detail: `".${s}" scores ${t.visualScore}% visual similarity against ".${t.tld}" under visually-weighted character comparison. ICANN's published threshold for string similarity objections is historically 70–75%. Strings at or above this level have been rejected at Initial Evaluation or flagged for expert panel review. This is a high application risk — not merely a caution.`,
+      guidebookRef: 'AGB Section 7.3, pp. 236–247; NIST Visual Similarity Algorithm',
+      recommendation: `Test immediately against ICANN's official NIST string similarity tool before investing further. At ${t.visualScore}% similarity to an existing TLD, rejection at Initial Evaluation is a realistic outcome. Modify the string or prepare a strong distinctiveness argument.`,
     });
   }
 
@@ -152,10 +152,10 @@ export function checkSimilarity(s: string): { result: CategoryResult; similarTLD
     });
   }
 
-  const score = topScore >= 90 ? 92
-    : topScore >= 80 ? 75
-    : topScore >= 70 ? 55
-    : topScore >= 60 ? 35
+  const score = topScore >= 90 ? 92   // SIM-001: extreme — near-certain rejection
+    : topScore >= 75 ? 82             // SIM-002: at/above ICANN published threshold → HIGH
+    : topScore >= 60 ? 45             // below threshold but notable → MEDIUM
+    : topScore >= 50 ? 20             // mild similarity → LOW
     : 0;
 
   return {
