@@ -1,9 +1,8 @@
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import type { TLDRiskReport, RiskLevel } from '../engine/types';
 import { APPLICATION_RISK_CATEGORIES, COMPETITIVE_DEMAND_CATEGORIES } from '../engine/types';
 import { RiskBadge } from './RiskBadge';
 import { RiskCategoryCard } from './RiskCategoryCard';
-import { RiskRadarChart } from './RadarChart';
 import { AIAnalysisPanel } from './AIAnalysisPanel';
 
 // Header background and card border driven by Application Risk level
@@ -43,18 +42,13 @@ const APP_RISK_COLOR: Record<RiskLevel, string> = {
   CLEAR:  'text-green-200',
 };
 
-type Tab = 'overview' | 'details';
-
 export function RiskReport({ report }: { report: TLDRiskReport }) {
-  const [tab, setTab] = useState<Tab>('overview');
-
-  // Cache AI analysis text so switching tabs doesn't re-call the API
+  // Cache AI analysis text so re-renders don't re-call the API
   const aiCacheRef = useRef<Record<string, string>>({});
 
   const appRiskLevel = report.applicationRiskLevel;
   const demandLevel  = report.competitiveDemandLevel;
 
-  // Split categories into the two groups for the Details tab
   const appRiskCategories = report.categories.filter(c => APPLICATION_RISK_CATEGORIES.has(c.category));
   const demandCategories  = report.categories.filter(c => COMPETITIVE_DEMAND_CATEGORIES.has(c.category));
 
@@ -116,135 +110,98 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-slate-200 bg-white/60 backdrop-blur">
-        {(['overview', 'details'] as Tab[]).map(t => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`flex-1 py-3 text-sm font-semibold capitalize transition-colors ${
-              tab === t
-                ? 'text-slate-900 border-b-2 border-slate-900 bg-white/80'
-                : 'text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            {t === 'overview' ? 'Overview' : 'Category Details'}
-          </button>
-        ))}
-      </div>
+      <div className="p-5 space-y-5">
 
-      <div className="p-5">
+        {/* AI Analysis */}
+        <AIAnalysisPanel
+          report={report}
+          cachedText={aiCacheRef.current[report.normalized] ?? ''}
+          onCacheUpdate={(text) => { aiCacheRef.current[report.normalized] = text; }}
+        />
 
-        {/* OVERVIEW TAB */}
-        {tab === 'overview' && (
-          <div className="space-y-5">
-
-            {/* AI Analysis — auto-runs on mount, cached on tab switch */}
-            <AIAnalysisPanel
-              report={report}
-              cachedText={aiCacheRef.current[report.normalized] ?? ''}
-              onCacheUpdate={(text) => { aiCacheRef.current[report.normalized] = text; }}
-            />
-
-            {/* Radar chart */}
+        {/* Top flags — HIGH and MEDIUM only */}
+        {(() => {
+          const keyFlags = report.topFlags.filter(f => f.severity === 'HIGH' || f.severity === 'MEDIUM');
+          return keyFlags.length > 0 ? (
             <div className="bg-white rounded-xl border border-slate-200 p-4">
-              <h3 className="text-sm font-semibold text-slate-600 mb-2">Risk Profile</h3>
-              <RiskRadarChart categories={report.categories} />
+              <h3 className="text-sm font-semibold text-slate-600 mb-3">Top Issues</h3>
+              <div className="space-y-2">
+                {keyFlags.map(flag => (
+                  <div key={flag.code} className="flex items-start gap-2.5 text-sm">
+                    <RiskBadge level={flag.severity} />
+                    <span className="text-slate-700 flex-1">{flag.title}</span>
+                  </div>
+                ))}
+              </div>
             </div>
+          ) : null;
+        })()}
 
-            {/* Top flags — HIGH and MEDIUM only */}
-            {(() => {
-              const keyFlags = report.topFlags.filter(f => f.severity === 'HIGH' || f.severity === 'MEDIUM');
-              return keyFlags.length > 0 ? (
-                <div className="bg-white rounded-xl border border-slate-200 p-4">
-                  <h3 className="text-sm font-semibold text-slate-600 mb-3">Top Issues</h3>
-                  <div className="space-y-2">
-                    {keyFlags.map(flag => (
-                      <div key={flag.code} className="flex items-start gap-2.5 text-sm">
-                        <RiskBadge level={flag.severity} />
-                        <span className="text-slate-700 flex-1">{flag.title}</span>
-                      </div>
-                    ))}
+        {/* Similar TLDs */}
+        {report.similarTLDs.length > 0 && (
+          <div className="bg-white rounded-xl border border-slate-200 p-4">
+            <h3 className="text-sm font-semibold text-slate-600 mb-3">Most Similar Existing TLDs</h3>
+            <div className="space-y-1.5">
+              {report.similarTLDs.map(t => (
+                <div key={t.tld} className="flex items-center justify-between">
+                  <span className="text-sm font-mono font-medium text-slate-700">.{t.tld}</span>
+                  <div className="flex items-center gap-2 flex-1 mx-4">
+                    <div className="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-slate-400"
+                        style={{ width: `${t.visualScore}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-slate-500">{t.visualScore}%</span>
+                    <span className="text-xs text-slate-400 capitalize">({t.type})</span>
                   </div>
                 </div>
-              ) : null;
-            })()}
-
-            {/* Similar TLDs */}
-            {report.similarTLDs.length > 0 && (
-              <div className="bg-white rounded-xl border border-slate-200 p-4">
-                <h3 className="text-sm font-semibold text-slate-600 mb-3">Most Similar Existing TLDs</h3>
-                <div className="space-y-1.5">
-                  {report.similarTLDs.map(t => (
-                    <div key={t.tld} className="flex items-center justify-between">
-                      <span className="text-sm font-mono font-medium text-slate-700">.{t.tld}</span>
-                      <div className="flex items-center gap-2 flex-1 mx-4">
-                        <div className="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                          <div
-                            className="h-full rounded-full bg-slate-400"
-                            style={{ width: `${t.visualScore}%` }}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs text-slate-500">{t.visualScore}%</span>
-                        <span className="text-xs text-slate-400 capitalize">({t.type})</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
         )}
 
-        {/* DETAILS TAB — two grouped sections */}
-        {tab === 'details' && (
-          <div className="space-y-5">
-
-            {/* Application Risk section */}
-            <div>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-px flex-1 bg-slate-200" />
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap px-1">
-                  Application Risk
-                </span>
-                <div className="h-px flex-1 bg-slate-200" />
-              </div>
-              <p className="text-xs text-slate-500 mb-3 px-1">
-                These categories determine whether your application can succeed through ICANN evaluation.
-                Click any row to expand details and guidebook references.
-              </p>
-              <div className="space-y-2">
-                {appRiskCategories.map(cat => (
-                  <RiskCategoryCard key={cat.category} cat={cat} />
-                ))}
-              </div>
-            </div>
-
-            {/* Competitive Demand section */}
-            <div>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-px flex-1 bg-slate-200" />
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap px-1">
-                  Competitive Demand
-                </span>
-                <div className="h-px flex-1 bg-slate-200" />
-              </div>
-              <p className="text-xs text-slate-500 mb-3 px-1">
-                These signals determine how contested the string will be — how many competitors to expect
-                and whether an ICANN auction is likely.
-              </p>
-              <div className="space-y-2">
-                {demandCategories.map(cat => (
-                  <RiskCategoryCard key={cat.category} cat={cat} />
-                ))}
-              </div>
-            </div>
-
+        {/* Application Risk categories */}
+        <div>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="h-px flex-1 bg-slate-200" />
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap px-1">
+              Application Risk
+            </span>
+            <div className="h-px flex-1 bg-slate-200" />
           </div>
-        )}
+          <p className="text-xs text-slate-500 mb-3 px-1">
+            These categories determine whether your application can succeed through ICANN evaluation.
+            Click any row to expand details and guidebook references.
+          </p>
+          <div className="space-y-2">
+            {appRiskCategories.map(cat => (
+              <RiskCategoryCard key={cat.category} cat={cat} />
+            ))}
+          </div>
+        </div>
 
+        {/* Competitive Demand categories */}
+        <div>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="h-px flex-1 bg-slate-200" />
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap px-1">
+              Competitive Demand
+            </span>
+            <div className="h-px flex-1 bg-slate-200" />
+          </div>
+          <p className="text-xs text-slate-500 mb-3 px-1">
+            These signals determine how contested the string will be — how many competitors to expect
+            and whether an ICANN auction is likely.
+          </p>
+          <div className="space-y-2">
+            {demandCategories.map(cat => (
+              <RiskCategoryCard key={cat.category} cat={cat} />
+            ))}
+          </div>
+        </div>
 
       </div>
     </div>
