@@ -77,7 +77,24 @@ export function assess(raw: string, appType: AppType = 'open'): TLDRiskReport {
   }
 
   const appWeightedAvg = appTotalWeight > 0 ? appWeightedSum / appTotalWeight : 0;
-  const applicationRiskScore = isHardBlocked ? 100 : Math.round(Math.max(appWeightedAvg, maxBlockerScore * 0.9));
+
+  // Floor rule — a single flag in any application risk category cannot be diluted
+  // to near-zero by clean scores in other categories. One real ICANN finding is a
+  // real problem, regardless of how clean everything else is.
+  const appCategoryHighest = categories
+    .filter(c => APPLICATION_RISK_CATEGORIES.has(c.category))
+    .reduce<RiskLevel>((worst, c) => {
+      const order: Record<RiskLevel, number> = { HIGH: 3, MEDIUM: 2, LOW: 1, CLEAR: 0 };
+      return order[c.level] > order[worst] ? c.level : worst;
+    }, 'CLEAR');
+
+  const appFloor = appCategoryHighest === 'HIGH'   ? 70
+                 : appCategoryHighest === 'MEDIUM' ? 35
+                 : appCategoryHighest === 'LOW'    ? 10
+                 : 0;
+
+  const applicationRiskScore = isHardBlocked ? 100
+    : Math.round(Math.max(appWeightedAvg, maxBlockerScore * 0.9, appFloor));
   const applicationRiskLevel = levelFromScore(applicationRiskScore);
 
   // ---- Competitive Demand score (STRING_CONTENTION category score, 0–100) ----
@@ -98,6 +115,7 @@ export function assess(raw: string, appType: AppType = 'open'): TLDRiskReport {
   const overallScore = Math.round(Math.max(
     totalWeight > 0 ? totalWeightedSum / totalWeight : 0,
     maxBlockerScore * 0.9,
+    appFloor,
   ));
   const overallLevel = levelFromScore(overallScore);
 
