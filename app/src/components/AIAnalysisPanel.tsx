@@ -40,12 +40,35 @@ const VERDICT_STYLE: Record<Verdict, { bg: string; border: string; text: string;
 
 const KNOWN_VERDICTS = Object.keys(VERDICT_STYLE) as Verdict[];
 
+// Citation type → badge colour
+const CITATION_BADGE: Record<string, string> = {
+  AGB:   'bg-indigo-100 text-indigo-700 border-indigo-200',   // Guidebook
+  PREC:  'bg-purple-100 text-purple-700 border-purple-200',   // 2012 precedents
+  ICANN: 'bg-blue-100   text-blue-700   border-blue-200',     // Board resolutions
+  GAC:   'bg-amber-100  text-amber-700  border-amber-200',    // GAC communiqués
+  RFC:   'bg-green-100  text-green-700  border-green-200',    // Technical RFCs
+};
+// Human-readable label for each citation type badge
+const CITATION_LABEL: Record<string, string> = {
+  AGB:   'Guidebook',
+  PREC:  '2012 Round',
+  ICANN: 'ICANN Board',
+  GAC:   'GAC',
+  RFC:   'RFC',
+};
+
 // ---------------------------------------------------------------------------
 // Parse the streamed text into sections once generation is complete
 // ---------------------------------------------------------------------------
+interface CitationItem {
+  type: string;   // e.g. 'AGB', 'PREC', 'ICANN', 'GAC', 'RFC'
+  text: string;
+}
+
 interface ParsedAnalysis {
   verdict: Verdict | null;
   recommendationBody: string;
+  citations: CitationItem[];
   competitiveLandscape: string;
 }
 
@@ -59,10 +82,12 @@ function stripMarkdown(text: string): string {
 }
 
 function parseAnalysis(raw: string): ParsedAnalysis {
-  const recMatch = raw.match(/##\s*RECOMMENDATION\s*([\s\S]*?)(?=##\s*COMPETITIVE LANDSCAPE|$)/i);
+  const recMatch  = raw.match(/##\s*RECOMMENDATION\s*([\s\S]*?)(?=##\s*CITATIONS|##\s*COMPETITIVE LANDSCAPE|$)/i);
+  const citMatch  = raw.match(/##\s*CITATIONS\s*([\s\S]*?)(?=##\s*COMPETITIVE LANDSCAPE|$)/i);
   const compMatch = raw.match(/##\s*COMPETITIVE LANDSCAPE\s*([\s\S]*?)$/i);
 
-  const recSection = recMatch ? recMatch[1].trim() : '';
+  const recSection  = recMatch  ? recMatch[1].trim()  : '';
+  const citSection  = citMatch  ? citMatch[1].trim()  : '';
   const compSection = compMatch ? compMatch[1].trim() : '';
 
   // Search through first 5 lines for a verdict — Claude sometimes adds preamble
@@ -85,9 +110,22 @@ function parseAnalysis(raw: string): ParsedAnalysis {
     ? lines.slice(verdictLineIdx + 1).join('\n').trim()
     : recSection;
 
+  // Parse citation lines: "[CODE] description" → { type, text }
+  const citations: CitationItem[] = citSection
+    .split('\n')
+    .map(l => l.trim())
+    .filter(Boolean)
+    .map(line => {
+      const m = line.match(/^\[([A-Z]+)\]\s+(.+)$/);
+      if (m) return { type: m[1], text: m[2] };
+      return { type: '–', text: line };
+    })
+    .filter(c => c.text.length > 0);
+
   return {
     verdict,
     recommendationBody: stripMarkdown(bodyLines),
+    citations,
     competitiveLandscape: stripMarkdown(compSection),
   };
 }
@@ -244,6 +282,27 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
         )}
       </div>
 
+      {/* Sources & Precedents */}
+      {parsed.citations.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">Sources &amp; Precedents</h3>
+          <ul className="space-y-2">
+            {parsed.citations.map((c, i) => {
+              const badgeClass = CITATION_BADGE[c.type] ?? 'bg-slate-100 text-slate-600 border-slate-200';
+              const label      = CITATION_LABEL[c.type] ?? c.type;
+              return (
+                <li key={i} className="flex items-start gap-2.5 text-sm">
+                  <span className={`flex-shrink-0 mt-0.5 inline-block text-[10px] font-bold px-1.5 py-0.5 rounded border ${badgeClass}`}>
+                    {label}
+                  </span>
+                  <span className="text-slate-600 leading-snug">{c.text}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
       {/* Competitive Landscape */}
       {parsed.competitiveLandscape && (
         <div className="bg-white rounded-xl border border-slate-200 p-4">
@@ -253,7 +312,7 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
       )}
 
       {/* Fallback: raw text if parsing found nothing */}
-      {!parsed.verdict && !parsed.recommendationBody && !parsed.competitiveLandscape && (
+      {!parsed.verdict && !parsed.recommendationBody && !parsed.citations.length && !parsed.competitiveLandscape && (
         <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
           {displayText}
         </div>
