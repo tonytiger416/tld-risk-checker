@@ -92,14 +92,12 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
 
             {/* Application Risk column */}
             <div className="bg-black/20 px-5 py-3 text-right min-w-[130px]">
-              <div className="text-xs opacity-70 uppercase tracking-wider mb-1">Application Risk</div>
-              <div className="text-4xl font-black leading-none">{report.applicationRiskScore}</div>
-              <div className="text-xs opacity-50 mt-0.5">out of 100</div>
-              <div className={`mt-1.5 text-xs font-bold ${APP_RISK_COLOR[appRiskLevel]}`}>
-                {appRiskLevel === 'HIGH'   ? '● HIGH RISK'
-                : appRiskLevel === 'MEDIUM' ? '● MEDIUM RISK'
-                : appRiskLevel === 'LOW'    ? '● LOW RISK'
-                :                             '● CLEAR'}
+              <div className="text-xs opacity-70 uppercase tracking-wider mb-2">Application Risk</div>
+              <div className={`text-2xl font-black leading-none ${APP_RISK_COLOR[appRiskLevel]}`}>
+                {appRiskLevel === 'HIGH'   ? 'HIGH'
+                : appRiskLevel === 'MEDIUM' ? 'MEDIUM'
+                : appRiskLevel === 'LOW'    ? 'LOW'
+                :                             'CLEAR'}
               </div>
             </div>
 
@@ -108,11 +106,8 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
 
             {/* Competitive Demand column */}
             <div className="bg-black/20 px-5 py-3 text-right min-w-[140px]">
-              <div className="text-xs opacity-70 uppercase tracking-wider mb-1">Competitive Demand</div>
-              <div className="text-4xl font-black leading-none">{report.competitiveDemandScore}</div>
-              <div className="text-xs opacity-50 mt-0.5">out of 100</div>
-              <div className={`mt-1.5 text-xs font-bold ${DEMAND_COLOR[demandLevel]}`}>
-                {demandLevel !== 'CLEAR' ? '● ' : '○ '}
+              <div className="text-xs opacity-70 uppercase tracking-wider mb-2">Competitive Demand</div>
+              <div className={`text-2xl font-black leading-none ${DEMAND_COLOR[demandLevel]}`}>
                 {DEMAND_LABEL[demandLevel].toUpperCase()}
               </div>
             </div>
