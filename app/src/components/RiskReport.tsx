@@ -114,7 +114,7 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
                 {keyFlags.map(flag => (
                   <div key={flag.code} className="flex items-start gap-3">
                     <RiskBadge level={flag.severity} />
-                    <span className="text-sm text-[#9ba8c0] flex-1 leading-snug">{flag.title}</span>
+                    <span className="text-sm text-[#c8d4e8] flex-1 leading-snug">{flag.title}</span>
                   </div>
                 ))}
               </div>
@@ -134,8 +134,8 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
                     <div className="h-full rounded-full bg-[#2e3a52]" style={{ width: `${t.visualScore}%` }} />
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <span className="text-xs font-mono text-[#5c698a]">{t.visualScore}%</span>
-                    <span className="text-xs text-[#3a4560] capitalize">({t.type})</span>
+                    <span className="text-xs font-mono text-[#7b88a8]">{t.visualScore}%</span>
+                    <span className="text-xs text-[#5c698a] capitalize">({t.type})</span>
                   </div>
                 </div>
               ))}
@@ -150,7 +150,7 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
             <span className="text-[10px] font-mono font-bold text-[#4a566e] tracking-[0.2em] uppercase whitespace-nowrap">Application Risk</span>
             <div className="h-px flex-1 bg-[#1e2840]" />
           </div>
-          <p className="text-xs text-[#4a566e] font-mono mb-3">
+          <p className="text-xs text-[#6b7898] font-mono mb-3">
             Can the application succeed through ICANN evaluation? Click any row to expand.
           </p>
           <div className="divide-y divide-[#1a2235] border border-[#21293d] rounded-lg overflow-hidden">
@@ -167,7 +167,7 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
             <span className="text-[10px] font-mono font-bold text-[#4a566e] tracking-[0.2em] uppercase whitespace-nowrap">Competitive Demand</span>
             <div className="h-px flex-1 bg-[#1e2840]" />
           </div>
-          <p className="text-xs text-[#4a566e] font-mono mb-3">
+          <p className="text-xs text-[#6b7898] font-mono mb-3">
             How many competitors should you expect, and is an ICANN auction likely?
           </p>
           <div className="border border-[#21293d] rounded-lg overflow-hidden">

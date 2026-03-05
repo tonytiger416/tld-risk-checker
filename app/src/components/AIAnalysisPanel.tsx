@@ -163,7 +163,7 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
           <span className="text-xs font-mono text-[#5c698a]">Generating analysis for .{report.normalized}</span>
         </div>
         {displayText && (
-          <div className="text-xs text-[#5c698a] leading-relaxed whitespace-pre-wrap font-mono bg-[#0d1117] rounded p-3 min-h-[80px]">
+          <div className="text-xs text-[#8a98b8] leading-relaxed whitespace-pre-wrap font-mono bg-[#0d1117] rounded p-3 min-h-[80px]">
             {displayText}
             <span className="inline-block w-0.5 h-3.5 bg-[#4a5e88] ml-0.5 animate-pulse align-text-bottom" />
           </div>
@@ -178,7 +178,7 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-sm font-mono font-semibold text-[#ff453a] mb-0.5">Analysis failed</p>
-            <p className="text-xs text-[#7b8aaa]">{errorMsg}</p>
+            <p className="text-xs text-[#a0aec0]">{errorMsg}</p>
           </div>
           <button
             onClick={() => { startedRef.current = false; doGenerate(); }}
@@ -220,7 +220,7 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
         )}
 
         {parsed.recommendationBody && (
-          <p className="text-sm text-[#9ba8c0] leading-relaxed">{parsed.recommendationBody}</p>
+          <p className="text-sm text-[#c8d4e8] leading-relaxed">{parsed.recommendationBody}</p>
         )}
       </div>
 
@@ -237,7 +237,7 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
                   <span className={`flex-shrink-0 mt-0.5 inline-block text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${badgeClass}`}>
                     {label}
                   </span>
-                  <span className="text-xs text-[#7b8aaa] leading-snug">{c.text}</span>
+                  <span className="text-xs text-[#b0bcd0] leading-snug">{c.text}</span>
                 </li>
               );
             })}
@@ -249,7 +249,7 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
       {parsed.competitiveLandscape && (
         <div className="bg-[#161b28] border border-[#21293d] rounded-lg p-5">
           <h3 className="text-[10px] font-mono font-bold text-[#5c698a] tracking-[0.2em] uppercase mb-3">Competitive Landscape</h3>
-          <p className="text-sm text-[#9ba8c0] leading-relaxed">{parsed.competitiveLandscape}</p>
+          <p className="text-sm text-[#c8d4e8] leading-relaxed">{parsed.competitiveLandscape}</p>
         </div>
       )}
 

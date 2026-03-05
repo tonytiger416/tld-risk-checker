@@ -49,12 +49,12 @@ export function RiskCategoryCard({ cat }: { cat: CategoryResult }) {
                 <RiskBadge level={flag.severity} />
                 <p className="text-sm font-semibold text-[#d8e0ec] leading-snug">{flag.title}</p>
               </div>
-              <p className="text-xs text-[#7b8aaa] leading-relaxed mb-3">{flag.detail}</p>
+              <p className="text-xs text-[#a8b8d0] leading-relaxed mb-3">{flag.detail}</p>
               <div className="space-y-1.5">
-                <p className="text-[11px] font-mono text-[#4a5e88]">
+                <p className="text-[11px] font-mono text-[#6070a0]">
                   <span className="text-[#4a7ad5]">REF</span>{'  '}{flag.guidebookRef}
                 </p>
-                <p className="text-xs text-[#9ba8c0] border-l border-[#2e3a52] pl-3 py-1">
+                <p className="text-xs text-[#b8c8dc] border-l border-[#2e3a52] pl-3 py-1">
                   {flag.recommendation}
                 </p>
               </div>
