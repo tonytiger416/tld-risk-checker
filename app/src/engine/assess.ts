@@ -20,6 +20,20 @@ function levelFromScore(score: number): RiskLevel {
   return 'CLEAR';
 }
 
+const LEVEL_ORDER: Record<RiskLevel, number> = { CLEAR: 0, LOW: 1, MEDIUM: 2, HIGH: 3 };
+
+// Ensure category level is never lower than its worst flag severity.
+// Prevents cases where a HIGH-severity flag lives inside a LOW-level category
+// due to score thresholds not being crossed (e.g. short string premium).
+function normalizeCategoryLevel(cat: CategoryResult): CategoryResult {
+  const maxFlagLevel = cat.flags.reduce<RiskLevel>(
+    (max, flag) => LEVEL_ORDER[flag.severity] > LEVEL_ORDER[max] ? flag.severity : max,
+    'CLEAR'
+  );
+  const effectiveLevel = LEVEL_ORDER[maxFlagLevel] > LEVEL_ORDER[cat.level] ? maxFlagLevel : cat.level;
+  return effectiveLevel === cat.level ? cat : { ...cat, level: effectiveLevel };
+}
+
 export function normalizeString(raw: string): string {
   return raw.trim().toLowerCase().replace(/^\.+/, '');
 }
@@ -41,7 +55,7 @@ export function assess(raw: string, appType: AppType = 'open'): TLDRiskReport {
     checkIDN(normalized),
     checkContention(normalized),
     checkEvaluation(normalized),
-  ];
+  ].map(normalizeCategoryLevel);
 
   // Hard blockers — no path forward regardless of resources
   const isHardBlocked = categories.some(
