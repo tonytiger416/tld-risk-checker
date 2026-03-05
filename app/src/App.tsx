@@ -62,24 +62,24 @@ export default function App() {
   const activeReportData = reports.find(r => r.normalized === activeReport);
 
   return (
-    <div className="min-h-screen bg-[#0b0d14]">
+    <div className="min-h-screen bg-[#0d1117]">
 
       {/* Header */}
-      <header className="border-b border-[#1a1e2e]">
+      <header className="border-b border-[#21293d]">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-baseline gap-4">
-          <span className="font-mono text-sm font-bold tracking-[0.15em] text-[#e2e8f0] uppercase">TLD Risk Checker</span>
-          <span className="text-xs font-mono text-[#2a3050] tracking-wider">ICANN 2026 · Applicant Guidebook V1</span>
+          <span className="font-mono text-sm font-bold tracking-[0.15em] text-[#e2e8f4] uppercase">TLD Risk Checker</span>
+          <span className="text-xs font-mono text-[#4a566e] tracking-wider">ICANN 2026 · Applicant Guidebook V1</span>
         </div>
       </header>
 
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-5">
 
         {/* Input form */}
-        <section className="bg-[#12151e] border border-[#1e2436] rounded-lg p-6">
+        <section className="bg-[#161b28] border border-[#21293d] rounded-lg p-6">
 
           {/* Application type */}
           <div className="mb-6">
-            <p className="text-[10px] font-mono font-bold text-[#3a4060] tracking-[0.2em] uppercase mb-3">Application Type</p>
+            <p className="text-[10px] font-mono font-bold text-[#5c698a] tracking-[0.2em] uppercase mb-3">Application Type</p>
             <div className="flex gap-2">
               {(['open', 'brand'] as AppType[]).map(t => (
                 <button
@@ -87,19 +87,19 @@ export default function App() {
                   onClick={() => setAppType(t)}
                   className={`flex-1 py-2.5 px-4 rounded-lg border text-left transition-all ${
                     appType === t
-                      ? 'border-[#e2e8f0] bg-[#e2e8f0] text-[#0b0d14]'
-                      : 'border-[#1e2436] text-[#4a5270] hover:border-[#2a3050] hover:text-[#6b7390]'
+                      ? 'border-[#e2e8f4] bg-[#e2e8f4] text-[#0d1117]'
+                      : 'border-[#21293d] text-[#6b7898] hover:border-[#2e3a52] hover:text-[#8a95b5]'
                   }`}
                 >
                   <div className="text-sm font-semibold">{t === 'open' ? 'Open Generic' : '.Brand TLD'}</div>
-                  <div className={`text-xs mt-0.5 font-mono ${appType === t ? 'text-[#4a5270]' : 'text-[#2a3050]'}`}>
+                  <div className={`text-xs mt-0.5 font-mono ${appType === t ? 'text-[#4a566e]' : 'text-[#3a4560]'}`}>
                     {t === 'open' ? '.shop, .cloud — open registration' : '.yourcompany — single registrant'}
                   </div>
                 </button>
               ))}
             </div>
             {appType === 'brand' && (
-              <p className="text-xs font-mono text-[#5a6080] border-l border-[#2a3050] pl-3 py-1 mt-3">
+              <p className="text-xs font-mono text-[#6b7898] border-l border-[#2e3a52] pl-3 py-1 mt-3">
                 Trademark scoring adjusted for rights holder. All other checks apply in full.
               </p>
             )}
@@ -107,17 +107,17 @@ export default function App() {
 
           {/* String input */}
           <div className="mb-5">
-            <p className="text-[10px] font-mono font-bold text-[#3a4060] tracking-[0.2em] uppercase mb-3">Strings</p>
+            <p className="text-[10px] font-mono font-bold text-[#5c698a] tracking-[0.2em] uppercase mb-3">Strings</p>
             <div
-              className="flex flex-wrap gap-2 px-3 py-2.5 border border-[#1e2436] rounded-lg focus-within:border-[#3a4a7a] transition-colors min-h-[48px] cursor-text bg-[#0b0d14]"
+              className="flex flex-wrap gap-2 px-3 py-2.5 border border-[#21293d] rounded-lg focus-within:border-[#3a4a7a] transition-colors min-h-[48px] cursor-text bg-[#0d1117]"
               onClick={() => inputRef.current?.focus()}
             >
               {tags.map(tag => (
-                <span key={tag} className="inline-flex items-center gap-1.5 bg-[#1e2436] text-[#c8cedd] text-xs font-mono px-2.5 py-1 rounded">
+                <span key={tag} className="inline-flex items-center gap-1.5 bg-[#1e2840] text-[#d0daea] text-xs font-mono px-2.5 py-1 rounded">
                   .{tag}
                   <button
                     onClick={e => { e.stopPropagation(); removeTag(tag); }}
-                    className="text-[#4a5270] hover:text-[#9ba0b8] leading-none text-sm"
+                    className="text-[#5c698a] hover:text-[#9ba8c0] leading-none text-sm"
                     aria-label={`Remove .${tag}`}
                   >×</button>
                 </span>
@@ -132,7 +132,7 @@ export default function App() {
                   onPaste={handlePaste}
                   onBlur={() => inputValue.trim() && addTag(inputValue)}
                   placeholder={tags.length === 0 ? 'shop, cloud, registry...' : ''}
-                  className="flex-1 min-w-[160px] bg-transparent outline-none text-[#e2e8f0] text-sm placeholder-[#2a3050] font-mono"
+                  className="flex-1 min-w-[160px] bg-transparent outline-none text-[#e2e8f4] text-sm placeholder-[#2e3a52] font-mono"
                 />
               )}
             </div>
@@ -140,11 +140,11 @@ export default function App() {
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono text-[#2a3050]">{tags.length}/{MAX_STRINGS} strings</span>
+            <span className="text-xs font-mono text-[#3a4560]">{tags.length}/{MAX_STRINGS} strings</span>
             <button
               onClick={runAssessment}
               disabled={loading || tags.length === 0}
-              className="px-6 py-2.5 bg-[#e2e8f0] hover:bg-white disabled:bg-[#1e2436] disabled:text-[#3a4060] disabled:cursor-not-allowed text-[#0b0d14] font-bold rounded-lg transition-colors text-sm tracking-wide font-mono"
+              className="px-6 py-2.5 bg-[#e2e8f4] hover:bg-white disabled:bg-[#1e2840] disabled:text-[#3a4560] disabled:cursor-not-allowed text-[#0d1117] font-bold rounded-lg transition-colors text-sm tracking-wide font-mono"
             >
               {loading ? 'Assessing...' : tags.length > 1 ? `Assess ${tags.length} Strings` : 'Assess Risk'}
             </button>
@@ -153,15 +153,15 @@ export default function App() {
 
         {/* Multi-string selector */}
         {reports.length > 1 && (
-          <div className="flex gap-px border border-[#1e2436] rounded-lg overflow-hidden bg-[#0b0d14]">
+          <div className="flex gap-px border border-[#21293d] rounded-lg overflow-hidden bg-[#0d1117]">
             {reports.map(r => (
               <button
                 key={r.normalized}
                 onClick={() => setActiveReport(r.normalized)}
                 className={`flex-1 px-4 py-3 text-xs font-mono font-semibold transition-colors flex items-center justify-center gap-2 ${
                   activeReport === r.normalized
-                    ? 'bg-[#12151e] text-[#e2e8f0]'
-                    : 'text-[#3a4060] hover:text-[#6b7390] hover:bg-[#0f1219]'
+                    ? 'bg-[#161b28] text-[#e2e8f4]'
+                    : 'text-[#5c698a] hover:text-[#8a95b5] hover:bg-[#131820]'
                 }`}
               >
                 <span>.{r.normalized}</span>
@@ -179,9 +179,9 @@ export default function App() {
 
       </main>
 
-      <footer className="mt-20 border-t border-[#1a1e2e] py-6 text-center">
-        <p className="text-[11px] font-mono text-[#2a3050] tracking-wider">TLD RISK CHECKER · ICANN NEW GTLD PROGRAM 2026 · AGB V1-2025.12.16</p>
-        <p className="text-[11px] font-mono text-[#1a1e2e] mt-1">For internal use only · Preliminary assessment · Not legal advice</p>
+      <footer className="mt-20 border-t border-[#1a2030] py-6 text-center">
+        <p className="text-[11px] font-mono text-[#3a4560] tracking-wider">TLD RISK CHECKER · ICANN NEW GTLD PROGRAM 2026 · AGB V1-2025.12.16</p>
+        <p className="text-[11px] font-mono text-[#21293d] mt-1">For internal use only · Preliminary assessment · Not legal advice</p>
       </footer>
 
     </div>
