@@ -30,13 +30,13 @@ export function RiskCategoryCard({ cat }: { cat: CategoryResult }) {
           hasFlags ? 'cursor-pointer hover:bg-[#091a35]' : 'cursor-default'
         }`}
       >
-        <span className={`text-sm font-medium ${isActive ? 'text-[#c0d8ee]' : 'text-[#2e5570]'}`}>
+        <span className={`text-sm font-medium ${isActive ? 'text-[#e0f0ff]' : 'text-[#5a98c8]'}`}>
           {CATEGORY_LABELS[cat.category]}
         </span>
         <div className="flex items-center gap-3 flex-shrink-0">
           <RiskBadge level={cat.level} />
           {hasFlags && (
-            <span className="text-[#2e5570] text-[10px] font-mono">{open ? '▲' : '▼'}</span>
+            <span className="text-[#5a98c8] text-[10px] font-mono">{open ? '▲' : '▼'}</span>
           )}
         </div>
       </button>
@@ -47,14 +47,14 @@ export function RiskCategoryCard({ cat }: { cat: CategoryResult }) {
             <div key={flag.code} className={`border-l-2 ${FLAG_BORDER[flag.severity]} px-4 py-3 bg-[#030c18]`}>
               <div className="flex items-start gap-2.5 mb-2">
                 <RiskBadge level={flag.severity} />
-                <p className="text-sm font-semibold text-[#c0d8ee] leading-snug">{flag.title}</p>
+                <p className="text-sm font-semibold text-[#e0f0ff] leading-snug">{flag.title}</p>
               </div>
-              <p className="text-xs text-[#8ab5d5] leading-relaxed mb-3">{flag.detail}</p>
+              <p className="text-xs text-[#b8d8f0] leading-relaxed mb-3">{flag.detail}</p>
               <div className="space-y-1.5">
-                <p className="text-[11px] font-mono text-[#4070a0]">
-                  <span className="text-[#4a90e0]">REF</span>{'  '}{flag.guidebookRef}
+                <p className="text-[11px] font-mono text-[#6898d0]">
+                  <span className="text-[#70b8ff]">REF</span>{'  '}{flag.guidebookRef}
                 </p>
-                <p className="text-xs text-[#98c0d8] border-l border-[#1a3a60] pl-3 py-1">
+                <p className="text-xs text-[#c8e8f8] border-l border-[#1a4a80] pl-3 py-1">
                   {flag.recommendation}
                 </p>
               </div>

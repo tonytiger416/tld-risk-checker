@@ -18,11 +18,11 @@ const VERDICT_STYLE: Record<Verdict, { border: string; text: string; dot: string
 const KNOWN_VERDICTS = Object.keys(VERDICT_STYLE) as Verdict[];
 
 const CITATION_BADGE: Record<string, string> = {
-  AGB:   'border-[#1a3a7a] text-[#6a90e5]',
-  PREC:  'border-[#2a1a60] text-[#9070d5]',
-  ICANN: 'border-[#103060] text-[#5a98e5]',
-  GAC:   'border-[#4e3e1e] text-[#c89030]',
-  RFC:   'border-[#1a4030] text-[#40b860]',
+  AGB:   'border-[#1a3a7a] text-[#80aaff]',
+  PREC:  'border-[#2a1a60] text-[#a888ff]',
+  ICANN: 'border-[#103060] text-[#70b8ff]',
+  GAC:   'border-[#4e3e1e] text-[#e0a840]',
+  RFC:   'border-[#1a4030] text-[#50d870]',
 };
 
 const CITATION_LABEL: Record<string, string> = {
@@ -143,9 +143,9 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
   if (!hasApiKey) {
     return (
       <div className="border border-dashed border-[#0e2a4a] rounded-lg px-5 py-6 text-center">
-        <p className="text-sm font-mono text-[#2e5570]">AI analysis not configured</p>
-        <p className="text-xs text-[#1e3a58] mt-1">
-          Add <code className="font-mono text-[#5a88cc]">VITE_CLAUDE_API_KEY</code> in project settings → redeploy.
+        <p className="text-sm font-mono text-[#6a9ec0]">AI analysis not configured</p>
+        <p className="text-xs text-[#4a88b8] mt-1">
+          Add <code className="font-mono text-[#70b8ff]">VITE_CLAUDE_API_KEY</code> in project settings → redeploy.
         </p>
       </div>
     );
@@ -157,15 +157,15 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
         <div className="flex items-center gap-2.5 mb-3">
           <span className="inline-flex gap-1">
             {[0, 150, 300].map(delay => (
-              <span key={delay} className="w-1.5 h-1.5 rounded-full bg-[#2a5888] animate-bounce" style={{ animationDelay: `${delay}ms` }} />
+              <span key={delay} className="w-1.5 h-1.5 rounded-full bg-[#3a7ab8] animate-bounce" style={{ animationDelay: `${delay}ms` }} />
             ))}
           </span>
-          <span className="text-xs font-mono text-[#3a6888]">Generating analysis for .{report.normalized}</span>
+          <span className="text-xs font-mono text-[#7ab8e0]">Generating analysis for .{report.normalized}</span>
         </div>
         {displayText && (
-          <div className="text-xs text-[#7aaabe] leading-relaxed whitespace-pre-wrap font-mono bg-[#030c18] rounded p-3 min-h-[80px]">
+          <div className="text-xs text-[#a0c8e8] leading-relaxed whitespace-pre-wrap font-mono bg-[#030c18] rounded p-3 min-h-[80px]">
             {displayText}
-            <span className="inline-block w-0.5 h-3.5 bg-[#2a5888] ml-0.5 animate-pulse align-text-bottom" />
+            <span className="inline-block w-0.5 h-3.5 bg-[#3a7ab8] ml-0.5 animate-pulse align-text-bottom" />
           </div>
         )}
       </div>
@@ -178,11 +178,11 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-sm font-mono font-semibold text-[#ff453a] mb-0.5">Analysis failed</p>
-            <p className="text-xs text-[#88a8c0]">{errorMsg}</p>
+            <p className="text-xs text-[#b0c8e0]">{errorMsg}</p>
           </div>
           <button
             onClick={() => { startedRef.current = false; doGenerate(); }}
-            className="flex-shrink-0 text-xs font-mono text-[#3a6888] hover:text-[#6a92b5] border border-[#0e2a4a] hover:border-[#1a3a60] px-3 py-1.5 rounded transition-colors"
+            className="flex-shrink-0 text-xs font-mono text-[#6a9ec0] hover:text-[#a0c8e8] border border-[#0e2a4a] hover:border-[#1a4a80] px-3 py-1.5 rounded transition-colors"
           >
             Retry
           </button>
@@ -200,10 +200,10 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
       {/* Recommendation */}
       <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-5">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-[10px] font-mono font-bold text-[#3a6888] tracking-[0.2em] uppercase">AI Recommendation</span>
+          <span className="text-[10px] font-mono font-bold text-[#7ab8e0] tracking-[0.2em] uppercase">AI Recommendation</span>
           <button
             onClick={() => { startedRef.current = false; doGenerate(); }}
-            className="text-[11px] font-mono text-[#2e5570] hover:text-[#4a7898] transition-colors"
+            className="text-[11px] font-mono text-[#5a98c8] hover:text-[#90c8f0] transition-colors"
             title="Regenerate"
           >
             ↻ regenerate
@@ -220,24 +220,24 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
         )}
 
         {parsed.recommendationBody && (
-          <p className="text-sm text-[#b0cde8] leading-relaxed">{parsed.recommendationBody}</p>
+          <p className="text-sm text-[#d8eeff] leading-relaxed">{parsed.recommendationBody}</p>
         )}
       </div>
 
       {/* Sources */}
       {parsed.citations.length > 0 && (
         <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-5">
-          <h3 className="text-[10px] font-mono font-bold text-[#3a6888] tracking-[0.2em] uppercase mb-3">Sources &amp; Precedents</h3>
+          <h3 className="text-[10px] font-mono font-bold text-[#7ab8e0] tracking-[0.2em] uppercase mb-3">Sources &amp; Precedents</h3>
           <ul className="space-y-2.5">
             {parsed.citations.map((c, i) => {
-              const badgeClass = CITATION_BADGE[c.type] ?? 'border-[#0e2a4a] text-[#3a6888]';
+              const badgeClass = CITATION_BADGE[c.type] ?? 'border-[#0e2a4a] text-[#7ab8e0]';
               const label      = CITATION_LABEL[c.type] ?? c.type;
               return (
                 <li key={i} className="flex items-start gap-2.5">
                   <span className={`flex-shrink-0 mt-0.5 inline-block text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${badgeClass}`}>
                     {label}
                   </span>
-                  <span className="text-xs text-[#90b5d0] leading-snug">{c.text}</span>
+                  <span className="text-xs text-[#b8d8f0] leading-snug">{c.text}</span>
                 </li>
               );
             })}
@@ -248,19 +248,19 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
       {/* Competitive Landscape */}
       {parsed.competitiveLandscape && (
         <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-5">
-          <h3 className="text-[10px] font-mono font-bold text-[#3a6888] tracking-[0.2em] uppercase mb-3">Competitive Landscape</h3>
-          <p className="text-sm text-[#b0cde8] leading-relaxed">{parsed.competitiveLandscape}</p>
+          <h3 className="text-[10px] font-mono font-bold text-[#7ab8e0] tracking-[0.2em] uppercase mb-3">Competitive Landscape</h3>
+          <p className="text-sm text-[#d8eeff] leading-relaxed">{parsed.competitiveLandscape}</p>
         </div>
       )}
 
       {/* Fallback */}
       {!parsed.verdict && !parsed.recommendationBody && !parsed.citations.length && !parsed.competitiveLandscape && (
-        <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-5 text-sm text-[#7aaabe] leading-relaxed whitespace-pre-wrap font-mono">
+        <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-5 text-sm text-[#a0c8e8] leading-relaxed whitespace-pre-wrap font-mono">
           {displayText}
         </div>
       )}
 
-      <p className="text-[11px] font-mono text-[#1e3a58] px-1">
+      <p className="text-[11px] font-mono text-[#2a5880] px-1">
         AI-generated · Not legal advice · Consult qualified ICANN counsel before applying.
       </p>
     </div>
