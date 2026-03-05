@@ -1,59 +1,109 @@
 import type { CategoryResult, RiskFlag, SimilarTLD } from '../types';
 import { EXISTING_TLDS_ARRAY } from '../data/existing-tlds';
-import { getCharSimilarity } from '../data/confusables';
+import { getCharSimilarity, getDigraphSimilarity } from '../data/confusables';
 
-// Visually-weighted Levenshtein distance
-// Uses confusables data to reduce substitution cost for visually similar characters
-// e.g. substituting 'rn' for 'm' costs much less than substituting 'r' for 'z'
-function weightedLevenshtein(a: string, b: string): number {
-  const m = a.length, n = b.length;
-  const dp: number[][] = Array.from({ length: m + 1 }, (_, i) =>
-    Array.from({ length: n + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
-  );
+// ---------------------------------------------------------------------------
+// NIST Visual Similarity Algorithm
+// Ported from Paul E. Black's Python implementation (NIST, May 2008)
+// Source: https://hissa.nist.gov/~black/GTLD/ (strSimilarity.py v1.14)
+// US Government work — public domain (17 USC 105)
+//
+// Key differences from plain Levenshtein:
+//   1. Fractional substitution costs based on visual character similarity
+//   2. Digraph substitutions (rn↔m, vv↔w, cl↔d, nn↔m, etc.)
+//   3. Repetition-aware insert/delete costs
+//   4. Damerau-style transposition with character-similarity weighting
+//   5. NIST normalisation formula: (maxLen-D) / (maxLen + 3D + |lenDiff|·D)
+// ---------------------------------------------------------------------------
+
+/** Repetition-aware insert/delete cost (NIST formula) */
+function repetitionCost(s: string, pos: number): number {
+  const ch = s[pos].toLowerCase();
+  let back = 0;
+  let i = pos - 1;
+  while (i >= 0 && s[i].toLowerCase() === ch) { back++; i--; }
+  return Math.max(0, 1.7 - 0.4 * back);
+}
+
+/** Full NIST enhanced Levenshtein distance (returns a float) */
+function nistLevenshtein(s1: string, s2: string): number {
+  const m = s1.length;
+  const n = s2.length;
+
+  // Initialise DP table with repetition-aware boundary costs
+  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 1; i <= m; i++) dp[i][0] = dp[i - 1][0] + repetitionCost(s1, i - 1);
+  for (let j = 1; j <= n; j++) dp[0][j] = dp[0][j - 1] + repetitionCost(s2, j - 1);
 
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {
-      if (a[i - 1] === b[j - 1]) {
-        dp[i][j] = dp[i - 1][j - 1];
-      } else {
-        const charSim = getCharSimilarity(a[i - 1], b[j - 1]);
-        const substitutionCost = 1 - charSim;
-        dp[i][j] = Math.min(
-          dp[i - 1][j] + 1,
-          dp[i][j - 1] + 1,
-          dp[i - 1][j - 1] + substitutionCost
-        );
+      const a = s1[i - 1];
+      const b = s2[j - 1];
+
+      // 1. Substitution / exact match
+      const subCost = 1 - getCharSimilarity(a, b);
+      let best = dp[i - 1][j - 1] + subCost;
+
+      // 2. Delete from s1 / insert from s2 (repetition-aware)
+      best = Math.min(best, dp[i - 1][j] + repetitionCost(s1, i - 1));
+      best = Math.min(best, dp[i][j - 1] + repetitionCost(s2, j - 1));
+
+      // 3. Transposition (Damerau) — cost = 1 - similarity of the two transposed chars
+      if (i >= 2 && j >= 2) {
+        const a1 = s1[i - 2], a2 = s1[i - 1];
+        const b1 = s2[j - 2], b2 = s2[j - 1];
+        if (a1.toLowerCase() === b2.toLowerCase() && a2.toLowerCase() === b1.toLowerCase()) {
+          best = Math.min(best, dp[i - 2][j - 2] + (1 - getCharSimilarity(a1, a2)));
+        }
       }
+
+      // 4. Digraph 2→1: two chars from s1 replace one char in s2
+      if (i >= 2) {
+        const dg = s1[i - 2].toLowerCase() + s1[i - 1].toLowerCase();
+        const dsim = getDigraphSimilarity(dg, s2[j - 1].toLowerCase());
+        if (dsim >= 0) best = Math.min(best, dp[i - 2][j - 1] + (1 - dsim));
+      }
+
+      // 5. Digraph 1→2: one char from s1 replaces two chars in s2
+      if (j >= 2) {
+        const dg = s2[j - 2].toLowerCase() + s2[j - 1].toLowerCase();
+        const dsim = getDigraphSimilarity(s1[i - 1].toLowerCase(), dg);
+        if (dsim >= 0) best = Math.min(best, dp[i - 1][j - 2] + (1 - dsim));
+      }
+
+      // 6. Digraph 2→2: two chars from s1 replace two chars in s2
+      if (i >= 2 && j >= 2) {
+        const dg1 = s1[i - 2].toLowerCase() + s1[i - 1].toLowerCase();
+        const dg2 = s2[j - 2].toLowerCase() + s2[j - 1].toLowerCase();
+        const dsim = getDigraphSimilarity(dg1, dg2);
+        if (dsim >= 0) best = Math.min(best, dp[i - 2][j - 2] + (1 - dsim));
+      }
+
+      dp[i][j] = best;
     }
   }
   return dp[m][n];
 }
 
-// Normalize common visual confusable digraphs before comparison
-function normalizeConfusables(s: string): string {
-  return s
-    .replace(/rn/g, 'm')
-    .replace(/vv/g, 'w')
-    .replace(/cl/g, 'd')
-    .replace(/0/g, 'o')
-    .replace(/1/g, 'l')
-    .replace(/5/g, 's');
-}
-
-// Visual similarity score 0–100
+/**
+ * NIST howConfusableAre() — returns 0–100 integer percentage.
+ * Formula: (maxLen - D) / (maxLen + 3·D + |lenDiff|·D)
+ * Penalises length differences more aggressively than plain (1 - D/maxLen).
+ */
 function visualSimilarity(a: string, b: string): number {
-  if (a === b) return 100;
-  const dist = weightedLevenshtein(a, b);
-  const maxLen = Math.max(a.length, b.length);
-  const rawScore = Math.round((1 - dist / maxLen) * 100);
+  const s1 = a.toLowerCase();
+  const s2 = b.toLowerCase();
+  if (s1 === s2) return 100;
 
-  // Also check after normalising confusables — catches rn/m, 0/O, 1/l etc.
-  const aNorm = normalizeConfusables(a);
-  const bNorm = normalizeConfusables(b);
-  const normDist = weightedLevenshtein(aNorm, bNorm);
-  const normScore = Math.round((1 - normDist / Math.max(aNorm.length, bNorm.length)) * 100);
+  const D = nistLevenshtein(s1, s2);
+  const maxLen = Math.max(s1.length, s2.length);
+  const lenDiff = Math.abs(s1.length - s2.length);
 
-  return Math.max(rawScore, normScore);
+  if (maxLen === 0) return 100;
+  if (D === 0) return 100;
+
+  const score = (maxLen - D) / (maxLen + 3 * D + lenDiff * D);
+  return Math.round(Math.max(0, score) * 100);
 }
 
 // Soundex phonetic encoding
