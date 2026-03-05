@@ -202,11 +202,16 @@ export function checkSimilarity(s: string): { result: CategoryResult; similarTLD
     });
   }
 
-  const score = topScore >= 90 ? 92   // SIM-001: extreme — near-certain rejection
+  let score = topScore >= 90 ? 92   // SIM-001: extreme — near-certain rejection
     : topScore >= 75 ? 82             // SIM-002: at/above ICANN published threshold → HIGH
     : topScore >= 60 ? 45             // below threshold but notable → MEDIUM
     : topScore >= 50 ? 20             // mild similarity → LOW
     : 0;
+
+  // Plural/singular variants and phonetic matches carry inherent risk regardless
+  // of their visual score — ensure the category level reflects the flag severity
+  if (pluralMatch && score < 45) score = 45;   // SIM-004 is MEDIUM → category must be ≥ MEDIUM
+  if (phoneticMatch && score < 20) score = 20; // SIM-003 is LOW   → category must be ≥ LOW
 
   return {
     result: {

@@ -43,7 +43,7 @@ const APP_RISK_COLOR: Record<RiskLevel, string> = {
   CLEAR:  'text-green-200',
 };
 
-type Tab = 'overview' | 'details' | 'recommendations';
+type Tab = 'overview' | 'details';
 
 export function RiskReport({ report }: { report: TLDRiskReport }) {
   const [tab, setTab] = useState<Tab>('overview');
@@ -123,7 +123,7 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
 
       {/* Tabs */}
       <div className="flex border-b border-slate-200 bg-white/60 backdrop-blur">
-        {(['overview', 'details', 'recommendations'] as Tab[]).map(t => (
+        {(['overview', 'details'] as Tab[]).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -133,7 +133,7 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            {t === 'overview' ? 'Overview' : t === 'details' ? 'Category Details' : 'Recommendations'}
+            {t === 'overview' ? 'Overview' : 'Category Details'}
           </button>
         ))}
       </div>
@@ -250,27 +250,6 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
           </div>
         )}
 
-        {/* RECOMMENDATIONS TAB */}
-        {tab === 'recommendations' && (
-          <div className="space-y-3">
-            <div className="bg-white rounded-xl border border-slate-200 p-4">
-              <h3 className="text-sm font-semibold text-slate-600 mb-3">Action Items</h3>
-              <ol className="space-y-3">
-                {report.recommendations.map((rec, i) => (
-                  <li key={i} className="flex gap-3 text-sm">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-slate-100 text-slate-600 font-bold text-xs flex items-center justify-center">
-                      {i + 1}
-                    </span>
-                    <span className="text-slate-700 flex-1">{rec}</span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-            <div className="rounded-xl bg-slate-100 border border-slate-200 px-4 py-3 text-xs text-slate-500">
-              <strong className="text-slate-700">Disclaimer:</strong> This tool provides a preliminary risk assessment based on publicly available criteria from the ICANN 2026 Round Applicant Guidebook (V1-2025.12.16). It does not constitute legal advice or a definitive ICANN evaluation. Always engage qualified legal and technical counsel before submitting an application.
-            </div>
-          </div>
-        )}
 
       </div>
     </div>
