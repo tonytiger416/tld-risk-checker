@@ -5,22 +5,14 @@ import { RiskBadge } from './RiskBadge';
 import { RiskCategoryCard } from './RiskCategoryCard';
 import { AIAnalysisPanel } from './AIAnalysisPanel';
 
-// Header background and card border driven by Application Risk level
-const HEADER_BG: Record<RiskLevel, string> = {
-  HIGH:   'bg-red-600',
-  MEDIUM: 'bg-amber-500',
-  LOW:    'bg-blue-600',
-  CLEAR:  'bg-green-600',
+// Top border accent color per risk level
+const ACCENT_BORDER: Record<RiskLevel, string> = {
+  HIGH:   'border-t-[#ff453a]',
+  MEDIUM: 'border-t-[#ff9f0a]',
+  LOW:    'border-t-[#0a84ff]',
+  CLEAR:  'border-t-[#32d74b]',
 };
 
-const BG: Record<RiskLevel, string> = {
-  HIGH:   'border-red-300 bg-red-50',
-  MEDIUM: 'border-amber-300 bg-amber-50',
-  LOW:    'border-blue-300 bg-blue-50',
-  CLEAR:  'border-green-300 bg-green-50',
-};
-
-// Human-readable labels for the Competitive Demand score
 const DEMAND_LABEL: Record<RiskLevel, string> = {
   HIGH:   'Auction Likely',
   MEDIUM: 'Competition Expected',
@@ -29,21 +21,20 @@ const DEMAND_LABEL: Record<RiskLevel, string> = {
 };
 
 const DEMAND_COLOR: Record<RiskLevel, string> = {
-  HIGH:   'text-red-200',
-  MEDIUM: 'text-amber-200',
-  LOW:    'text-blue-200',
-  CLEAR:  'text-green-200',
+  HIGH:   'text-[#ff453a]',
+  MEDIUM: 'text-[#ff9f0a]',
+  LOW:    'text-[#0a84ff]',
+  CLEAR:  'text-[#32d74b]',
 };
 
 const APP_RISK_COLOR: Record<RiskLevel, string> = {
-  HIGH:   'text-red-200',
-  MEDIUM: 'text-amber-200',
-  LOW:    'text-blue-200',
-  CLEAR:  'text-green-200',
+  HIGH:   'text-[#ff453a]',
+  MEDIUM: 'text-[#ff9f0a]',
+  LOW:    'text-[#0a84ff]',
+  CLEAR:  'text-[#32d74b]',
 };
 
 export function RiskReport({ report }: { report: TLDRiskReport }) {
-  // Cache AI analysis text so re-renders don't re-call the API
   const aiCacheRef = useRef<Record<string, string>>({});
 
   const appRiskLevel = report.applicationRiskLevel;
@@ -53,55 +44,49 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
   const demandCategories  = report.categories.filter(c => COMPETITIVE_DEMAND_CATEGORIES.has(c.category));
 
   return (
-    <div className={`rounded-2xl border-2 overflow-hidden shadow-sm ${BG[appRiskLevel]}`}>
+    <div className={`bg-[#12151e] border border-[#1e2436] border-t-2 ${ACCENT_BORDER[appRiskLevel]} rounded-lg overflow-hidden`}>
 
       {/* Hard Blocked Banner */}
       {report.isHardBlocked && (
-        <div className="bg-red-700 text-white px-6 py-3 flex items-center gap-3">
-          <span className="text-2xl">⛔</span>
+        <div className="bg-[#1a0808] border-b border-[#3a1010] px-6 py-3 flex items-center gap-3">
+          <span className="text-lg">⛔</span>
           <div>
-            <p className="font-bold text-sm">HARD BLOCKED — DO NOT APPLY</p>
-            <p className="text-xs text-red-200 mt-0.5">This string is permanently ineligible. No amount of effort, legal action, or resources can change this outcome. Remove it from your candidate list.</p>
+            <p className="font-mono font-bold text-sm text-[#ff453a] tracking-wider">HARD BLOCKED — DO NOT APPLY</p>
+            <p className="text-xs text-[#6b3030] mt-0.5">This string is permanently ineligible. No amount of effort, legal action, or resources can change this outcome.</p>
           </div>
         </div>
       )}
 
-      {/* Header — two scores side by side */}
-      <div className={`${HEADER_BG[appRiskLevel]} px-6 py-5 text-white`}>
-        <div className="flex items-start justify-between flex-wrap gap-4">
+      {/* Header */}
+      <div className="px-6 py-5 border-b border-[#1a1e2e]">
+        <div className="flex items-start justify-between flex-wrap gap-6">
 
-          {/* Left — TLD identity */}
+          {/* TLD identity */}
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-semibold uppercase tracking-widest opacity-80">Candidate TLD</span>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${report.appType === 'brand' ? 'bg-white/20 text-white' : 'bg-white/10 text-white/80'}`}>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[10px] font-mono font-bold text-[#3a4060] tracking-[0.2em] uppercase">Candidate TLD</span>
+              <span className="text-[10px] font-mono text-[#2a3050] border border-[#1e2436] px-2 py-0.5 rounded">
                 {report.appType === 'brand' ? '.Brand' : 'Open Generic'}
               </span>
             </div>
-            <h2 className="text-3xl font-bold tracking-tight">.{report.normalized}</h2>
+            <h2 className="text-4xl font-mono font-bold tracking-tight text-[#e2e8f0]">.{report.normalized}</h2>
           </div>
 
-          {/* Right — Application Risk + Competitive Demand */}
-          <div className="flex items-stretch gap-px bg-white/20 rounded-xl overflow-hidden">
+          {/* Scores */}
+          <div className="flex items-stretch gap-px border border-[#1e2436] rounded-lg overflow-hidden">
 
-            {/* Application Risk column */}
-            <div className="bg-black/20 px-5 py-3 text-right min-w-[130px]">
-              <div className="text-xs opacity-70 uppercase tracking-wider mb-2">Application Risk</div>
-              <div className={`text-2xl font-black leading-none ${APP_RISK_COLOR[appRiskLevel]}`}>
-                {appRiskLevel === 'HIGH'   ? 'HIGH'
-                : appRiskLevel === 'MEDIUM' ? 'MEDIUM'
-                : appRiskLevel === 'LOW'    ? 'LOW'
-                :                             'CLEAR'}
+            <div className="bg-[#0f1219] px-5 py-3 min-w-[140px]">
+              <div className="text-[10px] font-mono text-[#3a4060] tracking-[0.15em] uppercase mb-2">Application Risk</div>
+              <div className={`text-xl font-mono font-black ${APP_RISK_COLOR[appRiskLevel]}`}>
+                {appRiskLevel}
               </div>
             </div>
 
-            {/* Divider */}
-            <div className="w-px bg-white/10" />
+            <div className="w-px bg-[#1a1e2e]" />
 
-            {/* Competitive Demand column */}
-            <div className="bg-black/20 px-5 py-3 text-right min-w-[140px]">
-              <div className="text-xs opacity-70 uppercase tracking-wider mb-2">Competitive Demand</div>
-              <div className={`text-2xl font-black leading-none ${DEMAND_COLOR[demandLevel]}`}>
+            <div className="bg-[#0f1219] px-5 py-3 min-w-[160px]">
+              <div className="text-[10px] font-mono text-[#3a4060] tracking-[0.15em] uppercase mb-2">Competitive Demand</div>
+              <div className={`text-xl font-mono font-black ${DEMAND_COLOR[demandLevel]}`}>
                 {DEMAND_LABEL[demandLevel].toUpperCase()}
               </div>
             </div>
@@ -110,6 +95,7 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
         </div>
       </div>
 
+      {/* Body */}
       <div className="p-5 space-y-5">
 
         {/* AI Analysis */}
@@ -119,17 +105,17 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
           onCacheUpdate={(text) => { aiCacheRef.current[report.normalized] = text; }}
         />
 
-        {/* Top flags — HIGH and MEDIUM only */}
+        {/* Top Issues */}
         {(() => {
           const keyFlags = report.topFlags.filter(f => f.severity === 'HIGH' || f.severity === 'MEDIUM');
           return keyFlags.length > 0 ? (
-            <div className="bg-white rounded-xl border border-slate-200 p-4">
-              <h3 className="text-sm font-semibold text-slate-600 mb-3">Top Issues</h3>
-              <div className="space-y-2">
+            <div className="bg-[#12151e] border border-[#1e2436] rounded-lg p-4">
+              <h3 className="text-[10px] font-mono font-bold text-[#3a4060] tracking-[0.2em] uppercase mb-3">Top Issues</h3>
+              <div className="space-y-2.5">
                 {keyFlags.map(flag => (
-                  <div key={flag.code} className="flex items-start gap-2.5 text-sm">
+                  <div key={flag.code} className="flex items-start gap-3">
                     <RiskBadge level={flag.severity} />
-                    <span className="text-slate-700 flex-1">{flag.title}</span>
+                    <span className="text-sm text-[#9ba8c0] flex-1 leading-snug">{flag.title}</span>
                   </div>
                 ))}
               </div>
@@ -139,23 +125,18 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
 
         {/* Similar TLDs */}
         {report.similarTLDs.length > 0 && (
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <h3 className="text-sm font-semibold text-slate-600 mb-3">Most Similar Existing TLDs</h3>
-            <div className="space-y-1.5">
+          <div className="bg-[#12151e] border border-[#1e2436] rounded-lg p-4">
+            <h3 className="text-[10px] font-mono font-bold text-[#3a4060] tracking-[0.2em] uppercase mb-3">Most Similar Existing TLDs</h3>
+            <div className="space-y-2">
               {report.similarTLDs.map(t => (
-                <div key={t.tld} className="flex items-center justify-between">
-                  <span className="text-sm font-mono font-medium text-slate-700">.{t.tld}</span>
-                  <div className="flex items-center gap-2 flex-1 mx-4">
-                    <div className="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-slate-400"
-                        style={{ width: `${t.visualScore}%` }}
-                      />
-                    </div>
+                <div key={t.tld} className="flex items-center gap-4">
+                  <span className="text-sm font-mono text-[#8891b0] w-24 flex-shrink-0">.{t.tld}</span>
+                  <div className="flex-1 bg-[#0b0d14] rounded-full h-1 overflow-hidden">
+                    <div className="h-full rounded-full bg-[#2a3050]" style={{ width: `${t.visualScore}%` }} />
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-slate-500">{t.visualScore}%</span>
-                    <span className="text-xs text-slate-400 capitalize">({t.type})</span>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <span className="text-xs font-mono text-[#4a5270]">{t.visualScore}%</span>
+                    <span className="text-xs text-[#2a3050] capitalize">({t.type})</span>
                   </div>
                 </div>
               ))}
@@ -163,40 +144,34 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
           </div>
         )}
 
-        {/* Application Risk categories */}
+        {/* Application Risk Categories */}
         <div>
           <div className="flex items-center gap-3 mb-3">
-            <div className="h-px flex-1 bg-slate-200" />
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap px-1">
-              Application Risk
-            </span>
-            <div className="h-px flex-1 bg-slate-200" />
+            <div className="h-px flex-1 bg-[#1a1e2e]" />
+            <span className="text-[10px] font-mono font-bold text-[#2a3050] tracking-[0.2em] uppercase whitespace-nowrap">Application Risk</span>
+            <div className="h-px flex-1 bg-[#1a1e2e]" />
           </div>
-          <p className="text-xs text-slate-500 mb-3 px-1">
-            These categories determine whether your application can succeed through ICANN evaluation.
-            Click any row to expand details and guidebook references.
+          <p className="text-xs text-[#2a3050] font-mono mb-3">
+            Can the application succeed through ICANN evaluation? Click any row to expand.
           </p>
-          <div className="space-y-2">
+          <div className="divide-y divide-[#141720] border border-[#1e2436] rounded-lg overflow-hidden">
             {appRiskCategories.map(cat => (
               <RiskCategoryCard key={cat.category} cat={cat} />
             ))}
           </div>
         </div>
 
-        {/* Competitive Demand categories */}
+        {/* Competitive Demand Categories */}
         <div>
           <div className="flex items-center gap-3 mb-3">
-            <div className="h-px flex-1 bg-slate-200" />
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap px-1">
-              Competitive Demand
-            </span>
-            <div className="h-px flex-1 bg-slate-200" />
+            <div className="h-px flex-1 bg-[#1a1e2e]" />
+            <span className="text-[10px] font-mono font-bold text-[#2a3050] tracking-[0.2em] uppercase whitespace-nowrap">Competitive Demand</span>
+            <div className="h-px flex-1 bg-[#1a1e2e]" />
           </div>
-          <p className="text-xs text-slate-500 mb-3 px-1">
-            These signals determine how contested the string will be — how many competitors to expect
-            and whether an ICANN auction is likely.
+          <p className="text-xs text-[#2a3050] font-mono mb-3">
+            How many competitors should you expect, and is an ICANN auction likely?
           </p>
-          <div className="space-y-2">
+          <div className="border border-[#1e2436] rounded-lg overflow-hidden">
             {demandCategories.map(cat => (
               <RiskCategoryCard key={cat.category} cat={cat} />
             ))}

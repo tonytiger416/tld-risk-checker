@@ -50,7 +50,7 @@ export default function App() {
   }
 
   async function runAssessment() {
-    if (tags.length === 0) { setError('Please enter at least one TLD string.'); return; }
+    if (tags.length === 0) { setError('Enter at least one TLD string.'); return; }
     setLoading(true); setError(''); setReports([]); setActiveReport(null);
     await new Promise(r => setTimeout(r, 50));
     const results = tags.map(t => assess(t, appType));
@@ -62,122 +62,128 @@ export default function App() {
   const activeReportData = reports.find(r => r.normalized === activeReport);
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <header className="bg-[#1e3a5f] text-white shadow-lg">
-        <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">TLD Risk Checker</h1>
-            <p className="text-blue-200 text-sm mt-0.5">ICANN 2026 Round — Applicant Guidebook Risk Assessment</p>
-          </div>
+    <div className="min-h-screen bg-[#0b0d14]">
+
+      {/* Header */}
+      <header className="border-b border-[#1a1e2e]">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-baseline gap-4">
+          <span className="font-mono text-sm font-bold tracking-[0.15em] text-[#e2e8f0] uppercase">TLD Risk Checker</span>
+          <span className="text-xs font-mono text-[#2a3050] tracking-wider">ICANN 2026 · Applicant Guidebook V1</span>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-8 space-y-6">
-        <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-          <h2 className="text-lg font-bold text-slate-800 mb-1">Assess Candidate TLD Strings</h2>
-          <p className="text-sm text-slate-500 mb-5">
-            Type a string and press <kbd className="px-1.5 py-0.5 bg-slate-100 rounded text-xs font-mono border">Enter</kbd> or comma to add. Up to {MAX_STRINGS} strings. Do not include the leading dot.
-          </p>
+      <main className="max-w-5xl mx-auto px-6 py-8 space-y-5">
 
-          {/* Application Type */}
-          <div className="mb-5">
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Application Type</label>
-            <div className="flex gap-3">
+        {/* Input form */}
+        <section className="bg-[#12151e] border border-[#1e2436] rounded-lg p-6">
+
+          {/* Application type */}
+          <div className="mb-6">
+            <p className="text-[10px] font-mono font-bold text-[#3a4060] tracking-[0.2em] uppercase mb-3">Application Type</p>
+            <div className="flex gap-2">
               {(['open', 'brand'] as AppType[]).map(t => (
                 <button
                   key={t}
                   onClick={() => setAppType(t)}
-                  className={`flex-1 py-3 px-4 rounded-xl border-2 text-sm font-semibold transition-all text-left ${
-                    appType === t ? 'border-[#1e3a5f] bg-[#1e3a5f] text-white' : 'border-slate-200 text-slate-600 hover:border-slate-300 bg-slate-50'
+                  className={`flex-1 py-2.5 px-4 rounded-lg border text-left transition-all ${
+                    appType === t
+                      ? 'border-[#e2e8f0] bg-[#e2e8f0] text-[#0b0d14]'
+                      : 'border-[#1e2436] text-[#4a5270] hover:border-[#2a3050] hover:text-[#6b7390]'
                   }`}
                 >
-                  <div className="font-bold">{t === 'open' ? 'Open Generic TLD' : '.Brand TLD'}</div>
-                  <div className={`text-xs mt-0.5 ${appType === t ? 'text-blue-200' : 'text-slate-400'}`}>
-                    {t === 'open' ? 'e.g. .shop, .cloud — open registration' : 'e.g. .yourcompany — single registrant'}
+                  <div className="text-sm font-semibold">{t === 'open' ? 'Open Generic' : '.Brand TLD'}</div>
+                  <div className={`text-xs mt-0.5 font-mono ${appType === t ? 'text-[#4a5270]' : 'text-[#2a3050]'}`}>
+                    {t === 'open' ? '.shop, .cloud — open registration' : '.yourcompany — single registrant'}
                   </div>
                 </button>
               ))}
             </div>
             {appType === 'brand' && (
-              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-2">
-                <strong>.Brand mode:</strong> Trademark scoring is adjusted assuming you are the rights holder. All other checks — IGO protections, geographic names, DNS collision — apply in full.
+              <p className="text-xs font-mono text-[#5a6080] border-l border-[#2a3050] pl-3 py-1 mt-3">
+                Trademark scoring adjusted for rights holder. All other checks apply in full.
               </p>
             )}
           </div>
 
-          {/* Tag input */}
-          <div
-            className="flex flex-wrap gap-2 p-3 border-2 border-slate-200 rounded-xl focus-within:border-[#1e3a5f] transition-colors min-h-[56px] cursor-text bg-slate-50"
-            onClick={() => inputRef.current?.focus()}
-          >
-            {tags.map(tag => (
-              <span key={tag} className="inline-flex items-center gap-1 bg-[#1e3a5f] text-white text-sm font-semibold rounded-lg px-3 py-1">
-                .{tag}
-                <button onClick={e => { e.stopPropagation(); removeTag(tag); }} className="ml-1 text-white/60 hover:text-white leading-none text-base" aria-label={`Remove .${tag}`}>×</button>
-              </span>
-            ))}
-            {tags.length < MAX_STRINGS && (
-              <input
-                ref={inputRef}
-                type="text"
-                value={inputValue}
-                onChange={e => setInputValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onPaste={handlePaste}
-                onBlur={() => inputValue.trim() && addTag(inputValue)}
-                placeholder={tags.length === 0 ? 'e.g. shop, cloud, registry ...' : ''}
-                className="flex-1 min-w-[160px] bg-transparent outline-none text-slate-800 text-sm placeholder-slate-400"
-              />
-            )}
+          {/* String input */}
+          <div className="mb-5">
+            <p className="text-[10px] font-mono font-bold text-[#3a4060] tracking-[0.2em] uppercase mb-3">Strings</p>
+            <div
+              className="flex flex-wrap gap-2 px-3 py-2.5 border border-[#1e2436] rounded-lg focus-within:border-[#3a4a7a] transition-colors min-h-[48px] cursor-text bg-[#0b0d14]"
+              onClick={() => inputRef.current?.focus()}
+            >
+              {tags.map(tag => (
+                <span key={tag} className="inline-flex items-center gap-1.5 bg-[#1e2436] text-[#c8cedd] text-xs font-mono px-2.5 py-1 rounded">
+                  .{tag}
+                  <button
+                    onClick={e => { e.stopPropagation(); removeTag(tag); }}
+                    className="text-[#4a5270] hover:text-[#9ba0b8] leading-none text-sm"
+                    aria-label={`Remove .${tag}`}
+                  >×</button>
+                </span>
+              ))}
+              {tags.length < MAX_STRINGS && (
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={inputValue}
+                  onChange={e => setInputValue(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  onPaste={handlePaste}
+                  onBlur={() => inputValue.trim() && addTag(inputValue)}
+                  placeholder={tags.length === 0 ? 'shop, cloud, registry...' : ''}
+                  className="flex-1 min-w-[160px] bg-transparent outline-none text-[#e2e8f0] text-sm placeholder-[#2a3050] font-mono"
+                />
+              )}
+            </div>
+            {error && <p className="text-[#ff453a] text-xs font-mono mt-2">{error}</p>}
           </div>
 
-          {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
-
-          <div className="flex items-center justify-between mt-4">
-            <span className="text-xs text-slate-400">{tags.length}/{MAX_STRINGS} strings · {appType === 'brand' ? '.Brand' : 'Open Generic'}</span>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-mono text-[#2a3050]">{tags.length}/{MAX_STRINGS} strings</span>
             <button
               onClick={runAssessment}
               disabled={loading || tags.length === 0}
-              className="px-6 py-2.5 bg-[#1e3a5f] hover:bg-[#2a4a73] disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors text-sm"
+              className="px-6 py-2.5 bg-[#e2e8f0] hover:bg-white disabled:bg-[#1e2436] disabled:text-[#3a4060] disabled:cursor-not-allowed text-[#0b0d14] font-bold rounded-lg transition-colors text-sm tracking-wide font-mono"
             >
-              {loading ? 'Assessing...' : `Assess Risk${tags.length > 1 ? ` (${tags.length} strings)` : ''}`}
+              {loading ? 'Assessing...' : tags.length > 1 ? `Assess ${tags.length} Strings` : 'Assess Risk'}
             </button>
           </div>
         </section>
 
-        {reports.length > 0 && (
-          <section className="space-y-5">
-            {reports.length > 1 && (
-              <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-                <h2 className="text-xs font-semibold text-slate-500 mb-3 uppercase tracking-widest">Assessment Summary</h2>
-                <div className="flex flex-wrap gap-2">
-                  {reports.map(r => (
-                    <button
-                      key={r.normalized}
-                      onClick={() => setActiveReport(r.normalized)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 transition-all text-sm font-semibold ${
-                        activeReport === r.normalized ? 'border-[#1e3a5f] bg-[#1e3a5f] text-white shadow' : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300'
-                      }`}
-                    >
-                      <span>.{r.normalized}</span>
-                      {r.isHardBlocked
-                        ? <span className="text-xs bg-red-600 text-white rounded px-1.5 py-0.5 font-bold tracking-wide">⛔ BLOCKED</span>
-                        : <RiskBadge level={r.applicationRiskLevel} />
-                      }
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            {activeReportData && <RiskReport report={activeReportData} />}
-          </section>
+        {/* Multi-string selector */}
+        {reports.length > 1 && (
+          <div className="flex gap-px border border-[#1e2436] rounded-lg overflow-hidden bg-[#0b0d14]">
+            {reports.map(r => (
+              <button
+                key={r.normalized}
+                onClick={() => setActiveReport(r.normalized)}
+                className={`flex-1 px-4 py-3 text-xs font-mono font-semibold transition-colors flex items-center justify-center gap-2 ${
+                  activeReport === r.normalized
+                    ? 'bg-[#12151e] text-[#e2e8f0]'
+                    : 'text-[#3a4060] hover:text-[#6b7390] hover:bg-[#0f1219]'
+                }`}
+              >
+                <span>.{r.normalized}</span>
+                {r.isHardBlocked
+                  ? <span className="text-[#ff453a]">BLOCKED</span>
+                  : <RiskBadge level={r.applicationRiskLevel} />
+                }
+              </button>
+            ))}
+          </div>
         )}
+
+        {/* Active report */}
+        {activeReportData && <RiskReport report={activeReportData} />}
+
       </main>
 
-      <footer className="mt-16 border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-400">
-        <p>TLD Risk Checker · ICANN New gTLD Program: 2026 Round Applicant Guidebook (V1-2025.12.16)</p>
-        <p className="mt-1">For internal use only. Preliminary assessment only — not legal advice or an official ICANN evaluation.</p>
+      <footer className="mt-20 border-t border-[#1a1e2e] py-6 text-center">
+        <p className="text-[11px] font-mono text-[#2a3050] tracking-wider">TLD RISK CHECKER · ICANN NEW GTLD PROGRAM 2026 · AGB V1-2025.12.16</p>
+        <p className="text-[11px] font-mono text-[#1a1e2e] mt-1">For internal use only · Preliminary assessment · Not legal advice</p>
       </footer>
+
     </div>
   );
 }

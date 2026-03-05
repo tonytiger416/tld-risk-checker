@@ -3,76 +3,60 @@ import type { CategoryResult, RiskLevel } from '../engine/types';
 import { CATEGORY_LABELS } from '../engine/types';
 import { RiskBadge } from './RiskBadge';
 
-const LEVEL_BAR: Record<RiskLevel, string> = {
-  HIGH:   'bg-red-500',
-  MEDIUM: 'bg-amber-500',
-  LOW:    'bg-blue-400',
-  CLEAR:  'bg-green-500',
+const BORDER: Record<RiskLevel, string> = {
+  HIGH:   'border-l-[#ff453a]',
+  MEDIUM: 'border-l-[#ff9f0a]',
+  LOW:    'border-l-[#0a84ff]',
+  CLEAR:  'border-l-[#1e2436]',
 };
 
-const SEV_COLOR: Record<RiskLevel, string> = {
-  HIGH:   'border-red-400 bg-red-50',
-  MEDIUM: 'border-amber-400 bg-amber-50',
-  LOW:    'border-blue-400 bg-blue-50',
-  CLEAR:  'border-green-400 bg-green-50',
-};
-
-const SEV_DOT: Record<RiskLevel, string> = {
-  HIGH:   'bg-red-500',
-  MEDIUM: 'bg-amber-500',
-  LOW:    'bg-blue-500',
-  CLEAR:  'bg-green-500',
+const FLAG_BORDER: Record<RiskLevel, string> = {
+  HIGH:   'border-l-[#ff453a]',
+  MEDIUM: 'border-l-[#ff9f0a]',
+  LOW:    'border-l-[#0a84ff]',
+  CLEAR:  'border-l-[#32d74b]',
 };
 
 export function RiskCategoryCard({ cat }: { cat: CategoryResult }) {
   const [open, setOpen] = useState(false);
   const hasFlags = cat.flags.length > 0;
+  const isActive = cat.level !== 'CLEAR';
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+    <div className={`border-l-2 ${BORDER[cat.level]} bg-[#12151e]`}>
       <button
         onClick={() => hasFlags && setOpen(o => !o)}
-        className={`w-full text-left px-4 py-3 flex items-center gap-3 ${hasFlags ? 'cursor-pointer hover:bg-slate-50' : 'cursor-default'} transition-colors`}
+        className={`w-full text-left px-4 py-3 flex items-center justify-between gap-4 transition-colors ${
+          hasFlags ? 'cursor-pointer hover:bg-[#171b27]' : 'cursor-default'
+        }`}
       >
-        {/* Score bar */}
-        <div className="w-1.5 self-stretch rounded-full flex-shrink-0 bg-slate-100 relative overflow-hidden">
-          <div
-            className={`absolute bottom-0 left-0 right-0 rounded-full ${LEVEL_BAR[cat.level]} transition-all`}
-            style={{ height: `${cat.score}%` }}
-          />
+        <span className={`text-sm font-medium ${isActive ? 'text-[#e2e8f0]' : 'text-[#3a4060]'}`}>
+          {CATEGORY_LABELS[cat.category]}
+        </span>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <RiskBadge level={cat.level} />
+          {hasFlags && (
+            <span className="text-[#3a4060] text-[10px] font-mono">{open ? '▲' : '▼'}</span>
+          )}
         </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-sm font-semibold text-slate-800">{CATEGORY_LABELS[cat.category]}</span>
-            <RiskBadge level={cat.level} />
-          </div>
-          <p className="text-xs text-slate-500 mt-0.5 truncate">{cat.summary}</p>
-        </div>
-
-        {hasFlags && (
-          <span className="text-slate-400 text-sm flex-shrink-0">{open ? '▲' : '▼'}</span>
-        )}
       </button>
 
       {open && hasFlags && (
-        <div className="border-t border-slate-100 px-4 py-3 space-y-3">
+        <div className="border-t border-[#1a1e2e] divide-y divide-[#141720]">
           {cat.flags.map(flag => (
-            <div key={flag.code} className={`rounded-lg border-l-4 px-3 py-2.5 ${SEV_COLOR[flag.severity]}`}>
-              <div className="flex items-start gap-2">
-                <span className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${SEV_DOT[flag.severity]}`} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-800">{flag.title}</p>
-                  <p className="text-xs text-slate-600 mt-1">{flag.detail}</p>
-                  <div className="mt-2 flex flex-col gap-1">
-                    <p className="text-xs text-slate-500">
-                      <span className="font-medium">Guidebook ref:</span> {flag.guidebookRef}
-                    </p>
-                    <p className="text-xs text-slate-700 bg-white/70 rounded px-2 py-1 border border-slate-200">
-                      <span className="font-medium">Recommendation:</span> {flag.recommendation}
-                    </p>
-                  </div>
-                </div>
+            <div key={flag.code} className={`border-l-2 ${FLAG_BORDER[flag.severity]} px-4 py-3 bg-[#0f1219]`}>
+              <div className="flex items-start gap-2.5 mb-2">
+                <RiskBadge level={flag.severity} />
+                <p className="text-sm font-semibold text-[#d8dce8] leading-snug">{flag.title}</p>
+              </div>
+              <p className="text-xs text-[#6b7390] leading-relaxed mb-3">{flag.detail}</p>
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-mono text-[#3a4878]">
+                  <span className="text-[#2a5aad]">REF</span>{'  '}{flag.guidebookRef}
+                </p>
+                <p className="text-xs text-[#8891b0] border-l border-[#2a3050] pl-3 py-1">
+                  {flag.recommendation}
+                </p>
               </div>
             </div>
           ))}

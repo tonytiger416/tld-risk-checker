@@ -1,10 +1,10 @@
 import type { RiskLevel } from '../engine/types';
 
-const CONFIG: Record<RiskLevel, { bg: string; text: string; label: string; dot: string }> = {
-  HIGH:   { bg: 'bg-red-100',    text: 'text-red-700',    dot: 'bg-red-500',    label: 'HIGH RISK' },
-  MEDIUM: { bg: 'bg-amber-100',  text: 'text-amber-700',  dot: 'bg-amber-500',  label: 'MEDIUM RISK' },
-  LOW:    { bg: 'bg-blue-100',   text: 'text-blue-700',   dot: 'bg-blue-500',   label: 'LOW RISK' },
-  CLEAR:  { bg: 'bg-green-100',  text: 'text-green-700',  dot: 'bg-green-500',  label: 'CLEAR' },
+const CONFIG: Record<RiskLevel, { text: string; dot: string; label: string }> = {
+  HIGH:   { text: 'text-[#ff453a]', dot: 'bg-[#ff453a]', label: 'HIGH RISK' },
+  MEDIUM: { text: 'text-[#ff9f0a]', dot: 'bg-[#ff9f0a]', label: 'MEDIUM'    },
+  LOW:    { text: 'text-[#0a84ff]', dot: 'bg-[#0a84ff]', label: 'LOW RISK'  },
+  CLEAR:  { text: 'text-[#32d74b]', dot: 'bg-[#32d74b]', label: 'CLEAR'     },
 };
 
 interface Props {
@@ -13,12 +13,12 @@ interface Props {
   large?: boolean;
 }
 
-export function RiskBadge({ level, score, large }: Props) {
+export function RiskBadge({ level, large }: Props) {
   const c = CONFIG[level];
   return (
-    <span className={`inline-flex items-center gap-1.5 font-semibold rounded-full ${c.bg} ${c.text} ${large ? 'px-4 py-1.5 text-sm' : 'px-2.5 py-1 text-xs'}`}>
-      <span className={`rounded-full ${c.dot} ${large ? 'w-2.5 h-2.5' : 'w-2 h-2'}`} />
-      {c.label}{score !== undefined && ` — ${score}/100`}
+    <span className={`inline-flex items-center gap-1.5 font-mono font-semibold tracking-wider ${c.text} ${large ? 'text-sm' : 'text-[11px]'}`}>
+      <span className={`inline-block rounded-full flex-shrink-0 ${c.dot} ${large ? 'w-2 h-2' : 'w-1.5 h-1.5'}`} />
+      {c.label}
     </span>
   );
 }

@@ -1,9 +1,14 @@
 @import "tailwindcss";
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  background-color: #f1f5f9;
-  font-family: system-ui, -apple-system, sans-serif;
+  background-color: #0b0d14;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  color: #1e293b;
+  -moz-osx-font-smoothing: grayscale;
+  color: #e2e8f0;
 }
