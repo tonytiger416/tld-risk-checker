@@ -102,6 +102,23 @@ export function checkContention(s: string): CategoryResult {
     });
   }
 
+  // ---- String length premium -------------------------------------------
+  // Shorter strings command higher demand — 3-char generics are the shortest
+  // available as new gTLDs and historically attract the most applicants
+  const len = s.length;
+  const lengthPoints = len === 3 ? 20 : len === 4 ? 12 : len === 5 ? 5 : 0;
+  if (lengthPoints > 0) {
+    score += lengthPoints;
+    flags.push({
+      code: 'CON-006',
+      severity: len === 3 ? 'HIGH' : len === 4 ? 'MEDIUM' : 'LOW',
+      title: `".${s}" is a short premium string (${len} characters)`,
+      detail: `Three- and four-character TLD strings are the shortest generics available as new gTLDs. Short strings command significant premium demand because they are memorable, versatile, and scarce — professional registry operators actively target them as long-term portfolio assets. Historically, the shortest strings attracted the most competing applicants and the highest auction prices.`,
+      guidebookRef: 'AGB Section 4.1, pp. 191–192; ICANN 2012 auction history',
+      recommendation: `Budget for elevated auction costs. Short strings like ".${s}" disproportionately attract well-capitalised registry operators — factor a higher contention reserve into your business plan.`,
+    });
+  }
+
   // Cap at 100
   score = Math.min(100, score);
 

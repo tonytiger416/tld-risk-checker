@@ -100,6 +100,26 @@ export const COMMERCIAL_VALUE: Map<string, 'ultra' | 'high' | 'medium'> = new Ma
   ['home',         'medium'],
   ['house',        'medium'],
   ['homes',        'medium'],
+
+  // 2026 emerging categories — high-value sectors not prominent in the 2012 round
+  ['web3',         'ultra'],
+  ['defi',         'ultra'],
+  ['fintech',      'ultra'],
+  ['ml',           'high'],
+  ['saas',         'high'],
+  ['creator',      'high'],
+  ['stream',       'high'],
+  ['streaming',    'high'],
+  ['podcast',      'high'],
+  ['biotech',      'high'],
+  ['carbon',       'medium'],
+  ['climate',      'medium'],
+  ['sustainable',  'medium'],
+  ['sustainability','medium'],
+  ['remote',       'medium'],
+  ['coworking',    'medium'],
+  ['dao',          'medium'],
+  ['nft',          'medium'],
 ]);
 
 // ---------------------------------------------------------------------------
@@ -170,4 +190,21 @@ export const SEARCH_POPULARITY: Map<string, 'ultra' | 'high' | 'medium'> = new M
   ['security',    'medium'],
   ['shop',        'medium'],
   ['store',       'medium'],
+
+  // 2026 emerging search categories
+  ['web3',        'high'],
+  ['creator',     'high'],
+  ['stream',      'high'],
+  ['podcast',     'high'],
+  ['remote',      'high'],
+  ['fintech',     'high'],
+  ['ml',          'medium'],
+  ['carbon',      'medium'],
+  ['climate',     'medium'],
+  ['sustainability','medium'],
+  ['dao',         'medium'],
+  ['nft',         'medium'],
+  ['biotech',     'medium'],
+  ['saas',        'medium'],
+  ['coworking',   'medium'],
 ]);
