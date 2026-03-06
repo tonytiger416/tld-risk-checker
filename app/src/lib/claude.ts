@@ -94,6 +94,14 @@ export function buildPrompt(report: TLDRiskReport): string {
 
   const verdict = computeVerdict(report);
 
+  // Extract stat chip values so the AI text matches what is displayed to the user
+  const contentionCat = report.categories.find(c => c.category === 'STRING_CONTENTION');
+  const primaryFlag = contentionCat?.flags.find(f => f.stats && f.stats.length > 0);
+  const chipStats = primaryFlag?.stats;
+  const chipApplicants = chipStats?.find(s => s.label.toLowerCase().includes('applicant'))?.value;
+  const chipBudget = chipStats?.find(s => s.label.toLowerCase().includes('auction') || s.label.toLowerCase().includes('reserve'))?.value;
+  const chipOperator = chipStats?.find(s => s.label.toLowerCase().includes('operator') || s.label.toLowerCase().includes('operator'))?.value;
+
   return `Assess this TLD application and provide your expert opinion.
 
 STRING: .${report.normalized}
@@ -112,6 +120,11 @@ COMPETITIVE LANDSCAPE ALIGNMENT: Your competitive landscape section must reflect
   report.competitiveDemandLevel === 'LOW'    ? 'Limited applicant interest is expected. Reflect the relatively clear path but note any niche competitors.' :
                                                'Minimal competitive demand. Reflect that contention is unlikely and auction budget is low priority.'
 }
+
+STAT CHIPS — CRITICAL: The following values are displayed to the user in stat cards above your competitive landscape text. Your written analysis MUST use these exact figures — do not invent different numbers or contradict them:
+  Expected applicants: ${chipApplicants ?? 'unknown'}
+  Auction reserve: ${chipBudget ?? 'unknown'}
+  Incumbent / likely operators: ${chipOperator ?? 'unknown'}
 
 CATEGORY SCORES:
 ${categoryLines}
