@@ -27,6 +27,8 @@ const LPI_EXACT_TERMS = new Set([
   'hate', 'nazi', 'fascist', 'fascism', 'racist', 'racism',
   'scam', 'fraud', 'phish', 'phishing', 'spam',
   'porn', 'porno', 'sex', 'xxx', 'adult', 'nude', 'erotic', 'fetish',
+  // profanity abbreviations — TLD applications for these have been rejected on LPI grounds
+  'fck', 'fuk', 'fuq', 'sht', 'cnt', 'btch', 'slut', 'whore', 'bastard',
   'drug', 'drugs', 'cocaine', 'heroin', 'meth', 'fentanyl', 'crack',
   'gun', 'guns', 'weapon', 'weapons', 'pistol', 'rifle',
   'jihad', 'isis', 'alqaeda',
