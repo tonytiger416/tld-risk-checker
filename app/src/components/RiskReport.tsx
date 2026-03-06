@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import type { TLDRiskReport, RiskLevel } from '../engine/types';
-import { APPLICATION_RISK_CATEGORIES, COMPETITIVE_DEMAND_CATEGORIES } from '../engine/types';
+import { APPLICATION_RISK_CATEGORIES } from '../engine/types';
 import { RiskBadge } from './RiskBadge';
 import { RiskCategoryCard } from './RiskCategoryCard';
 import { AIAnalysisPanel } from './AIAnalysisPanel';
@@ -48,7 +48,6 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
   const demandLevel  = report.competitiveDemandLevel;
 
   const appRiskCategories = report.categories.filter(c => APPLICATION_RISK_CATEGORIES.has(c.category));
-  const demandCategories  = report.categories.filter(c => COMPETITIVE_DEMAND_CATEGORIES.has(c.category));
 
   return (
     <div className={`bg-[#071830] border border-[#0e2a4a] border-t-2 ${ACCENT_BORDER[appRiskLevel]} rounded-lg overflow-hidden`}>
@@ -173,22 +172,6 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
           </div>
         </div>
 
-        {/* Competitive Demand Categories */}
-        <div>
-          <div className="flex items-center gap-3 mb-3">
-            <div className="h-px flex-1 bg-[#0a2040]" />
-            <span className="text-[10px] font-mono font-bold text-[#6a9ec0] tracking-[0.2em] uppercase whitespace-nowrap">Competitive Demand</span>
-            <div className="h-px flex-1 bg-[#0a2040]" />
-          </div>
-          <p className="text-xs text-[#7ab8e0] font-mono mb-3">
-            How many competitors should you expect, and is an ICANN auction likely?
-          </p>
-          <div className="border border-[#0e2a4a] rounded-lg overflow-hidden">
-            {demandCategories.map(cat => (
-              <RiskCategoryCard key={cat.category} cat={cat} />
-            ))}
-          </div>
-        </div>
 
       </div>
     </div>
