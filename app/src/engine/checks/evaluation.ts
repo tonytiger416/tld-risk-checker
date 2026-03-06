@@ -1,4 +1,5 @@
 import type { CategoryResult, RiskFlag } from '../types';
+import { OUTCOMES_2012, GAC_WITHDRAWALS_2012 } from '../data/contention2012';
 
 // Strings where an organized, established community body exists and a
 // competing applicant could pursue Community Priority Evaluation (CPE)
@@ -50,11 +51,17 @@ export function checkEvaluation(s: string): CategoryResult {
 
   // ---- Community Priority Evaluation (CPE) risk -------------------------
   if (CPE_HIGH_RISK.has(s)) {
+    const cpeOutcome = OUTCOMES_2012.get(s);
+    const hasPrecedent = cpeOutcome?.outcome === 'community';
+    const precedentSentence = hasPrecedent && cpeOutcome?.winner
+      ? `This is not hypothetical: in the 2012 round, ${cpeOutcome.winner} filed a community application for ".${s}", invoked CPE, and received priority delegation — bypassing ${cpeOutcome.applicantCount - 1} generic applicants including ${cpeOutcome.notable.filter(n => !n.toLowerCase().includes('community')).slice(0, 2).join(' and ')} without any auction. ${cpeOutcome.note ?? ''}`
+      : `This has direct precedent: in the 2012 round, community applications for strings including .eco, .sport, and .music bypassed all generic applicants under CPE without any auction.`;
+
     flags.push({
       code: 'EVAL-CPE',
       severity: 'HIGH',
       title: `A community applicant could claim priority over ".${s}" via CPE`,
-      detail: `An organised community body (trade association, NGO, or industry group) could apply for ".${s}" as a community applicant under AGB §7.2 and invoke Community Priority Evaluation (CPE). If they score ≥14/16 on the CPE criteria, they receive priority delegation over all generic applicants — eliminating auction and bypassing your financial advantage entirely. This has happened: in the 2012 round, community applications like .organic and .gay advanced under CPE processes. For ".${s}", established international organisations exist that could credibly claim community designation.`,
+      detail: `An organised community body (trade association, NGO, or industry group) could apply for ".${s}" as a community applicant under AGB §7.2 and invoke Community Priority Evaluation (CPE). If they score ≥14/16 on the CPE criteria, they receive priority delegation over all generic applicants — eliminating auction and bypassing your financial advantage entirely. ${precedentSentence} For ".${s}", established international organisations exist that could credibly claim community designation.`,
       guidebookRef: 'AGB §7.2, pp. 229–236 — Community Priority Evaluation',
       recommendation: `Research whether any international body (trade association, NGO, or standards organisation) is planning a community application for ".${s}". If so, either differentiate your application strategy significantly or consider whether you could partner with or qualify as the community applicant yourself.`,
     });
@@ -62,11 +69,16 @@ export function checkEvaluation(s: string): CategoryResult {
 
   // ---- GAC Early Warning risk -------------------------------------------
   if (GAC_EARLY_WARNING_RISK.has(s)) {
+    const hadWithdrawal = GAC_WITHDRAWALS_2012.has(s);
+    const withdrawalSentence = hadWithdrawal
+      ? `In 2012, applicants for ".${s}" withdrew their applications specifically due to GAC pressure rather than contest the process — the same outcome is the most likely scenario if you proceed.`
+      : `In the 2012 round, applicants for strings in this category withdrew rather than contest GAC objections — fighting GAC consensus advice at Board level has an extremely poor success rate.`;
+
     flags.push({
       code: 'EVAL-GAC',
       severity: 'HIGH',
       title: `".${s}" is likely to attract a GAC Early Warning`,
-      detail: `The Governmental Advisory Committee (GAC) has historically issued Early Warnings and formal advice against strings in this category. A GAC Early Warning does not automatically block your application but triggers a consultation process. However, formal GAC advice to the ICANN Board recommending rejection is extremely difficult to overcome — the Board must provide clear rationale to depart from GAC consensus advice (AGB §3.1). Several 2012 applicants withdrew after GAC Early Warnings rather than contest the process.`,
+      detail: `The Governmental Advisory Committee (GAC) has historically issued Early Warnings and formal advice against strings in this category. A GAC Early Warning does not automatically block your application but triggers a consultation process. However, formal GAC advice to the ICANN Board recommending rejection is extremely difficult to overcome — the Board must provide clear rationale to depart from GAC consensus advice (AGB §3.1). ${withdrawalSentence}`,
       guidebookRef: 'AGB §3.1, pp. 34–40 — GAC advice mechanism; GAC communiqués 2011–2013',
       recommendation: `Before applying for ".${s}", conduct a formal GAC risk assessment with experienced ICANN policy counsel. Prepare a detailed public interest justification and consider proactive engagement with relevant government bodies before the application window opens.`,
     });
