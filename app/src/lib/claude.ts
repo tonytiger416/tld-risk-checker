@@ -1,6 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { TLDRiskReport } from '../engine/types';
 import { CATEGORY_LABELS } from '../engine/types';
+import { classifyString } from '../engine/data/string-context';
+import { getComparables } from '../engine/data/gtld-prices';
 
 // ---------------------------------------------------------------------------
 // System prompt — deep ICANN expert persona with citation requirements
@@ -105,6 +107,30 @@ export function buildPrompt(report: TLDRiskReport): string {
 
   const verdict = computeVerdict(report);
 
+  // Semantic context + comparable price anchors
+  const ctx = classifyString(report.normalized);
+  const comparables = getComparables(report.normalized, ctx.semanticClass);
+
+  const contextBlock = [
+    `STRING CONTEXT:`,
+    `  Semantic class: ${ctx.semanticClass}`,
+    `  Profile: ${ctx.description}`,
+    `  Buyer pool: ${ctx.buyerProfile}`,
+    ctx.regulatoryNote ? `  Regulatory note: ${ctx.regulatoryNote}` : '',
+  ].filter(Boolean).join('\n');
+
+  const comparablesBlock = comparables.length > 0
+    ? comparables.map(c => {
+        const price = c.priceMn !== undefined
+          ? `$${c.priceMn}M${c.approx ? ' est.' : ''}`
+          : 'price undisclosed';
+        const buyer = c.buyer ? `, ${c.buyer}` : '';
+        const year = c.year ? `, ${c.year}` : '';
+        const note = c.notes ? `; ${c.notes}` : '';
+        return `  .${c.tld} [${c.semanticClass}] — ${c.mechanism}, ${price}, ${c.applicants} applicants${buyer}${year}${note}`;
+      }).join('\n')
+    : '  No direct comparables available — use engine scores and semantic class to calibrate.';
+
   return `Assess this TLD application and provide your expert opinion.
 
 STRING: .${report.normalized}
@@ -123,6 +149,11 @@ COMPETITIVE LANDSCAPE ALIGNMENT: Your competitive landscape section must reflect
   report.competitiveDemandLevel === 'LOW'    ? 'Limited applicant interest is expected. Reflect the relatively clear path but note any niche competitors.' :
                                                'Minimal competitive demand. Reflect that contention is unlikely and auction budget is low priority.'
 }
+
+${contextBlock}
+
+STRING COMPARABLES — closest semantic matches from gTLD price history (use these as calibration anchors for your COMPETITIVE STATS and auction reserve estimates — do not use generic length tiers when these comparables are available):
+${comparablesBlock}
 
 CATEGORY SCORES:
 ${categoryLines}
