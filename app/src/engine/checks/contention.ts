@@ -1,5 +1,52 @@
 import type { CategoryResult, RiskFlag } from '../types';
 import { COMMERCIAL_VALUE, SEARCH_POPULARITY } from '../data/demand';
+import { OUTCOMES_2012 } from '../data/contention2012';
+
+function build2012Detail(s: string): { detail: string; recommendation: string } {
+  const out = OUTCOMES_2012.get(s);
+
+  if (!out) {
+    // No specific data — generic text
+    return {
+      detail: `".${s}" was applied for by multiple parties in the 2012 round, triggering a string contention set. Given continued strong demand for generic strings, it is very likely to attract multiple applicants in the 2026 round. Resolution proceeds through private agreement or ICANN auction.`,
+      recommendation: 'Budget for potential auction costs (which reached tens of millions of USD for premium strings in 2012). Prepare a strong use-case narrative to differentiate your application.',
+    };
+  }
+
+  const { applicantCount, notable, outcome, winner, priceMn, year, note } = out;
+  const notableStr = notable.slice(0, 3).join(', ');
+
+  if (outcome === 'community') {
+    return {
+      detail: `In the 2012 round, ${applicantCount} applications were filed for ".${s}" — including ${notableStr}. ${winner ? `The community application by ${winner} invoked Community Priority Evaluation (CPE) and received priority delegation, bypassing every generic applicant without an auction.` : ''} ${note ?? ''} This is a direct precedent: an organised community body has already demonstrated it can win ".${s}" through CPE in a prior round.`,
+      recommendation: `Before applying, confirm whether the same or a successor community body intends to file a CPE application in 2026. A repeat CPE outcome would eliminate your application entirely regardless of financial resources or use-case strength.`,
+    };
+  }
+
+  if (outcome === 'private') {
+    return {
+      detail: `In the 2012 round, ${applicantCount} applications were filed for ".${s}" — including ${notableStr}. The contention set was resolved through private agreement among applicants rather than proceeding to ICANN auction. ${note ?? ''} In 2026, the same operators or successors (including Identity Digital, the result of the Donuts-Afilias merger) are highly likely to re-enter.`,
+      recommendation: `Research current ownership and renewal intentions of 2012 applicants. Private resolution is possible but requires negotiating leverage; budget for auction as a fallback.`,
+    };
+  }
+
+  // Auction outcome
+  const priceStr = priceMn ? ` at $${priceMn}M` : '';
+  const yearStr = year ? ` in ${year}` : '';
+  const winnerStr = winner ? `${winner} won the ICANN auction${yearStr}${priceStr}.` : `The contention set proceeded to ICANN auction${yearStr}.`;
+  const priceContext = priceMn && priceMn >= 100
+    ? ' This was the highest price ever paid for a new gTLD string.'
+    : priceMn && priceMn >= 30
+    ? ' This was among the highest prices paid for any new gTLD string.'
+    : '';
+
+  return {
+    detail: `In the 2012 round, ${applicantCount} applications were filed for ".${s}" — including ${notableStr}. ${winnerStr}${priceContext} ${note ? note + '.' : ''} The operators behind these bids (Verisign, Google, Amazon, Identity Digital/Donuts, Radix) are highly likely to compete again in 2026.`,
+    recommendation: priceMn
+      ? `Hold a minimum auction reserve of $${Math.round(priceMn * 0.5)}M–$${priceMn}M in your business plan — 2026 prices are unlikely to be lower than 2012 given increased operator sophistication. Prepare a differentiated use-case narrative to strengthen your position in any private resolution.`
+      : `Prepare for auction. Research current ownership of ".${s}" and whether the 2012 winner intends to defend the namespace — incumbent operators sometimes participate as a defensive measure.`,
+  };
+}
 
 // High-demand generic strings that attracted multiple applicants in 2012 and will again
 const HIGH_CONTENTION_STRINGS = new Set([
@@ -36,13 +83,16 @@ export function checkContention(s: string): CategoryResult {
 
   if (in2012 && inHighContention) {
     score = 60;
+    const { detail, recommendation } = build2012Detail(s);
+    const out = OUTCOMES_2012.get(s);
+    const applicantCount = out?.applicantCount ?? 'multiple';
     flags.push({
       code: 'CON-001',
       severity: 'HIGH',
-      title: `".${s}" attracted multiple applicants in 2012 and is high-demand`,
-      detail: `".${s}" was applied for by multiple parties in the 2012 round, triggering a string contention set and auction. Given continued strong demand for generic strings, it is very likely to attract multiple applicants in the 2026 round. Resolution proceeds through private agreement or ICANN auction.`,
-      guidebookRef: 'AGB Section 5, pp. 130–170',
-      recommendation: 'Budget for potential auction costs (which reached tens of millions of USD for premium strings in 2012). Prepare a strong use-case narrative to differentiate your application.',
+      title: `".${s}" attracted ${applicantCount} applicants in 2012 and is high-demand`,
+      detail,
+      guidebookRef: 'AGB Section 5, pp. 130–170; ICANN 2012 new gTLD application data',
+      recommendation,
     });
   } else if (inHighContention) {
     score = 35;
@@ -50,19 +100,22 @@ export function checkContention(s: string): CategoryResult {
       code: 'CON-002',
       severity: 'MEDIUM',
       title: `".${s}" is a high-demand generic string — contention likely`,
-      detail: `".${s}" is a widely desirable generic string likely to attract competing applications from multiple parties in the 2026 round.`,
+      detail: `".${s}" is a widely desirable generic string likely to attract competing applications from multiple parties in the 2026 round. Established portfolio operators (Identity Digital, Radix, GMO Registry) systematically target strings in this category.`,
       guidebookRef: 'AGB Section 5, pp. 130–170',
       recommendation: 'Prepare for string contention. Have a resolution strategy ready, including willingness to negotiate or participate in an auction.',
     });
   } else if (in2012) {
     score = 30;
+    const { detail, recommendation } = build2012Detail(s);
+    const out = OUTCOMES_2012.get(s);
+    const applicantCount = out?.applicantCount ?? 'multiple';
     flags.push({
       code: 'CON-003',
       severity: 'MEDIUM',
-      title: `".${s}" was applied for in the 2012 round — renewed contention possible`,
-      detail: `".${s}" had applicants in the 2012 round. There is a meaningful probability of renewed interest from similar applicants or new entrants in 2026.`,
-      guidebookRef: 'AGB Section 5, pp. 130–170',
-      recommendation: 'Research who applied for this string in 2012 and whether they are likely to reapply. Build a differentiated value proposition.',
+      title: `".${s}" attracted ${applicantCount} applicant(s) in the 2012 round`,
+      detail,
+      guidebookRef: 'AGB Section 5, pp. 130–170; ICANN 2012 new gTLD application data',
+      recommendation,
     });
   }
 
