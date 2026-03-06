@@ -32,7 +32,12 @@ APPLY WITH STRATEGY
 HIGH RISK – PROCEED WITH CAUTION
 DO NOT APPLY
 
-Then write 4–5 sentences of tactical reasoning. Reference specific AGB sections and real-world precedents — do not reference internal flag codes (e.g. SIM-002, TM-001). If there is a hard blocker, explain exactly which AGB provision bars the application and what, if anything, can be done. If the string sailed through 2012, say so. If a similar string was rejected, name it. Plain text only — no markdown bold, italics, or bullet points.
+Then write 5–7 sentences of tactical reasoning covering ALL of the following — do not omit any:
+1. Application path: whether the string can clear ICANN's Initial Evaluation, noting any hard blockers by specific AGB provision.
+2. Objection exposure: explicitly assess (a) whether the Governmental Advisory Committee (GAC) is likely to issue an Early Warning or formal advice against this string — name which governments or blocs would likely object and why; (b) whether a Limited Public Interest Objection (LPI) could be filed by NGOs, civil society, or public health/safety bodies under AGB §3.5.2; (c) whether a Community Objection is plausible from an established institution representing a clearly delineated community under AGB §3.5.4; (d) whether a Legal Rights Objection (LRO) from trademark holders is a live risk.
+3. Precedent: cite a relevant 2012-round outcome or objection proceeding by name. If none is directly applicable, say so explicitly.
+4. Path forward: one concrete action to mitigate the most significant risk identified.
+Reference specific AGB sections and page numbers. Do not reference internal flag codes. Plain text only — no markdown bold, italics, or bullet points.
 
 ## CITATIONS
 List every source you referenced in the RECOMMENDATION and COMPETITIVE LANDSCAPE sections, one per line, in this format:
@@ -159,7 +164,7 @@ export async function streamAnalysis(
 
     const stream = client.messages.stream({
       model: 'claude-sonnet-4-5',
-      max_tokens: 1500,
+      max_tokens: 2000,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: buildPrompt(report) }],
     });
