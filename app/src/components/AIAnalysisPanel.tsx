@@ -249,6 +249,24 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
       {parsed.competitiveLandscape && (
         <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-5">
           <h3 className="text-[10px] font-mono font-bold text-[#7ab8e0] tracking-[0.2em] uppercase mb-3">Competitive Landscape</h3>
+
+          {/* Engine-derived stat chips — applicants / budget / operator */}
+          {(() => {
+            const contention = report.categories.find(c => c.category === 'STRING_CONTENTION');
+            const primaryFlag = contention?.flags.find(f => f.stats && f.stats.length > 0);
+            return primaryFlag?.stats ? (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {primaryFlag.stats.map(stat => (
+                  <div key={stat.label} className="flex-1 min-w-[90px] bg-[#030c18] border border-[#1a4a80] rounded-lg px-3 py-2.5">
+                    <div className="text-base leading-none mb-1">{stat.emoji}</div>
+                    <div className="text-[9px] font-mono text-[#6898d0] uppercase tracking-widest mb-0.5">{stat.label}</div>
+                    <div className="text-xs font-mono font-bold text-[#c8e8f8] leading-snug">{stat.value}</div>
+                  </div>
+                ))}
+              </div>
+            ) : null;
+          })()}
+
           <p className="text-sm text-[#d8eeff] leading-relaxed">{parsed.competitiveLandscape}</p>
         </div>
       )}
