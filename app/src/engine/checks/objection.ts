@@ -1,4 +1,5 @@
 import type { CategoryResult, RiskFlag } from '../types';
+import { COMMUNITY_OBJ_2012, LRO_2012 } from '../data/objections2012';
 
 // Community strings — exact match only (identifiable communities)
 const COMMUNITY_STRINGS = new Set([
@@ -37,13 +38,33 @@ export function checkObjection(s: string, appType: 'open' | 'brand' = 'open'): C
 
   // 1. Community objection risk — exact match
   if (COMMUNITY_STRINGS.has(s)) {
+    const precedent = COMMUNITY_OBJ_2012.get(s);
+    const precedentSentence = precedent
+      ? `In the 2012 round, ${precedent.filer} filed a formal Community Objection against ".${s}". Outcome: ${precedent.note}`
+      : `Community objections were filed against several identifiable community strings in the 2012 round — religious, LGBTQ+, and indigenous strings were all contested by established institutions.`;
+
     flags.push({
       code: 'OBJ-001',
       severity: 'HIGH',
       title: `".${s}" may attract a Community Objection`,
-      detail: `This string represents an identifiable community. A Community Objection may be filed by an established institution or association representing that community if they believe the applicant does not legitimately represent or serve the community. The objection panel can recommend rejection.`,
+      detail: `This string represents an identifiable community. A Community Objection may be filed by an established institution or association representing that community if they believe the applicant does not legitimately represent or serve the community. The objection panel can recommend rejection. ${precedentSentence}`,
       guidebookRef: 'AGB Section 3.5.4, pp. 120–124',
-      recommendation: `${appType === 'brand' ? 'As a .brand applicant, ensure you have documented community ties or endorsement.' : 'Demonstrate clear ties to or endorsement from the named community. Without community support, this objection is very difficult to defend.'}`,
+      recommendation: appType === 'brand'
+        ? 'As a .brand applicant, ensure you have documented community ties or endorsement.'
+        : `Demonstrate clear ties to or endorsement from the named community. Without community support or a formal endorsement from the established institution, a Community Objection is very difficult to defend.`,
+    });
+  }
+
+  // 5. Legal Rights Objection (LRO) risk — strings with 2012 LRO history
+  const lro = LRO_2012.get(s);
+  if (lro) {
+    flags.push({
+      code: 'OBJ-005',
+      severity: lro.outcome === 'upheld' ? 'HIGH' : 'MEDIUM',
+      title: `".${s}" had a Legal Rights Objection filed against it in 2012`,
+      detail: `In the 2012 round, ${lro.filer} filed a Legal Rights Objection (LRO) under AGB §3.5.1 against ".${s}". Outcome: ${lro.note} An LRO requires the filer to show (1) the string is identical or confusingly similar to their mark, (2) the applicant has no rights or legitimate interests, and (3) the application was filed in bad faith. The same trademark holder or successor may file again in 2026.`,
+      guidebookRef: 'AGB §3.5.1, pp. 107–115 — Legal Rights Objections; WIPO LRO panel decisions 2012–2013',
+      recommendation: `Research current trademark registrations for ".${s}" and whether ${lro.filer} (or a successor) is likely to file an LRO in 2026. If the mark holder is well-capitalised and the string is core to their brand identity, LRO risk is very high regardless of your intended use.`,
     });
   }
 
