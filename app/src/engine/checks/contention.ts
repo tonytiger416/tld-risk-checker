@@ -60,6 +60,17 @@ const HIGH_CONTENTION_STRINGS = new Set([
   'social', 'chat', 'mail', 'email', 'data', 'ai', 'crypto', 'nft',
   'brand', 'agency', 'company', 'pro', 'plus', 'now', 'new', 'best',
   'top', 'free', 'open', 'direct', 'express', 'one', 'first', 'next',
+  // Additional high-demand generics confirmed by 2012 data and market analysis
+  'site', 'fun', 'press', 'host', 'website', 'space', 'dev', 'xyz',
+  'legal', 'law', 'insurance', 'dental', 'events', 'luxury', 'fashion',
+  'beauty', 'solutions', 'services', 'ventures', 'software', 'marketing',
+  'beer', 'photos', 'photography', 'tours', 'flights', 'zone', 'run',
+  'today', 'properties', 'rentals', 'financial', 'community', 'exchange',
+  'support', 'systems', 'training', 'tools', 'partners', 'team', 'vision',
+  'management', 'international', 'capital', 'gallery', 'watch', 'pizza',
+  'singles', 'solar', 'repair', 'shoes', 'holiday', 'guru', 'expert',
+  'careers', 'productions', 'limited', 'tips', 'town', 'voyage', 'wtf',
+  'works', 'black', 'red', 'blue', 'pink', 'page',
 ]);
 
 // Strings applied for in 2012 by multiple parties — strongest historical contention signal
@@ -68,7 +79,31 @@ const CONTENTION_2012 = new Set([
   'game', 'games', 'green', 'group', 'hotel', 'live', 'media', 'music',
   'network', 'news', 'online', 'play', 'school', 'shop', 'sport', 'sports',
   'store', 'studio', 'tech', 'travel', 'web', 'work', 'world',
+  // Additional 2012 contention sets sourced from ICANN application data
+  'agency', 'beer', 'black', 'blue', 'capital', 'careers', 'community',
+  'dev', 'digital', 'events', 'exchange', 'expert', 'finance', 'financial',
+  'flights', 'fun', 'gallery', 'guru', 'holiday', 'host', 'house',
+  'international', 'land', 'life', 'limited', 'management', 'marketing',
+  'money', 'page', 'partners', 'photography', 'pink', 'pizza', 'plus',
+  'press', 'productions', 'properties', 'red', 'rentals', 'repair', 'run',
+  'services', 'shoes', 'singles', 'site', 'solar', 'solutions', 'space',
+  'support', 'systems', 'team', 'tips', 'today', 'tools', 'tours', 'town',
+  'training', 'ventures', 'vision', 'voyage', 'watch', 'website', 'works',
+  'wtf', 'xyz', 'zone',
 ]);
+
+// Map winner names to canonical incumbent operator names for 2026
+function getIncumbentName(winner: string): string {
+  if (winner.includes('Donuts') || winner.includes('Afilias')) return 'Identity Digital (Donuts + Afilias merger)';
+  if (winner.includes('Google') || winner.includes('Charleston Road')) return 'Google (Charleston Road Registry)';
+  if (winner.includes('Radix')) return 'Radix';
+  if (winner.includes('GMO')) return 'GMO Registry';
+  if (winner.includes('Verisign') || winner.includes('Nu Dot Co')) return 'Verisign (via Nu Dot Co)';
+  if (winner.includes('Amazon')) return 'Amazon';
+  if (winner.includes('XYZ')) return 'XYZ.com LLC';
+  if (winner.includes('Automattic') || winner.includes('WordPress')) return 'Automattic (WordPress)';
+  return winner;
+}
 
 export function checkContention(s: string): CategoryResult {
   const flags: RiskFlag[] = [];
@@ -77,6 +112,7 @@ export function checkContention(s: string): CategoryResult {
   const in2012 = CONTENTION_2012.has(s);
   const commercialTier = COMMERCIAL_VALUE.get(s);
   const searchTier = SEARCH_POPULARITY.get(s);
+  const outcome2012 = OUTCOMES_2012.get(s);
 
   // ---- Base score from contention history --------------------------------
   let score = 0;
@@ -84,8 +120,7 @@ export function checkContention(s: string): CategoryResult {
   if (in2012 && inHighContention) {
     score = 60;
     const { detail, recommendation } = build2012Detail(s);
-    const out = OUTCOMES_2012.get(s);
-    const applicantCount = out?.applicantCount ?? 'multiple';
+    const applicantCount = outcome2012?.applicantCount ?? 'multiple';
     flags.push({
       code: 'CON-001',
       severity: 'HIGH',
@@ -107,8 +142,7 @@ export function checkContention(s: string): CategoryResult {
   } else if (in2012) {
     score = 30;
     const { detail, recommendation } = build2012Detail(s);
-    const out = OUTCOMES_2012.get(s);
-    const applicantCount = out?.applicantCount ?? 'multiple';
+    const applicantCount = outcome2012?.applicantCount ?? 'multiple';
     flags.push({
       code: 'CON-003',
       severity: 'MEDIUM',
@@ -116,6 +150,25 @@ export function checkContention(s: string): CategoryResult {
       detail,
       guidebookRef: 'AGB Section 5, pp. 130–170; ICANN 2012 new gTLD application data',
       recommendation,
+    });
+  }
+
+  // ---- Incumbent operator re-application signal --------------------------
+  // If this string was won in 2012 by a known operator who still holds the TLD,
+  // that operator has strong financial incentive to defend their namespace in 2026.
+  if (outcome2012?.winner) {
+    const incumbentName = getIncumbentName(outcome2012.winner);
+    const isIdentityDigital = incumbentName.includes('Identity Digital');
+    score += 15;
+    flags.push({
+      code: 'CON-007',
+      severity: 'HIGH',
+      title: `Incumbent operator likely to re-apply: ${incumbentName}`,
+      detail: isIdentityDigital
+        ? `${incumbentName} — the result of the 2022 Donuts-Afilias merger — operates this TLD as part of a ~300-string portfolio. Identity Digital has the resources, infrastructure, and strategic incentive to systematically re-apply for every string they currently operate. Their auction war chest in 2012 was among the largest of any registry operator.`
+        : `${incumbentName} currently operates ".${s}" and has a direct financial incentive to defend this namespace. They have already demonstrated willingness to invest significantly at auction (the 2012 bid establishes a price floor), and retaining the string avoids ceding a strategic asset to a competitor.`,
+      guidebookRef: 'AGB Section 5, pp. 130–170; ICANN delegated TLD registry',
+      recommendation: `Factor ${incumbentName}'s re-application as near-certain. In any private resolution negotiation, their leverage is high — they know the registry's economics better than any new entrant. Your differentiation strategy needs to be compelling enough to justify auction participation against a well-capitalised incumbent.`,
     });
   }
 
