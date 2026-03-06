@@ -121,6 +121,15 @@ export function checkContention(s: string): CategoryResult {
     score = 60;
     const { detail, recommendation } = build2012Detail(s);
     const applicantCount = outcome2012?.applicantCount ?? 'multiple';
+    const stats = [
+      { emoji: '👥', label: 'Applicants in 2012', value: String(applicantCount) },
+      outcome2012?.priceMn
+        ? { emoji: '💰', label: 'Auction reserve', value: `$${Math.round(outcome2012.priceMn * 0.5)}M – $${outcome2012.priceMn}M` }
+        : { emoji: '💰', label: 'Auction reserve', value: 'Budget required' },
+      outcome2012?.winner
+        ? { emoji: '🏢', label: 'Incumbent operator', value: getIncumbentName(outcome2012.winner) }
+        : { emoji: '🏢', label: 'Operator activity', value: 'Portfolio operators active' },
+    ];
     flags.push({
       code: 'CON-001',
       severity: 'HIGH',
@@ -128,9 +137,18 @@ export function checkContention(s: string): CategoryResult {
       detail,
       guidebookRef: 'AGB Section 5, pp. 130–170; ICANN 2012 new gTLD application data',
       recommendation,
+      stats,
     });
   } else if (inHighContention) {
     score = 35;
+    const budgetEst = commercialTier === 'ultra' ? '$5M – $20M est.'
+      : commercialTier === 'high' ? '$1M – $5M est.'
+      : '$500K – $2M est.';
+    const stats = [
+      { emoji: '👥', label: 'Expected applicants', value: '2–5 est.' },
+      { emoji: '💰', label: 'Auction reserve', value: budgetEst },
+      { emoji: '🏢', label: 'Likely operators', value: 'Identity Digital, Radix' },
+    ];
     flags.push({
       code: 'CON-002',
       severity: 'MEDIUM',
@@ -138,11 +156,21 @@ export function checkContention(s: string): CategoryResult {
       detail: `".${s}" is a widely desirable generic string likely to attract competing applications from multiple parties in the 2026 round. Established portfolio operators (Identity Digital, Radix, GMO Registry) systematically target strings in this category.`,
       guidebookRef: 'AGB Section 5, pp. 130–170',
       recommendation: 'Prepare for string contention. Have a resolution strategy ready, including willingness to negotiate or participate in an auction.',
+      stats,
     });
   } else if (in2012) {
     score = 30;
     const { detail, recommendation } = build2012Detail(s);
     const applicantCount = outcome2012?.applicantCount ?? 'multiple';
+    const stats = [
+      { emoji: '👥', label: 'Applicants in 2012', value: String(applicantCount) },
+      outcome2012?.priceMn
+        ? { emoji: '💰', label: 'Auction reserve', value: `$${Math.round(outcome2012.priceMn * 0.5)}M – $${outcome2012.priceMn}M` }
+        : { emoji: '💰', label: 'Auction reserve', value: 'Monitor for bids' },
+      outcome2012?.winner
+        ? { emoji: '🏢', label: 'Incumbent operator', value: getIncumbentName(outcome2012.winner) }
+        : { emoji: '🏢', label: 'Operator activity', value: 'Niche interest possible' },
+    ];
     flags.push({
       code: 'CON-003',
       severity: 'MEDIUM',
@@ -150,6 +178,7 @@ export function checkContention(s: string): CategoryResult {
       detail,
       guidebookRef: 'AGB Section 5, pp. 130–170; ICANN 2012 new gTLD application data',
       recommendation,
+      stats,
     });
   }
 

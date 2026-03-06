@@ -1,6 +1,12 @@
 export type RiskLevel = 'HIGH' | 'MEDIUM' | 'LOW' | 'CLEAR';
 export type AppType = 'open' | 'brand';
 
+export interface RiskFlagStat {
+  emoji: string;
+  label: string;
+  value: string;
+}
+
 export interface RiskFlag {
   code: string;
   severity: RiskLevel;
@@ -8,6 +14,7 @@ export interface RiskFlag {
   detail: string;
   guidebookRef: string;
   recommendation: string;
+  stats?: RiskFlagStat[];
 }
 
 export type RiskCategory =
