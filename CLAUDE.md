@@ -142,4 +142,4 @@ Edit `app/src/engine/data/gtld-prices.ts` — add new `PriceRecord` entries to `
 - TypeScript strict mode — no `any`
 - Keep components focused; avoid over-engineering
 - `max_tokens: 2200` for Claude API calls (bumped to support longer recommendations + objection signals)
-- Model: `claude-sonnet-4-5`
+- Model: `claude-sonnet-4-6`
