@@ -32,17 +32,37 @@ const SEV_DOT: Record<ObjectionSeverity, string> = {
   'High risk': 'bg-[#ff453a]',
 };
 
+const TRADEMARK_LINKS = (s: string) => [
+  {
+    label: 'USPTO',
+    title: 'US Patent & Trademark Office',
+    url: `https://tmsearch.uspto.gov/search/search-information?query=${encodeURIComponent(s)}&searchType=free-form`,
+  },
+  {
+    label: 'WIPO',
+    title: 'WIPO Global Brand Database',
+    url: `https://branddb.wipo.int/branddb/en/search.jsf?query=brandName%3D(${encodeURIComponent(s)})*&by=brandName&rows=10`,
+  },
+  {
+    label: 'TMview',
+    title: 'TMview (EU + global)',
+    url: `https://www.tmdn.org/tmview/welcome#?criteria=S&trademarkName=${encodeURIComponent(s)}`,
+  },
+];
+
 interface Props {
   cat: CategoryResult;
   aiObjectionSignals?: ObjectionSignals | null;
   overrideLevel?: RiskLevel;
+  tldString?: string;
 }
 
-export function RiskCategoryCard({ cat, aiObjectionSignals, overrideLevel }: Props) {
+export function RiskCategoryCard({ cat, aiObjectionSignals, overrideLevel, tldString }: Props) {
   const [open, setOpen] = useState(false);
   const hasFlags = cat.flags.length > 0;
   const displayLevel = overrideLevel ?? cat.level;
   const isActive = displayLevel !== 'CLEAR';
+  const isTrademarkCard = cat.category === 'TRADEMARK_RIGHTS' && !!tldString;
 
   // AI has elevated the objection risk if any signal is Likely/High risk
   // and the engine didn't catch it (engine is CLEAR or LOW)
@@ -53,7 +73,7 @@ export function RiskCategoryCard({ cat, aiObjectionSignals, overrideLevel }: Pro
     ['Likely', 'High risk'].includes(aiObjectionSignals.lro.severity)
   ) && (cat.level === 'CLEAR' || cat.level === 'LOW');
 
-  const canExpand = hasFlags || aiObjectionSignals != null;
+  const canExpand = hasFlags || aiObjectionSignals != null || isTrademarkCard;
 
   return (
     <div className={`border-l-2 ${BORDER[displayLevel]} bg-[#071830]`}>
@@ -100,6 +120,32 @@ export function RiskCategoryCard({ cat, aiObjectionSignals, overrideLevel }: Pro
               </div>
             </div>
           ))}
+
+          {/* Trademark Search Links */}
+          {isTrademarkCard && (
+            <div className="px-4 py-3 bg-[#030c18]">
+              <p className="text-[9px] font-mono font-bold text-[#6898d0] tracking-[0.18em] uppercase mb-2.5">
+                Search Trademark Databases
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {TRADEMARK_LINKS(tldString!).map(({ label, title, url }) => (
+                  <a
+                    key={label}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={title}
+                    className="text-[10px] font-mono font-bold px-2.5 py-1 rounded border border-[#0e2a4a] text-[#7ab8e0] hover:border-[#1a4a80] hover:text-[#a8d8f8] hover:bg-[#071830] transition-colors"
+                  >
+                    {label} ↗
+                  </a>
+                ))}
+              </div>
+              <p className="text-[10px] text-[#4a7898] mt-2">
+                Search for ".{tldString}" and "{tldString}" as word marks. Opens in a new tab.
+              </p>
+            </div>
+          )}
 
           {/* AI Objection Assessment */}
           {aiObjectionSignals && (

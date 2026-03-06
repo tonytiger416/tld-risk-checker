@@ -192,6 +192,7 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
                 cat={cat}
                 aiObjectionSignals={cat.category === 'OBJECTION_GROUNDS' ? objectionSignals : null}
                 overrideLevel={cat.category === 'OBJECTION_GROUNDS' ? effectiveObjLevel : undefined}
+                tldString={cat.category === 'TRADEMARK_RIGHTS' ? report.normalized : undefined}
               />
             ))}
           </div>
