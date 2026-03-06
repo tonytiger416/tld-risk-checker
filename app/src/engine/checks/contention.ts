@@ -209,6 +209,8 @@ export function checkContention(s: string): CategoryResult {
 
   if (commercialPoints > 0) {
     score += commercialPoints;
+    const commApplicants = commercialTier === 'ultra' ? '5–10 est.' : commercialTier === 'high' ? '3–6 est.' : '2–4 est.';
+    const commBudget = commercialTier === 'ultra' ? '$5M – $20M est.' : commercialTier === 'high' ? '$1M – $5M est.' : '$500K – $2M est.';
     flags.push({
       code: 'CON-004',
       severity: commercialTier === 'ultra' ? 'HIGH' : 'MEDIUM',
@@ -216,6 +218,11 @@ export function checkContention(s: string): CategoryResult {
       detail: `".${s}" corresponds to a high-revenue commercial sector. Strings in lucrative markets (finance, health, legal, cloud, etc.) attract competing registry operators because premium SLD registrations command higher prices and volumes — making them worth contesting at auction.`,
       guidebookRef: 'AGB Section 5, pp. 130–170',
       recommendation: 'Prepare a strong economic case for your use of this namespace. Competing applicants from larger, better-resourced operators are more likely for commercial-value strings.',
+      stats: [
+        { emoji: '👥', label: 'Expected applicants', value: commApplicants },
+        { emoji: '💰', label: 'Auction reserve', value: commBudget },
+        { emoji: '🏢', label: 'Likely operators', value: 'Identity Digital, Radix, GMO' },
+      ],
     });
   }
 
@@ -244,6 +251,8 @@ export function checkContention(s: string): CategoryResult {
   const lengthPoints = len === 3 ? 20 : len === 4 ? 12 : len === 5 ? 5 : 0;
   if (lengthPoints > 0) {
     score += lengthPoints;
+    const lenApplicants = len === 3 ? '6–12 est.' : len === 4 ? '3–6 est.' : '2–4 est.';
+    const lenBudget = len === 3 ? '$5M – $30M est.' : len === 4 ? '$1M – $10M est.' : '$500K – $3M est.';
     flags.push({
       code: 'CON-006',
       severity: len === 3 ? 'HIGH' : len === 4 ? 'MEDIUM' : 'LOW',
@@ -251,6 +260,11 @@ export function checkContention(s: string): CategoryResult {
       detail: `Three- and four-character TLD strings are the shortest generics available as new gTLDs. Short strings command significant premium demand because they are memorable, versatile, and scarce — professional registry operators actively target them as long-term portfolio assets. Historically, the shortest strings attracted the most competing applicants and the highest auction prices.`,
       guidebookRef: 'AGB Section 4.1, pp. 191–192; ICANN 2012 auction history',
       recommendation: `Budget for elevated auction costs. Short strings like ".${s}" disproportionately attract well-capitalised registry operators — factor a higher contention reserve into your business plan.`,
+      stats: [
+        { emoji: '👥', label: 'Expected applicants', value: lenApplicants },
+        { emoji: '💰', label: 'Auction reserve', value: lenBudget },
+        { emoji: '🏢', label: 'Likely operators', value: 'Identity Digital, Radix, GMO' },
+      ],
     });
   }
 
