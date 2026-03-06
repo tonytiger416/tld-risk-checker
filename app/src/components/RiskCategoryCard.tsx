@@ -35,12 +35,14 @@ const SEV_DOT: Record<ObjectionSeverity, string> = {
 interface Props {
   cat: CategoryResult;
   aiObjectionSignals?: ObjectionSignals | null;
+  overrideLevel?: RiskLevel;
 }
 
-export function RiskCategoryCard({ cat, aiObjectionSignals }: Props) {
+export function RiskCategoryCard({ cat, aiObjectionSignals, overrideLevel }: Props) {
   const [open, setOpen] = useState(false);
   const hasFlags = cat.flags.length > 0;
-  const isActive = cat.level !== 'CLEAR';
+  const displayLevel = overrideLevel ?? cat.level;
+  const isActive = displayLevel !== 'CLEAR';
 
   // AI has elevated the objection risk if any signal is Likely/High risk
   // and the engine didn't catch it (engine is CLEAR or LOW)
@@ -54,7 +56,7 @@ export function RiskCategoryCard({ cat, aiObjectionSignals }: Props) {
   const canExpand = hasFlags || aiObjectionSignals != null;
 
   return (
-    <div className={`border-l-2 ${BORDER[cat.level]} bg-[#071830]`}>
+    <div className={`border-l-2 ${BORDER[displayLevel]} bg-[#071830]`}>
       <button
         onClick={() => canExpand && setOpen(o => !o)}
         className={`w-full text-left px-4 py-3 flex items-center justify-between gap-4 transition-colors ${
@@ -72,7 +74,7 @@ export function RiskCategoryCard({ cat, aiObjectionSignals }: Props) {
           )}
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
-          <RiskBadge level={cat.level} />
+          <RiskBadge level={displayLevel} />
           {canExpand && (
             <span className="text-[#5a98c8] text-[10px] font-mono">{open ? '▲' : '▼'}</span>
           )}

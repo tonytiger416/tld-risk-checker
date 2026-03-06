@@ -4,7 +4,26 @@ import { APPLICATION_RISK_CATEGORIES } from '../engine/types';
 import { RiskBadge } from './RiskBadge';
 import { RiskCategoryCard } from './RiskCategoryCard';
 import { AIAnalysisPanel } from './AIAnalysisPanel';
-import type { ObjectionSignals } from './AIAnalysisPanel';
+import type { ObjectionSignals, ObjectionSeverity } from './AIAnalysisPanel';
+
+const LEVEL_RANK: Record<RiskLevel, number> = { CLEAR: 0, LOW: 1, MEDIUM: 2, HIGH: 3 };
+
+function maxLevel(a: RiskLevel, b: RiskLevel): RiskLevel {
+  return LEVEL_RANK[a] >= LEVEL_RANK[b] ? a : b;
+}
+
+function aiSignalsToLevel(signals: ObjectionSignals): RiskLevel {
+  const severities: ObjectionSeverity[] = [
+    signals.gac.severity,
+    signals.lpi.severity,
+    signals.community.severity,
+    signals.lro.severity,
+  ];
+  if (severities.some(s => s === 'High risk' || s === 'Likely')) return 'HIGH';
+  if (severities.some(s => s === 'Possible')) return 'MEDIUM';
+  return 'CLEAR';
+}
+
 const ACCENT_BORDER: Record<RiskLevel, string> = {
   HIGH:   'border-t-[#ff453a]',
   MEDIUM: 'border-t-[#ff9f0a]',
@@ -47,10 +66,15 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
   const appRiskLevel = report.applicationRiskLevel;
   const demandLevel  = report.competitiveDemandLevel;
 
+  const engineObjCat = report.categories.find(c => c.category === 'OBJECTION_GROUNDS');
+  const aiObjLevel = objectionSignals ? aiSignalsToLevel(objectionSignals) : 'CLEAR';
+  const effectiveObjLevel = maxLevel(engineObjCat?.level ?? 'CLEAR', aiObjLevel);
+  const effectiveAppRiskLevel = maxLevel(appRiskLevel, effectiveObjLevel);
+
   const appRiskCategories = report.categories.filter(c => APPLICATION_RISK_CATEGORIES.has(c.category));
 
   return (
-    <div className={`bg-[#071830] border border-[#0e2a4a] border-t-2 ${ACCENT_BORDER[appRiskLevel]} rounded-lg overflow-hidden`}>
+    <div className={`bg-[#071830] border border-[#0e2a4a] border-t-2 ${ACCENT_BORDER[effectiveAppRiskLevel]} rounded-lg overflow-hidden`}>
 
       {/* Hard Blocked Banner */}
       {report.isHardBlocked && (
@@ -83,8 +107,8 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
 
             <div className="bg-[#030c18] px-5 py-3 min-w-[140px]">
               <div className="text-[10px] font-mono text-[#7ab8e0] tracking-[0.15em] uppercase mb-2">Application Risk</div>
-              <div className={`text-xl font-mono font-black ${APP_RISK_COLOR[appRiskLevel]}`}>
-                {APP_RISK_LABEL[appRiskLevel]}
+              <div className={`text-xl font-mono font-black ${APP_RISK_COLOR[effectiveAppRiskLevel]}`}>
+                {APP_RISK_LABEL[effectiveAppRiskLevel]}
               </div>
             </div>
 
@@ -167,6 +191,7 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
                 key={cat.category}
                 cat={cat}
                 aiObjectionSignals={cat.category === 'OBJECTION_GROUNDS' ? objectionSignals : null}
+                overrideLevel={cat.category === 'OBJECTION_GROUNDS' ? effectiveObjLevel : undefined}
               />
             ))}
           </div>
