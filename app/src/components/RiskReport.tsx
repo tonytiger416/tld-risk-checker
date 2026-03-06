@@ -4,8 +4,6 @@ import { APPLICATION_RISK_CATEGORIES, COMPETITIVE_DEMAND_CATEGORIES } from '../e
 import { RiskBadge } from './RiskBadge';
 import { RiskCategoryCard } from './RiskCategoryCard';
 import { AIAnalysisPanel } from './AIAnalysisPanel';
-import { computeVerdict } from '../lib/claude';
-
 const ACCENT_BORDER: Record<RiskLevel, string> = {
   HIGH:   'border-t-[#ff453a]',
   MEDIUM: 'border-t-[#ff9f0a]',
@@ -27,20 +25,18 @@ const DEMAND_COLOR: Record<RiskLevel, string> = {
   CLEAR:  'text-[#32d74b]',
 };
 
-// Short labels for the Application Risk header box — derived from verdict
-// so they always match what the AI recommendation section displays
-const VERDICT_SHORT: Record<string, string> = {
-  'STRONG APPLY':                     'STRONG APPLY',
-  'APPLY WITH STRATEGY':              'APPLY W/ STRATEGY',
-  'HIGH RISK – PROCEED WITH CAUTION': 'HIGH RISK',
-  'DO NOT APPLY':                     'DO NOT APPLY',
+const APP_RISK_LABEL: Record<RiskLevel, string> = {
+  HIGH:   'HIGH',
+  MEDIUM: 'MEDIUM',
+  LOW:    'LOW',
+  CLEAR:  'CLEAR',
 };
 
-const VERDICT_COLOR: Record<string, string> = {
-  'STRONG APPLY':                     'text-[#32d74b]',
-  'APPLY WITH STRATEGY':              'text-[#0a84ff]',
-  'HIGH RISK – PROCEED WITH CAUTION': 'text-[#ff9f0a]',
-  'DO NOT APPLY':                     'text-[#ff453a]',
+const APP_RISK_COLOR: Record<RiskLevel, string> = {
+  HIGH:   'text-[#ff453a]',
+  MEDIUM: 'text-[#ff9f0a]',
+  LOW:    'text-[#0a84ff]',
+  CLEAR:  'text-[#32d74b]',
 };
 
 export function RiskReport({ report }: { report: TLDRiskReport }) {
@@ -48,7 +44,6 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
 
   const appRiskLevel = report.applicationRiskLevel;
   const demandLevel  = report.competitiveDemandLevel;
-  const verdict      = computeVerdict(report);
 
   const appRiskCategories = report.categories.filter(c => APPLICATION_RISK_CATEGORIES.has(c.category));
   const demandCategories  = report.categories.filter(c => COMPETITIVE_DEMAND_CATEGORIES.has(c.category));
@@ -87,8 +82,8 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
 
             <div className="bg-[#030c18] px-5 py-3 min-w-[140px]">
               <div className="text-[10px] font-mono text-[#7ab8e0] tracking-[0.15em] uppercase mb-2">Application Risk</div>
-              <div className={`text-xl font-mono font-black ${VERDICT_COLOR[verdict]}`}>
-                {VERDICT_SHORT[verdict]}
+              <div className={`text-xl font-mono font-black ${APP_RISK_COLOR[appRiskLevel]}`}>
+                {APP_RISK_LABEL[appRiskLevel]}
               </div>
             </div>
 
