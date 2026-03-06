@@ -41,12 +41,27 @@ interface CompetitiveStats {
   operators: string;
 }
 
+export type ObjectionSeverity = 'None' | 'Possible' | 'Likely' | 'High risk';
+
+export interface ObjectionSignal {
+  severity: ObjectionSeverity;
+  reason: string;
+}
+
+export interface ObjectionSignals {
+  gac: ObjectionSignal;
+  lpi: ObjectionSignal;
+  community: ObjectionSignal;
+  lro: ObjectionSignal;
+}
+
 interface ParsedAnalysis {
   verdict: Verdict | null;
   recommendationBody: string;
   citations: CitationItem[];
   competitiveLandscape: string;
   competitiveStats: CompetitiveStats | null;
+  objectionSignals: ObjectionSignals | null;
 }
 
 function stripMarkdown(text: string): string {
@@ -57,16 +72,31 @@ function stripMarkdown(text: string): string {
     .trim();
 }
 
+function parseSignal(line: string | undefined): ObjectionSignal {
+  if (!line) return { severity: 'None', reason: '—' };
+  const m = line.match(/^(None|Possible|Likely|High risk)\s*[—\-–]\s*(.+)$/i);
+  if (m) {
+    const sev = m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase();
+    return {
+      severity: sev as ObjectionSeverity,
+      reason: m[2].trim(),
+    };
+  }
+  return { severity: 'None', reason: line };
+}
+
 function parseAnalysis(raw: string): ParsedAnalysis {
-  const recMatch   = raw.match(/##\s*RECOMMENDATION\s*([\s\S]*?)(?=##\s*CITATIONS|##\s*COMPETITIVE LANDSCAPE|$)/i);
-  const citMatch   = raw.match(/##\s*CITATIONS\s*([\s\S]*?)(?=##\s*COMPETITIVE LANDSCAPE|$)/i);
-  const compMatch  = raw.match(/##\s*COMPETITIVE LANDSCAPE\s*([\s\S]*?)(?=##\s*COMPETITIVE STATS|$)/i);
-  const statsMatch = raw.match(/##\s*COMPETITIVE STATS\s*([\s\S]*?)$/i);
+  const recMatch    = raw.match(/##\s*RECOMMENDATION\s*([\s\S]*?)(?=##\s*CITATIONS|##\s*COMPETITIVE LANDSCAPE|$)/i);
+  const citMatch    = raw.match(/##\s*CITATIONS\s*([\s\S]*?)(?=##\s*COMPETITIVE LANDSCAPE|$)/i);
+  const compMatch   = raw.match(/##\s*COMPETITIVE LANDSCAPE\s*([\s\S]*?)(?=##\s*COMPETITIVE STATS|$)/i);
+  const statsMatch  = raw.match(/##\s*COMPETITIVE STATS\s*([\s\S]*?)(?=##\s*OBJECTION SIGNALS|$)/i);
+  const objMatch    = raw.match(/##\s*OBJECTION SIGNALS\s*([\s\S]*?)$/i);
 
   const recSection   = recMatch   ? recMatch[1].trim()   : '';
   const citSection   = citMatch   ? citMatch[1].trim()   : '';
   const compSection  = compMatch  ? compMatch[1].trim()  : '';
   const statsSection = statsMatch ? statsMatch[1].trim() : '';
+  const objSection   = objMatch   ? objMatch[1].trim()   : '';
 
   const lines = recSection.split('\n');
   let verdict: Verdict | null = null;
@@ -105,12 +135,29 @@ function parseAnalysis(raw: string): ParsedAnalysis {
     }
   }
 
+  let objectionSignals: ObjectionSignals | null = null;
+  if (objSection) {
+    const gacLine  = objSection.match(/^GAC:\s*(.+)$/m)?.[1]?.trim();
+    const lpiLine  = objSection.match(/^LPI:\s*(.+)$/m)?.[1]?.trim();
+    const comLine  = objSection.match(/^COMMUNITY:\s*(.+)$/m)?.[1]?.trim();
+    const lroLine  = objSection.match(/^LRO:\s*(.+)$/m)?.[1]?.trim();
+    if (gacLine || lpiLine || comLine || lroLine) {
+      objectionSignals = {
+        gac:       parseSignal(gacLine),
+        lpi:       parseSignal(lpiLine),
+        community: parseSignal(comLine),
+        lro:       parseSignal(lroLine),
+      };
+    }
+  }
+
   return {
     verdict,
     recommendationBody: stripMarkdown(bodyLines),
     citations,
     competitiveLandscape: stripMarkdown(compSection),
     competitiveStats,
+    objectionSignals,
   };
 }
 
@@ -128,11 +175,12 @@ interface Props {
   report: TLDRiskReport;
   cachedText: string;
   onCacheUpdate: (text: string) => void;
+  onObjectionSignals?: (signals: ObjectionSignals) => void;
 }
 
 type GenState = 'generating' | 'done' | 'error';
 
-export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
+export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjectionSignals }: Props) {
   const hasApiKey = !!(import.meta.env.VITE_CLAUDE_API_KEY as string | undefined);
 
   const [genState, setGenState] = useState<GenState>(cachedText ? 'done' : 'generating');
@@ -163,6 +211,13 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
     doGenerate();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (genState !== 'done' || !onObjectionSignals) return;
+    const parsed = parseAnalysis(displayText);
+    if (parsed.objectionSignals) onObjectionSignals(parsed.objectionSignals);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [genState]);
 
   if (!hasApiKey) {
     return (

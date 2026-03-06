@@ -1,9 +1,10 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import type { TLDRiskReport, RiskLevel } from '../engine/types';
 import { APPLICATION_RISK_CATEGORIES, COMPETITIVE_DEMAND_CATEGORIES } from '../engine/types';
 import { RiskBadge } from './RiskBadge';
 import { RiskCategoryCard } from './RiskCategoryCard';
 import { AIAnalysisPanel } from './AIAnalysisPanel';
+import type { ObjectionSignals } from './AIAnalysisPanel';
 const ACCENT_BORDER: Record<RiskLevel, string> = {
   HIGH:   'border-t-[#ff453a]',
   MEDIUM: 'border-t-[#ff9f0a]',
@@ -41,6 +42,7 @@ const APP_RISK_COLOR: Record<RiskLevel, string> = {
 
 export function RiskReport({ report }: { report: TLDRiskReport }) {
   const aiCacheRef = useRef<Record<string, string>>({});
+  const [objectionSignals, setObjectionSignals] = useState<ObjectionSignals | null>(null);
 
   const appRiskLevel = report.applicationRiskLevel;
   const demandLevel  = report.competitiveDemandLevel;
@@ -108,6 +110,7 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
           report={report}
           cachedText={aiCacheRef.current[report.normalized] ?? ''}
           onCacheUpdate={(text) => { aiCacheRef.current[report.normalized] = text; }}
+          onObjectionSignals={setObjectionSignals}
         />
 
         {/* Top Issues */}
@@ -161,7 +164,11 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
           </p>
           <div className="divide-y divide-[#081830] border border-[#0e2a4a] rounded-lg overflow-hidden">
             {appRiskCategories.map(cat => (
-              <RiskCategoryCard key={cat.category} cat={cat} />
+              <RiskCategoryCard
+                key={cat.category}
+                cat={cat}
+                aiObjectionSignals={cat.category === 'OBJECTION_GROUNDS' ? objectionSignals : null}
+              />
             ))}
           </div>
         </div>

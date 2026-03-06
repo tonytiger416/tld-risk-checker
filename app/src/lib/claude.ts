@@ -56,7 +56,14 @@ Write 3–4 sentences covering: realistic number of competing applicants based o
 Output exactly three lines with no extra text, in this format:
 APPLICANTS: [your estimate, e.g. "4–8" or "2–3" or "Likely uncontested"]
 BUDGET: [your auction reserve estimate, e.g. "$10M–$15M" or "$500K–$2M" or "No auction expected"]
-OPERATORS: [comma-separated likely operators, e.g. "Identity Digital, Radix, GMO" or "Low operator interest"]`;
+OPERATORS: [comma-separated likely operators, e.g. "Identity Digital, Radix, GMO" or "Low operator interest"]
+
+## OBJECTION SIGNALS
+Output exactly four lines assessing each objection mechanism. Use only these severity labels: None / Possible / Likely / High risk.
+GAC: [severity] — [one-line reason, or "No GAC sensitivity identified"]
+LPI: [severity] — [one-line reason, or "No LPI grounds identified"]
+COMMUNITY: [severity] — [one-line reason, or "No community objection risk identified"]
+LRO: [severity] — [one-line reason, or "No trademark conflict identified"]`;
 
 // ---------------------------------------------------------------------------
 // Deterministically compute the verdict from engine scores
@@ -195,7 +202,7 @@ export async function streamAnalysis(
 
     const stream = client.messages.stream({
       model: 'claude-sonnet-4-5',
-      max_tokens: 2000,
+      max_tokens: 2200,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: buildPrompt(report) }],
     });
