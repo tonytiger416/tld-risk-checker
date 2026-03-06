@@ -56,11 +56,12 @@ type Verdict =
   | 'DO NOT APPLY';
 
 export function computeVerdict(report: TLDRiskReport): Verdict {
-  if (report.isHardBlocked || report.applicationRiskLevel === 'HIGH') return 'DO NOT APPLY';
-  if (report.applicationRiskLevel === 'MEDIUM') return 'HIGH RISK – PROCEED WITH CAUTION';
+  if (report.isHardBlocked) return 'DO NOT APPLY';
+  if (report.applicationRiskLevel === 'HIGH') return 'HIGH RISK – PROCEED WITH CAUTION';
+  if (report.applicationRiskLevel === 'MEDIUM') return 'APPLY WITH STRATEGY';
   if (report.applicationRiskLevel === 'LOW') return 'APPLY WITH STRATEGY';
   // CLEAR application risk
-  if (report.competitiveDemandLevel === 'HIGH') return 'APPLY WITH STRATEGY';
+  if (report.competitiveDemandLevel === 'HIGH' || report.competitiveDemandLevel === 'MEDIUM') return 'APPLY WITH STRATEGY';
   return 'STRONG APPLY';
 }
 
