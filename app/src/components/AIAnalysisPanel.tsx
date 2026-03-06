@@ -35,11 +35,18 @@ const CITATION_LABEL: Record<string, string> = {
 
 interface CitationItem { type: string; text: string; }
 
+interface CompetitiveStats {
+  applicants: string;
+  budget: string;
+  operators: string;
+}
+
 interface ParsedAnalysis {
   verdict: Verdict | null;
   recommendationBody: string;
   citations: CitationItem[];
   competitiveLandscape: string;
+  competitiveStats: CompetitiveStats | null;
 }
 
 function stripMarkdown(text: string): string {
@@ -51,13 +58,15 @@ function stripMarkdown(text: string): string {
 }
 
 function parseAnalysis(raw: string): ParsedAnalysis {
-  const recMatch  = raw.match(/##\s*RECOMMENDATION\s*([\s\S]*?)(?=##\s*CITATIONS|##\s*COMPETITIVE LANDSCAPE|$)/i);
-  const citMatch  = raw.match(/##\s*CITATIONS\s*([\s\S]*?)(?=##\s*COMPETITIVE LANDSCAPE|$)/i);
-  const compMatch = raw.match(/##\s*COMPETITIVE LANDSCAPE\s*([\s\S]*?)$/i);
+  const recMatch   = raw.match(/##\s*RECOMMENDATION\s*([\s\S]*?)(?=##\s*CITATIONS|##\s*COMPETITIVE LANDSCAPE|$)/i);
+  const citMatch   = raw.match(/##\s*CITATIONS\s*([\s\S]*?)(?=##\s*COMPETITIVE LANDSCAPE|$)/i);
+  const compMatch  = raw.match(/##\s*COMPETITIVE LANDSCAPE\s*([\s\S]*?)(?=##\s*COMPETITIVE STATS|$)/i);
+  const statsMatch = raw.match(/##\s*COMPETITIVE STATS\s*([\s\S]*?)$/i);
 
-  const recSection  = recMatch  ? recMatch[1].trim()  : '';
-  const citSection  = citMatch  ? citMatch[1].trim()  : '';
-  const compSection = compMatch ? compMatch[1].trim() : '';
+  const recSection   = recMatch   ? recMatch[1].trim()   : '';
+  const citSection   = citMatch   ? citMatch[1].trim()   : '';
+  const compSection  = compMatch  ? compMatch[1].trim()  : '';
+  const statsSection = statsMatch ? statsMatch[1].trim() : '';
 
   const lines = recSection.split('\n');
   let verdict: Verdict | null = null;
@@ -82,11 +91,26 @@ function parseAnalysis(raw: string): ParsedAnalysis {
     })
     .filter(c => c.text.length > 0);
 
+  let competitiveStats: CompetitiveStats | null = null;
+  if (statsSection) {
+    const applicants = statsSection.match(/^APPLICANTS:\s*(.+)$/m)?.[1]?.trim();
+    const budget     = statsSection.match(/^BUDGET:\s*(.+)$/m)?.[1]?.trim();
+    const operators  = statsSection.match(/^OPERATORS:\s*(.+)$/m)?.[1]?.trim();
+    if (applicants || budget || operators) {
+      competitiveStats = {
+        applicants: applicants ?? '—',
+        budget:     budget     ?? '—',
+        operators:  operators  ?? '—',
+      };
+    }
+  }
+
   return {
     verdict,
     recommendationBody: stripMarkdown(bodyLines),
     citations,
     competitiveLandscape: stripMarkdown(compSection),
+    competitiveStats,
   };
 }
 
@@ -250,28 +274,25 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate }: Props) {
         <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-5">
           <h3 className="text-[10px] font-mono font-bold text-[#7ab8e0] tracking-[0.2em] uppercase mb-3">Competitive Landscape</h3>
 
-          {/* Engine-derived stat chips — always shown, fallback to score-based estimates */}
+          {/* Stat chips — AI-parsed when available, engine fallback while streaming */}
           {(() => {
             const contention = report.categories.find(c => c.category === 'STRING_CONTENTION');
             const primaryFlag = contention?.flags.find(f => f.stats && f.stats.length > 0);
-            const score = contention?.score ?? 0;
-            const chips = primaryFlag?.stats ?? [
-              {
-                emoji: '👥',
-                label: 'Expected applicants',
-                value: score >= 40 ? '2–4 est.' : score >= 15 ? '1–2 est.' : 'Likely uncontested',
-              },
-              {
-                emoji: '💰',
-                label: 'Auction reserve',
-                value: score >= 40 ? '$500K – $2M est.' : score >= 15 ? '$100K – $500K est.' : 'No auction expected',
-              },
-              {
-                emoji: '🏢',
-                label: 'Operator activity',
-                value: score >= 40 ? 'Some operator interest' : 'Low operator interest',
-              },
-            ];
+            const engineScore = contention?.score ?? 0;
+
+            // Use AI-generated stats if parsed; otherwise fall back to engine estimates
+            const chips = parsed.competitiveStats
+              ? [
+                  { emoji: '👥', label: 'Expected applicants', value: parsed.competitiveStats.applicants },
+                  { emoji: '💰', label: 'Auction reserve',     value: parsed.competitiveStats.budget },
+                  { emoji: '🏢', label: 'Likely operators',    value: parsed.competitiveStats.operators },
+                ]
+              : primaryFlag?.stats ?? [
+                  { emoji: '👥', label: 'Expected applicants', value: engineScore >= 40 ? '2–4 est.' : engineScore >= 15 ? '1–2 est.' : 'Likely uncontested' },
+                  { emoji: '💰', label: 'Auction reserve',     value: engineScore >= 40 ? '$500K – $2M est.' : engineScore >= 15 ? '$100K – $500K est.' : 'No auction expected' },
+                  { emoji: '🏢', label: 'Operator activity',   value: engineScore >= 40 ? 'Some operator interest' : 'Low operator interest' },
+                ];
+
             return (
               <div className="flex flex-wrap gap-2 mb-4">
                 {chips.map(stat => (

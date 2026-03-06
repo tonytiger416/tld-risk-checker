@@ -43,7 +43,13 @@ Example:
 [ICANN] Board Res. 2018.02.08.05 — .corp/.home/.mail deferred strings
 
 ## COMPETITIVE LANDSCAPE
-Write 3–4 sentences covering: realistic number of competing applicants based on 2012 history and current market signals, estimated auction reserve budget you should hold, your competitive positioning relative to likely opponents, and one specific strategic differentiator to develop in your application. Plain text only.`;
+Write 3–4 sentences covering: realistic number of competing applicants based on 2012 history and current market signals, estimated auction reserve budget you should hold, your competitive positioning relative to likely opponents, and one specific strategic differentiator to develop in your application. Plain text only.
+
+## COMPETITIVE STATS
+Output exactly three lines with no extra text, in this format:
+APPLICANTS: [your estimate, e.g. "4–8" or "2–3" or "Likely uncontested"]
+BUDGET: [your auction reserve estimate, e.g. "$10M–$15M" or "$500K–$2M" or "No auction expected"]
+OPERATORS: [comma-separated likely operators, e.g. "Identity Digital, Radix, GMO" or "Low operator interest"]`;
 
 // ---------------------------------------------------------------------------
 // Deterministically compute the verdict from engine scores
@@ -94,14 +100,6 @@ export function buildPrompt(report: TLDRiskReport): string {
 
   const verdict = computeVerdict(report);
 
-  // Extract stat chip values so the AI text matches what is displayed to the user
-  const contentionCat = report.categories.find(c => c.category === 'STRING_CONTENTION');
-  const primaryFlag = contentionCat?.flags.find(f => f.stats && f.stats.length > 0);
-  const chipStats = primaryFlag?.stats;
-  const chipApplicants = chipStats?.find(s => s.label.toLowerCase().includes('applicant'))?.value;
-  const chipBudget = chipStats?.find(s => s.label.toLowerCase().includes('auction') || s.label.toLowerCase().includes('reserve'))?.value;
-  const chipOperator = chipStats?.find(s => s.label.toLowerCase().includes('operator') || s.label.toLowerCase().includes('operator'))?.value;
-
   return `Assess this TLD application and provide your expert opinion.
 
 STRING: .${report.normalized}
@@ -120,11 +118,6 @@ COMPETITIVE LANDSCAPE ALIGNMENT: Your competitive landscape section must reflect
   report.competitiveDemandLevel === 'LOW'    ? 'Limited applicant interest is expected. Reflect the relatively clear path but note any niche competitors.' :
                                                'Minimal competitive demand. Reflect that contention is unlikely and auction budget is low priority.'
 }
-
-STAT CHIPS — CRITICAL: The following values are displayed to the user in stat cards above your competitive landscape text. Your written analysis MUST use these exact figures — do not invent different numbers or contradict them:
-  Expected applicants: ${chipApplicants ?? 'unknown'}
-  Auction reserve: ${chipBudget ?? 'unknown'}
-  Incumbent / likely operators: ${chipOperator ?? 'unknown'}
 
 CATEGORY SCORES:
 ${categoryLines}
