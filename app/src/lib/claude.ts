@@ -39,15 +39,7 @@ Then write 5–7 sentences of tactical reasoning covering ALL of the following �
 2. Objection exposure: explicitly assess (a) whether the Governmental Advisory Committee (GAC) is likely to issue an Early Warning or formal advice against this string — name which governments or blocs would likely object and why; (b) whether a Limited Public Interest Objection (LPI) could be filed by NGOs, civil society, or public health/safety bodies under AGB §3.5.2; (c) whether a Community Objection is plausible from an established institution representing a clearly delineated community under AGB §3.5.4; (d) whether a Legal Rights Objection (LRO) from trademark holders is a live risk.
 3. Precedent: cite a relevant 2012-round outcome or objection proceeding by name. If none is directly applicable, say so explicitly.
 4. Path forward: one concrete action to mitigate the most significant risk identified.
-Reference specific AGB sections and page numbers. Do not reference internal flag codes. Plain text only — no markdown bold, italics, or bullet points.
-
-## CITATIONS
-List every source you referenced in the RECOMMENDATION and COMPETITIVE LANDSCAPE sections, one per line, in this format:
-[CODE] Full citation
-Example:
-[AGB] §7.3, pp.236–247 — String Similarity Evaluation, NIST visual algorithm
-[PREC] .web — contention set, Nu Dot Co LLC (Verisign-backed) won 2016 auction at $135M; second IRP (Altanovo v. ICANN) ongoing 2026
-[ICANN] Board Res. 2018.02.08.05 — .corp/.home/.mail deferred strings
+Reference specific AGB sections and page numbers inline in your text (e.g. "AGB §4.1.2, p.193"). Do not reference internal flag codes. Plain text only — no markdown bold, italics, or bullet points.
 
 ## COMPETITIVE LANDSCAPE
 Write 3–4 sentences covering: realistic number of competing applicants based on 2012 history and current market signals, estimated auction reserve budget you should hold, your competitive positioning relative to likely opponents, and one specific strategic differentiator to develop in your application. Plain text only.
@@ -202,7 +194,7 @@ export async function streamAnalysis(
 
     const stream = client.messages.stream({
       model: 'claude-sonnet-4-6',
-      max_tokens: 2200,
+      max_tokens: 1300,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: buildPrompt(report) }],
     });

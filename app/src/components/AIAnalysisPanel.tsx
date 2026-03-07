@@ -17,24 +17,6 @@ const VERDICT_STYLE: Record<Verdict, { border: string; text: string; dot: string
 
 const KNOWN_VERDICTS = Object.keys(VERDICT_STYLE) as Verdict[];
 
-const CITATION_BADGE: Record<string, string> = {
-  AGB:   'border-[#1a3a7a] text-[#80aaff]',
-  PREC:  'border-[#2a1a60] text-[#a888ff]',
-  ICANN: 'border-[#103060] text-[#70b8ff]',
-  GAC:   'border-[#4e3e1e] text-[#e0a840]',
-  RFC:   'border-[#1a4030] text-[#50d870]',
-};
-
-const CITATION_LABEL: Record<string, string> = {
-  AGB:   'Guidebook',
-  PREC:  '2012 Round',
-  ICANN: 'ICANN Board',
-  GAC:   'GAC',
-  RFC:   'RFC',
-};
-
-interface CitationItem { type: string; text: string; }
-
 interface CompetitiveStats {
   applicants: string;
   budget: string;
@@ -58,7 +40,6 @@ export interface ObjectionSignals {
 interface ParsedAnalysis {
   verdict: Verdict | null;
   recommendationBody: string;
-  citations: CitationItem[];
   competitiveLandscape: string;
   competitiveStats: CompetitiveStats | null;
   objectionSignals: ObjectionSignals | null;
@@ -86,14 +67,12 @@ function parseSignal(line: string | undefined): ObjectionSignal {
 }
 
 function parseAnalysis(raw: string): ParsedAnalysis {
-  const recMatch    = raw.match(/##\s*RECOMMENDATION\s*([\s\S]*?)(?=##\s*CITATIONS|##\s*COMPETITIVE LANDSCAPE|$)/i);
-  const citMatch    = raw.match(/##\s*CITATIONS\s*([\s\S]*?)(?=##\s*COMPETITIVE LANDSCAPE|$)/i);
+  const recMatch    = raw.match(/##\s*RECOMMENDATION\s*([\s\S]*?)(?=##\s*COMPETITIVE LANDSCAPE|$)/i);
   const compMatch   = raw.match(/##\s*COMPETITIVE LANDSCAPE\s*([\s\S]*?)(?=##\s*COMPETITIVE STATS|$)/i);
   const statsMatch  = raw.match(/##\s*COMPETITIVE STATS\s*([\s\S]*?)(?=##\s*OBJECTION SIGNALS|$)/i);
   const objMatch    = raw.match(/##\s*OBJECTION SIGNALS\s*([\s\S]*?)$/i);
 
   const recSection   = recMatch   ? recMatch[1].trim()   : '';
-  const citSection   = citMatch   ? citMatch[1].trim()   : '';
   const compSection  = compMatch  ? compMatch[1].trim()  : '';
   const statsSection = statsMatch ? statsMatch[1].trim() : '';
   const objSection   = objMatch   ? objMatch[1].trim()   : '';
@@ -111,15 +90,6 @@ function parseAnalysis(raw: string): ParsedAnalysis {
   const bodyLines = verdictLineIdx >= 0
     ? lines.slice(verdictLineIdx + 1).join('\n').trim()
     : recSection;
-
-  const citations: CitationItem[] = citSection
-    .split('\n').map(l => l.trim()).filter(Boolean)
-    .map(line => {
-      const m = line.match(/^\[([A-Z]+)\]\s+(.+)$/);
-      if (m) return { type: m[1], text: m[2] };
-      return { type: '–', text: line };
-    })
-    .filter(c => c.text.length > 0);
 
   let competitiveStats: CompetitiveStats | null = null;
   if (statsSection) {
@@ -154,7 +124,6 @@ function parseAnalysis(raw: string): ParsedAnalysis {
   return {
     verdict,
     recommendationBody: stripMarkdown(bodyLines),
-    citations,
     competitiveLandscape: stripMarkdown(compSection),
     competitiveStats,
     objectionSignals,
@@ -303,27 +272,6 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
         )}
       </div>
 
-      {/* Sources */}
-      {parsed.citations.length > 0 && (
-        <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-5">
-          <h3 className="text-[10px] font-mono font-bold text-[#7ab8e0] tracking-[0.2em] uppercase mb-3">Sources &amp; Precedents</h3>
-          <ul className="space-y-2.5">
-            {parsed.citations.map((c, i) => {
-              const badgeClass = CITATION_BADGE[c.type] ?? 'border-[#0e2a4a] text-[#7ab8e0]';
-              const label      = CITATION_LABEL[c.type] ?? c.type;
-              return (
-                <li key={i} className="flex items-start gap-2.5">
-                  <span className={`flex-shrink-0 mt-0.5 inline-block text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${badgeClass}`}>
-                    {label}
-                  </span>
-                  <span className="text-xs text-[#b8d8f0] leading-snug">{c.text}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
-
       {/* Competitive Landscape */}
       {parsed.competitiveLandscape && (
         <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-5">
@@ -366,7 +314,7 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
       )}
 
       {/* Fallback */}
-      {!parsed.verdict && !parsed.recommendationBody && !parsed.citations.length && !parsed.competitiveLandscape && (
+      {!parsed.verdict && !parsed.recommendationBody && !parsed.competitiveLandscape && (
         <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-5 text-sm text-[#a0c8e8] leading-relaxed whitespace-pre-wrap font-mono">
           {displayText}
         </div>

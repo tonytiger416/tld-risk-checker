@@ -90,14 +90,15 @@ Chip value priority chain:
 3. Score-based generic fallback
 
 ### AI Output Structure
-Claude outputs exactly five sections in order:
-1. `## RECOMMENDATION` — verdict on first line, then 5–7 sentences
-2. `## CITATIONS` — one citation per line
-3. `## COMPETITIVE LANDSCAPE` — 3–4 sentences
-4. `## COMPETITIVE STATS` — exactly three lines: `APPLICANTS:`, `BUDGET:`, `OPERATORS:`
-5. `## OBJECTION SIGNALS` — exactly four lines: `GAC:`, `LPI:`, `COMMUNITY:`, `LRO:`
+Claude outputs exactly four sections in order:
+1. `## RECOMMENDATION` — verdict on first line, then 5–7 sentences (AGB refs inline in text)
+2. `## COMPETITIVE LANDSCAPE` — 3–4 sentences
+3. `## COMPETITIVE STATS` — exactly three lines: `APPLICANTS:`, `BUDGET:`, `OPERATORS:`
+4. `## OBJECTION SIGNALS` — exactly four lines: `GAC:`, `LPI:`, `COMMUNITY:`, `LRO:`
 
-`parseAnalysis()` in `AIAnalysisPanel.tsx` splits on these headings. The COMPETITIVE LANDSCAPE regex must stop before `## COMPETITIVE STATS`, and the COMPETITIVE STATS regex must stop before `## OBJECTION SIGNALS`:
+Citations section removed — AGB/precedent refs are cited inline in the RECOMMENDATION text instead.
+
+`parseAnalysis()` in `AIAnalysisPanel.tsx` splits on these headings:
 ```
 /##\s*COMPETITIVE LANDSCAPE\s*([\s\S]*?)(?=##\s*COMPETITIVE STATS|$)/i
 /##\s*COMPETITIVE STATS\s*([\s\S]*?)(?=##\s*OBJECTION SIGNALS|$)/i
@@ -141,5 +142,5 @@ Edit `app/src/engine/data/gtld-prices.ts` — add new `PriceRecord` entries to `
 - Tailwind CSS v4 only — no `@apply`, no `tailwind.config.js`
 - TypeScript strict mode — no `any`
 - Keep components focused; avoid over-engineering
-- `max_tokens: 2200` for Claude API calls (bumped to support longer recommendations + objection signals)
+- `max_tokens: 1300` for Claude API calls (citations removed, 4 sections only)
 - Model: `claude-sonnet-4-6`
