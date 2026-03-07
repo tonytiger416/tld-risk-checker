@@ -101,7 +101,7 @@ export default function App() {
                   onKeyDown={handleKeyDown}
                   onPaste={handlePaste}
                   onBlur={() => inputValue.trim() && addTag(inputValue)}
-                  placeholder={tags.length === 0 ? 'shop, cloud, registry...' : ''}
+                  placeholder={tags.length === 0 ? 'crypto, auth, cloud...' : ''}
                   className="flex-1 min-w-[160px] bg-transparent outline-none text-white text-sm placeholder-[#2a5070] font-mono"
                 />
               )}
