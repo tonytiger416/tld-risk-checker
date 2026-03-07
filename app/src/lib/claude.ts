@@ -85,14 +85,23 @@ export function buildPrompt(report: TLDRiskReport): string {
     .map(c => `  ${CATEGORY_LABELS[c.category]}: ${c.score}/100 (${c.level}) — ${c.summary}`)
     .join('\n');
 
-  const flagLines = allFlags.length > 0
-    ? allFlags.map(f =>
-        `  [${f.code}] ${f.severity}: ${f.title}\n` +
+  // Only surface HIGH and MEDIUM flags in full — LOW/CLEAR are noise for the AI
+  const materialFlags = allFlags.filter(f => f.severity === 'HIGH' || f.severity === 'MEDIUM');
+  const suppressedCount = allFlags.length - materialFlags.length;
+  const suppressedNote = suppressedCount > 0
+    ? `\n\n  (${suppressedCount} LOW/CLEAR flag${suppressedCount > 1 ? 's' : ''} omitted — not material to this assessment)`
+    : '';
+
+  const flagLines = materialFlags.length > 0
+    ? materialFlags.map(f =>
+        `  ${f.severity}: ${f.title}\n` +
         `    Detail: ${f.detail}\n` +
         `    AGB ref: ${f.guidebookRef}\n` +
         `    Recommendation: ${f.recommendation}`
-      ).join('\n\n')
-    : '  No flags raised.';
+      ).join('\n\n') + suppressedNote
+    : allFlags.length > 0
+      ? `  No HIGH or MEDIUM flags raised — application path is clean.${suppressedNote}`
+      : '  No flags raised.';
 
   const similarLines = report.similarTLDs.length > 0
     ? report.similarTLDs.map(t => `  .${t.tld} (${t.type} match, ${t.visualScore}% similarity)`).join('\n')
@@ -155,7 +164,7 @@ ${comparablesBlock}
 CATEGORY SCORES:
 ${categoryLines}
 
-ALL FLAGS (${allFlags.length} total):
+MATERIAL FLAGS (${materialFlags.length} of ${allFlags.length} total — HIGH and MEDIUM only):
 ${flagLines}
 
 SIMILAR EXISTING TLDs:
