@@ -17,6 +17,7 @@ export interface PriceRecord {
   year?: number;
   applicants: number;
   notes?: string;
+  era?: '2012' | '2026_outlook';  // omitted = 2012 actual; 2026_outlook = forward estimate
 }
 
 // ---------------------------------------------------------------------------
@@ -517,6 +518,72 @@ export const PRICE_RECORDS: PriceRecord[] = [
     priceMn: 0.42, approx: true, buyer: 'Uniregistry (now GoDaddy)', year: 2015, applicants: 3,
     notes: 'Frank Schilling\'s Uniregistry portfolio string',
   },
+
+  // ---- 2026 MARKET OUTLOOK — AI / LLM VERTICAL ----------------------------
+  // Forward estimates based on 2024–2025 market signals, .ai ccTLD premium
+  // data, and applicant intelligence. All approx: true.
+  {
+    tld: 'agent', semanticClass: 'tech_generic', mechanism: 'auction',
+    priceMn: 8, approx: true, year: 2026, applicants: 6, era: '2026_outlook',
+    notes: '2026 outlook — AI agent/automation sector; hyperscalers, AI-native operators, and portfolio registries all likely bidders; .ai ccTLD secondary market premiums signal strong buyer appetite for AI namespace; est. $5–12M range',
+  },
+  {
+    tld: 'bot', semanticClass: 'tech_generic', mechanism: 'auction',
+    priceMn: 4, approx: true, year: 2026, applicants: 5, era: '2026_outlook',
+    notes: '2026 outlook — AI chatbot / automation sector; 3-char premium amplified by LLM wave; chatbot platforms, AI infrastructure operators likely; est. $3–6M range',
+  },
+  {
+    tld: 'model', semanticClass: 'tech_generic', mechanism: 'auction',
+    priceMn: 3, approx: true, year: 2026, applicants: 4, era: '2026_outlook',
+    notes: '2026 outlook — AI model/LLM naming vertical; ambiguous across AI, fashion, data modelling; Identity Digital, Radix, AI-sector operators likely; est. $2–5M range',
+  },
+  {
+    tld: 'llm', semanticClass: 'short_premium_generic', mechanism: 'auction',
+    priceMn: 3, approx: true, year: 2026, applicants: 4, era: '2026_outlook',
+    notes: '2026 outlook — Large Language Model abbreviation; niche but high-value; 3-char premium; AI infrastructure operators the primary buyer pool; est. $2–5M range',
+  },
+  {
+    tld: 'api', semanticClass: 'tech_generic', mechanism: 'auction',
+    priceMn: 4, approx: true, year: 2026, applicants: 5, era: '2026_outlook',
+    notes: '2026 outlook — developer/API economy string; 3-char premium; Stripe/Twilio-class operators, Google, Radix likely; developer buyer pool commands significant SLD premium; est. $3–6M range',
+  },
+  {
+    tld: 'auth', semanticClass: 'tech_generic', mechanism: 'auction',
+    priceMn: 2.5, approx: true, year: 2026, applicants: 3, era: '2026_outlook',
+    notes: '2026 outlook — authentication/identity infrastructure; strategic for SSO, OAuth, and identity platform operators; Okta, Cloudflare, security-focused registries likely; est. $1.5–4M range',
+  },
+  {
+    tld: 'secure', semanticClass: 'tech_generic', mechanism: 'auction',
+    priceMn: 2, approx: true, year: 2026, applicants: 3, era: '2026_outlook',
+    notes: '2026 outlook — cybersecurity vertical; enterprise security buyer pool; moderate contention; est. $1–3M range',
+  },
+
+  // ---- 2026 MARKET OUTLOOK — WEB3 / CRYPTO ---------------------------------
+  {
+    tld: 'crypto', semanticClass: 'financial_generic', mechanism: 'auction',
+    priceMn: 8, approx: true, year: 2026, applicants: 6, era: '2026_outlook',
+    notes: '2026 outlook — high GAC sensitivity (FATF, SEC, EU MiCA); web3 operators, exchanges, blockchain infrastructure firms likely; Unstoppable Domains holds blockchain .crypto but has no ICANN standing; est. $5–15M depending on regulatory climate at filing',
+  },
+  {
+    tld: 'wallet', semanticClass: 'financial_generic', mechanism: 'auction',
+    priceMn: 3, approx: true, year: 2026, applicants: 4, era: '2026_outlook',
+    notes: '2026 outlook — digital wallet sector; fintech + web3 buyer pool; GAC may flag financial consumer protection; est. $2–5M range',
+  },
+  {
+    tld: 'token', semanticClass: 'financial_generic', mechanism: 'auction',
+    priceMn: 2.5, approx: true, year: 2026, applicants: 4, era: '2026_outlook',
+    notes: '2026 outlook — crypto token / authentication dual meaning; web3 and enterprise identity operators; GAC sensitivity possible; est. $1.5–4M range',
+  },
+  {
+    tld: 'defi', semanticClass: 'financial_generic', mechanism: 'auction',
+    priceMn: 2, approx: true, year: 2026, applicants: 3, era: '2026_outlook',
+    notes: '2026 outlook — decentralised finance sector; niche but committed buyer pool; high GAC sensitivity from financial regulators; est. $1–3M range',
+  },
+  {
+    tld: 'chain', semanticClass: 'tech_generic', mechanism: 'auction',
+    priceMn: 3, approx: true, year: 2026, applicants: 4, era: '2026_outlook',
+    notes: '2026 outlook — blockchain/supply chain dual appeal; broad buyer pool beyond web3; Identity Digital, Radix, and web3-native operators likely; est. $2–5M range',
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -563,6 +630,9 @@ export function getComparables(tld: string, semanticClass: SemanticClass): Price
       else if (siblingIdx === 1) score += 40;
       else if (siblingIdx === 2) score += 25;
     }
+
+    // Prefer 2026 outlook records — more current than 2012 actuals
+    if (r.era === '2026_outlook') score += 30;
 
     // Prefer records with known prices — they provide better calibration
     if (r.priceMn !== undefined) score += 20;

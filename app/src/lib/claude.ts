@@ -133,7 +133,8 @@ export function buildPrompt(report: TLDRiskReport): string {
         const buyer = c.buyer ? `, ${c.buyer}` : '';
         const year = c.year ? `, ${c.year}` : '';
         const note = c.notes ? `; ${c.notes}` : '';
-        return `  .${c.tld} [${c.semanticClass}] — ${c.mechanism}, ${price}, ${c.applicants} applicants${buyer}${year}${note}`;
+        const eraTag = c.era === '2026_outlook' ? ' [2026 est.]' : ' [2012 actual]';
+        return `  .${c.tld} [${c.semanticClass}]${eraTag} — ${c.mechanism}, ${price}, ${c.applicants} applicants${buyer}${year}${note}`;
       }).join('\n')
     : '  No direct comparables available — use engine scores and semantic class to calibrate.';
 
@@ -158,7 +159,7 @@ COMPETITIVE LANDSCAPE ALIGNMENT: Your competitive landscape section must reflect
 
 ${contextBlock}
 
-STRING COMPARABLES — closest semantic matches from gTLD price history (use these as calibration anchors for your COMPETITIVE STATS and auction reserve estimates — do not use generic length tiers when these comparables are available):
+STRING COMPARABLES — closest semantic matches from gTLD price history and 2026 market outlook estimates (tagged [2012 actual] or [2026 est.]). Use these as calibration anchors for COMPETITIVE STATS and auction reserve estimates. 2026 estimates reflect current market signals and should be weighted more heavily than 2012 actuals where both are present:
 ${comparablesBlock}
 
 CATEGORY SCORES:
