@@ -91,12 +91,20 @@ Chip value priority chain:
 
 ### AI Output Structure
 Claude outputs exactly four sections in order:
-1. `## RECOMMENDATION` — verdict on first line, then 5–7 sentences (AGB refs inline in text)
+1. `## RECOMMENDATION` — verdict on first line, then 5–7 sentences balanced between opportunity and risk
 2. `## COMPETITIVE LANDSCAPE` — 3–4 sentences
 3. `## COMPETITIVE STATS` — exactly three lines: `APPLICANTS:`, `BUDGET:`, `OPERATORS:`
 4. `## OBJECTION SIGNALS` — exactly four lines: `GAC:`, `LPI:`, `COMMUNITY:`, `LRO:`
 
 Citations section removed — AGB/precedent refs are cited inline in the RECOMMENDATION text instead.
+
+### AI Persona & Tone
+The expert is a trusted strategic advisor, not a risk auditor. The RECOMMENDATION must:
+- Lead with the commercial/strategic opportunity of the string
+- Cover objections proportionally (one sentence if low, more only if genuinely serious)
+- Cite AGB sections and 2012 precedents only where they add weight — not on every sentence
+- Use plain, confident language; explain any ICANN jargon in context
+- Give one concrete tactical action as the closing advice
 
 `parseAnalysis()` in `AIAnalysisPanel.tsx` splits on these headings:
 ```
