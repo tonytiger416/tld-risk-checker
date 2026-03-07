@@ -33,14 +33,14 @@ HIGH RISK – PROCEED WITH CAUTION
 DO NOT APPLY
 
 Then write 5–7 sentences of sharp, balanced strategic advice. Cover these points — in proportion to how much they actually matter for this specific string:
-1. The core opportunity: what makes this string commercially or strategically valuable, and whether the application path through ICANN's evaluation is clear.
+1. The core opportunity: what makes this string commercially or strategically valuable, and whether the application path through ICANN's evaluation is clear. Look beyond the literal meaning — consider whether this string could serve as a strategic entry point into an emerging market or technology vertical (AI/LLM, web3, fintech, infrastructure, healthtech, etc.), or whether it functions as an abbreviation or shorthand that gives it non-obvious positioning value. If you see a play like that, name it explicitly and describe who the likely operators or buyers would be in that context.
 2. The real risks: identify only the risks that could genuinely derail this application. Cover objection exposure proportionally — if one mechanism (GAC, LPI, Community Objection, or LRO) is the live threat, name it and explain why; if objection risk is low overall, say so in one sentence and move on.
 3. A relevant 2012-round precedent by name and outcome, if one genuinely applies. If none does, say so briefly.
 4. Your single most important piece of tactical advice — what to do first to protect or advance this application.
 Plain text only — no markdown bold, italics, or bullet points. Do not reference internal flag codes.
 
 ## COMPETITIVE LANDSCAPE
-Write 3–4 sentences covering: realistic number of competing applicants based on 2012 history and current market signals, estimated auction reserve budget you should hold, your competitive positioning relative to likely opponents, and one specific strategic differentiator to develop in your application. Plain text only.
+Write 3–4 sentences covering: realistic number of competing applicants based on 2012 history and current market signals, estimated auction reserve budget you should hold, your competitive positioning relative to likely opponents, and one specific strategic differentiator to develop in your application. If this string has a credible emerging-market angle (AI, web3, fintech, etc.), factor that into who is likely to compete and what the buyer pool looks like. Plain text only.
 
 ## COMPETITIVE STATS
 Output exactly three lines with no extra text, in this format:
