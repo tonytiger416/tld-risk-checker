@@ -199,27 +199,6 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
     );
   }
 
-  if (genState === 'generating') {
-    return (
-      <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-4">
-        <div className="flex items-center gap-2.5 mb-3">
-          <span className="inline-flex gap-1">
-            {[0, 150, 300].map(delay => (
-              <span key={delay} className="w-1.5 h-1.5 rounded-full bg-[#3a7ab8] animate-bounce" style={{ animationDelay: `${delay}ms` }} />
-            ))}
-          </span>
-          <span className="text-xs font-mono text-[#7ab8e0]">Generating analysis for .{report.normalized}</span>
-        </div>
-        {displayText && (
-          <div className="text-xs text-[#a0c8e8] leading-relaxed whitespace-pre-wrap font-mono bg-[#030c18] rounded p-3 min-h-[80px]">
-            {displayText}
-            <span className="inline-block w-0.5 h-3.5 bg-[#3a7ab8] ml-0.5 animate-pulse align-text-bottom" />
-          </div>
-        )}
-      </div>
-    );
-  }
-
   if (genState === 'error') {
     return (
       <div className="bg-[#071830] border border-[#2e1a1a] rounded-lg p-4">
@@ -239,10 +218,32 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
     );
   }
 
+  const isStreaming = genState === 'generating';
   const parsed = parseAnalysis(displayText);
   // Verdict is always derived from the engine — never from Claude's text
   const verdict = computeVerdict(report);
   const verdictStyle = VERDICT_STYLE[verdict];
+
+  // Cursor blinks at the end of whatever section is currently streaming
+  const cursor = isStreaming
+    ? <span className="inline-block w-0.5 h-3.5 bg-[#3a7ab8] ml-0.5 animate-pulse align-text-bottom" />
+    : null;
+
+  // Show initial loading dots before any text arrives
+  if (isStreaming && !displayText) {
+    return (
+      <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-4">
+        <div className="flex items-center gap-2.5">
+          <span className="inline-flex gap-1">
+            {[0, 150, 300].map(delay => (
+              <span key={delay} className="w-1.5 h-1.5 rounded-full bg-[#3a7ab8] animate-bounce" style={{ animationDelay: `${delay}ms` }} />
+            ))}
+          </span>
+          <span className="text-xs font-mono text-[#7ab8e0]">Generating analysis for .{report.normalized}</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
@@ -251,13 +252,10 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
       <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-5">
         <div className="flex items-center justify-between mb-4">
           <span className="text-[10px] font-mono font-bold text-[#7ab8e0] tracking-[0.2em] uppercase">AI Recommendation</span>
-          <button
-            onClick={() => { startedRef.current = false; doGenerate(); }}
-            className="text-[11px] font-mono text-[#5a98c8] hover:text-[#90c8f0] transition-colors"
-            title="Regenerate"
-          >
-            ↻ regenerate
-          </button>
+          {isStreaming
+            ? <span className="inline-flex gap-1">{[0,150,300].map(d => <span key={d} className="w-1 h-1 rounded-full bg-[#3a7ab8] animate-bounce" style={{ animationDelay: `${d}ms` }} />)}</span>
+            : <button onClick={() => { startedRef.current = false; doGenerate(); }} className="text-[11px] font-mono text-[#5a98c8] hover:text-[#90c8f0] transition-colors" title="Regenerate">↻ regenerate</button>
+          }
         </div>
 
         <div className={`inline-flex items-center gap-2.5 px-4 py-2 rounded border ${verdictStyle.border} mb-4`}>
@@ -268,7 +266,10 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
         </div>
 
         {parsed.recommendationBody && (
-          <p className="text-sm text-[#d8eeff] leading-relaxed">{parsed.recommendationBody}</p>
+          <p className="text-sm text-[#d8eeff] leading-relaxed">
+            {parsed.recommendationBody}
+            {isStreaming && !parsed.competitiveLandscape && cursor}
+          </p>
         )}
       </div>
 
@@ -283,7 +284,6 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
             const primaryFlag = contention?.flags.find(f => f.stats && f.stats.length > 0);
             const engineScore = contention?.score ?? 0;
 
-            // Use AI-generated stats if parsed; otherwise fall back to engine estimates
             const chips = parsed.competitiveStats
               ? [
                   { emoji: '👥', label: 'Expected applicants', value: parsed.competitiveStats.applicants },
@@ -309,14 +309,10 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
             );
           })()}
 
-          <p className="text-sm text-[#d8eeff] leading-relaxed">{parsed.competitiveLandscape}</p>
-        </div>
-      )}
-
-      {/* Fallback */}
-      {!parsed.verdict && !parsed.recommendationBody && !parsed.competitiveLandscape && (
-        <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-5 text-sm text-[#a0c8e8] leading-relaxed whitespace-pre-wrap font-mono">
-          {displayText}
+          <p className="text-sm text-[#d8eeff] leading-relaxed">
+            {parsed.competitiveLandscape}
+            {isStreaming && cursor}
+          </p>
         </div>
       )}
 
