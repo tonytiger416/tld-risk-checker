@@ -120,6 +120,52 @@ export const WELL_KNOWN_BRANDS: Set<string> = new Set([
   'transferwise', 'wise', 'nubank', 'chime',
 ]);
 
+// ---------------------------------------------------------------------------
+// Near-miss / typosquat detection set
+// Coined-term brands (non-dictionary words) where a 1-edit-distance string
+// is almost certainly an intentional trademark proximity play.
+// Deliberately excludes common English words (ford, delta, united, etc.)
+// to avoid false positives on legitimate generic strings.
+// ---------------------------------------------------------------------------
+export const NEAR_MISS_BRANDS: Set<string> = new Set([
+  // Big tech — household coined names
+  'google', 'apple', 'microsoft', 'amazon', 'netflix', 'spotify',
+  'instagram', 'youtube', 'tiktok', 'linkedin', 'snapchat', 'pinterest',
+  'discord', 'shopify', 'stripe', 'paypal', 'nvidia', 'qualcomm',
+  'adobe', 'salesforce', 'atlassian', 'cloudflare', 'github', 'gitlab',
+  'dropbox', 'twilio', 'datadog', 'snowflake', 'palantir', 'crowdstrike',
+  'openai', 'anthropic', 'deepmind',
+  'samsung', 'huawei', 'xiaomi', 'ericsson', 'lenovo',
+  // Social / consumer platforms
+  'facebook', 'whatsapp', 'reddit', 'airbnb', 'ubereats',
+  'doordash', 'instacart', 'deliveroo', 'coinbase', 'binance',
+  'robinhood', 'revolut', 'klarna', 'afterpay', 'nubank',
+  // Retail / fashion — coined or highly distinctive marks
+  'nike', 'adidas', 'gucci', 'prada', 'chanel', 'hermes',
+  'louis', 'versace', 'burberry', 'lacoste', 'uniqlo', 'shein',
+  'rolex', 'omega', 'cartier', 'tiffany', 'breitling',
+  'walmart', 'costco', 'ikea', 'flipkart', 'mercadolibre',
+  'mcdonalds', 'starbucks', 'chipotle', 'doordash',
+  'cocacola', 'redbull', 'gatorade', 'nescafe', 'nespresso',
+  // Finance — distinctive marks (not generic words)
+  'mastercard', 'citibank', 'barclays', 'jpmorgan', 'blackrock',
+  'vanguard', 'fidelity', 'goldmansachs', 'morganstanley',
+  'deutschebank', 'bnpparibas', 'santander', 'sequoia',
+  // Pharma / health — coined marks
+  'pfizer', 'novartis', 'astrazeneca', 'moderna', 'gilead',
+  'regeneron', 'biogen', 'medtronic', 'stryker',
+  // Auto — distinctive coined marks only (excludes ford, honda, audi etc.)
+  'tesla', 'ferrari', 'lamborghini', 'porsche', 'volkswagen',
+  'hyundai', 'maserati', 'bentley', 'rivian', 'lucid',
+  // Travel / hospitality
+  'marriott', 'hilton', 'expedia', 'tripadvisor',
+  // Media / telecom
+  'netflix', 'spotify', 'paramount', 'bloomberg',
+  'vodafone', 'softbank', 'tmobile',
+  // Crypto / fintech
+  'binance', 'coinbase', 'kraken', 'opensea', 'metamask',
+]);
+
 // Offensive/sensitive strings that may trigger Limited Public Interest Objection
 export const SENSITIVE_STRINGS: string[] = [
   'sex', 'porn', 'adult', 'xxx', 'nude', 'erotic', 'explicit',

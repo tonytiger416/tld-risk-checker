@@ -1,5 +1,22 @@
 import type { CategoryResult, RiskFlag } from '../types';
-import { WELL_KNOWN_BRANDS, SENSITIVE_STRINGS, STOCK_EXCHANGES } from '../data/brands';
+import { WELL_KNOWN_BRANDS, NEAR_MISS_BRANDS, SENSITIVE_STRINGS, STOCK_EXCHANGES } from '../data/brands';
+
+// Levenshtein edit distance — used for near-miss trademark detection
+function levenshtein(a: string, b: string): number {
+  if (Math.abs(a.length - b.length) > 2) return 99; // fast exit
+  const prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  const curr = new Array<number>(b.length + 1).fill(0);
+  for (let i = 1; i <= a.length; i++) {
+    curr[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      curr[j] = a[i - 1] === b[j - 1]
+        ? prev[j - 1]
+        : 1 + Math.min(prev[j - 1], prev[j], curr[j - 1]);
+    }
+    prev.splice(0, prev.length, ...curr);
+  }
+  return curr[b.length];
+}
 
 // Brands that are also common English words — only flag on exact match, never as substring
 // (e.g. "american" in "americanstores" is intentional; flagging "fundamental" for "fund" is not)
@@ -58,7 +75,28 @@ export function checkTrademark(s: string, appType: 'open' | 'brand' = 'open'): C
     }
   }
 
-  // 3. Sensitive/offensive strings — EXACT MATCH ONLY (no false positives from substrings)
+  // 3. Near-miss / typosquat detection — 1-edit-distance from a coined brand name
+  // Catches strings like .nke (nike), .googl (google), .amazn (amazon)
+  const alreadyFlagged = flags.some(f => f.code === 'TM-001' || f.code === 'TM-002');
+  if (!alreadyFlagged) {
+    for (const brand of NEAR_MISS_BRANDS) {
+      if (brand === s) continue; // exact match already handled
+      if (Math.abs(s.length - brand.length) > 1) continue; // can't be distance 1
+      if (levenshtein(s, brand) === 1) {
+        flags.push({
+          code: 'TM-NEAR',
+          severity: 'MEDIUM',
+          title: `".${s}" is one character away from the "${brand}" trademark`,
+          detail: `".${s}" differs from the globally recognised "${brand}" trademark by a single character — a deletion, insertion, or substitution. This is a classic typosquat pattern. Rights holders routinely monitor for near-miss registrations and have successfully filed Legal Rights Objections (LROs) against strings with this level of similarity to their marks. The LRO process under AGB §3.5.3 specifically covers strings that could mislead users into associating them with an established mark.`,
+          guidebookRef: 'AGB Section 3.5.3, pp. 121–124',
+          recommendation: `Conduct a full trademark clearance search before proceeding. The "${brand}" rights holder has grounds to file an LRO and would likely succeed given the one-character proximity. Consider whether this string has an independent legitimate use case that clearly distinguishes it from the brand — if not, do not apply.`,
+        });
+        break; // only flag the closest match
+      }
+    }
+  }
+
+  // 4. Sensitive/offensive strings — EXACT MATCH ONLY (no false positives from substrings)
   for (const sensitive of SENSITIVE_STRINGS) {
     if (s === sensitive) {
       flags.push({
@@ -73,7 +111,7 @@ export function checkTrademark(s: string, appType: 'open' | 'brand' = 'open'): C
     }
   }
 
-  // 4. Stock exchange / financial market identifier
+  // 5. Stock exchange / financial market identifier
   if (STOCK_EXCHANGES.has(s)) {
     flags.push({
       code: 'TM-004',
@@ -85,7 +123,7 @@ export function checkTrademark(s: string, appType: 'open' | 'brand' = 'open'): C
     });
   }
 
-  // 5. TMCH reminder — always shown when no other flags (regardless of app type)
+  // 6. TMCH reminder — always shown when no other flags (regardless of app type)
   const hasMeaningfulFlags = flags.some(f => f.severity === 'HIGH' || f.severity === 'MEDIUM');
   if (!hasMeaningfulFlags) {
     flags.push({
