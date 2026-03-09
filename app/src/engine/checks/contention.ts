@@ -245,27 +245,50 @@ export function checkContention(s: string): CategoryResult {
   }
 
   // ---- String length premium -------------------------------------------
-  // Shorter strings command higher demand — 3-char generics are the shortest
-  // available as new gTLDs and historically attract the most applicants
+  // Short strings command higher demand — BUT only when the string also has
+  // real semantic/market signals. A 4-char opaque acronym like ".hsgs" attracts
+  // far less interest than a 4-char semantic string like ".auth" or ".auth".
+  // Without any other signal, length alone only adds a small scarcity note at LOW.
   const len = s.length;
-  const lengthPoints = len === 3 ? 20 : len === 4 ? 12 : len === 5 ? 5 : 0;
-  if (lengthPoints > 0) {
-    score += lengthPoints;
-    const lenApplicants = len === 3 ? '6–12 est.' : len === 4 ? '3–6 est.' : '2–4 est.';
-    const lenBudget = len === 3 ? '$5M – $30M est.' : len === 4 ? '$1M – $10M est.' : '$500K – $3M est.';
-    flags.push({
-      code: 'CON-006',
-      severity: len === 3 ? 'HIGH' : len === 4 ? 'MEDIUM' : 'LOW',
-      title: `".${s}" is a short premium string (${len} characters)`,
-      detail: `Three- and four-character TLD strings are the shortest generics available as new gTLDs. Short strings command significant premium demand because they are memorable, versatile, and scarce — professional registry operators actively target them as long-term portfolio assets. Historically, the shortest strings attracted the most competing applicants and the highest auction prices.`,
-      guidebookRef: 'AGB Section 4.1, pp. 191–192; ICANN 2012 auction history',
-      recommendation: `Budget for elevated auction costs. Short strings like ".${s}" disproportionately attract well-capitalised registry operators — factor a higher contention reserve into your business plan.`,
-      stats: [
-        { emoji: '👥', label: 'Expected applicants', value: lenApplicants },
-        { emoji: '💰', label: 'Auction reserve', value: lenBudget },
-        { emoji: '🏢', label: 'Likely operators', value: 'Identity Digital, Radix, GMO' },
-      ],
-    });
+  const hasSemanticSignal = in2012 || inHighContention || commercialPoints > 0 || searchPoints > 0;
+
+  if (len <= 5) {
+    if (hasSemanticSignal) {
+      // Short string with real demand signals — full premium, meaningful severity
+      const lengthPoints = len === 3 ? 20 : len === 4 ? 12 : 5;
+      score += lengthPoints;
+      const lenApplicants = len === 3 ? '6–12 est.' : len === 4 ? '3–6 est.' : '2–4 est.';
+      const lenBudget = len === 3 ? '$5M – $30M est.' : len === 4 ? '$1M – $10M est.' : '$500K – $3M est.';
+      flags.push({
+        code: 'CON-006',
+        severity: len === 3 ? 'HIGH' : len === 4 ? 'MEDIUM' : 'LOW',
+        title: `".${s}" is a short premium string (${len} characters)`,
+        detail: `Three- and four-character TLD strings are the shortest generics available as new gTLDs. Short strings with recognisable semantic value command significant premium demand — professional registry operators actively target them as long-term portfolio assets. Historically, the shortest strings with real market meaning attracted the most competing applicants and the highest auction prices.`,
+        guidebookRef: 'AGB Section 4.1, pp. 191–192; ICANN 2012 auction history',
+        recommendation: `Budget for elevated auction costs. Short strings like ".${s}" with clear market relevance disproportionately attract well-capitalised registry operators — factor a higher contention reserve into your business plan.`,
+        stats: [
+          { emoji: '👥', label: 'Expected applicants', value: lenApplicants },
+          { emoji: '💰', label: 'Auction reserve', value: lenBudget },
+          { emoji: '🏢', label: 'Likely operators', value: 'Identity Digital, Radix, GMO' },
+        ],
+      });
+    } else if (len <= 4) {
+      // Short but semantically opaque — scarcity interest only, no real market demand
+      score += len === 3 ? 8 : 5;
+      flags.push({
+        code: 'CON-006',
+        severity: 'LOW',
+        title: `".${s}" is a short string — limited scarcity-driven interest possible`,
+        detail: `Short strings (3–4 characters) can attract opportunistic portfolio operators who bid on scarce generics regardless of meaning. However, without recognisable commercial, semantic, or contention history signals, competitive interest is driven by scarcity alone — not the market demand that drives real auction competition. Opaque acronyms without an established meaning consistently attract fewer applicants and lower auction prices than semantically clear short strings.`,
+        guidebookRef: 'AGB Section 4.1, pp. 191–192; ICANN 2012 auction history',
+        recommendation: `Monitor for competing applications during the submission window. A contested auction is unlikely without stronger semantic demand, but a portfolio operator may bid opportunistically on the scarcity value alone.`,
+        stats: [
+          { emoji: '👥', label: 'Expected applicants', value: len === 3 ? '1–3 est.' : '1–2 est.' },
+          { emoji: '💰', label: 'Auction reserve', value: len === 3 ? '$100K – $500K est.' : '$50K – $200K est.' },
+          { emoji: '🏢', label: 'Likely operators', value: 'Opportunistic portfolio interest only' },
+        ],
+      });
+    }
   }
 
   // Cap at 100

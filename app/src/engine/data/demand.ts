@@ -157,6 +157,16 @@ export const COMMERCIAL_VALUE: Map<string, 'ultra' | 'high' | 'medium'> = new Ma
   ['space',        'medium'],
   ['xyz',          'medium'],
 
+  // Tech infrastructure abbreviations — real commercial categories with operator interest
+  ['auth',         'high'],   // authentication/identity — security infrastructure vertical
+  ['api',          'high'],   // developer APIs — core internet infrastructure market
+  ['dev',          'high'],   // developer tooling — large audience, established operator interest
+  ['sdk',          'medium'], // software development kit
+  ['cdn',          'medium'], // content delivery networks
+  ['dns',          'medium'], // DNS infrastructure
+  ['ssl',          'medium'], // SSL/TLS security certificates
+  ['vpn',          'medium'], // virtual private networks — consumer and enterprise
+
   // 2026 emerging categories — high-value sectors not prominent in the 2012 round
   ['web3',         'ultra'],
   ['defi',         'ultra'],
