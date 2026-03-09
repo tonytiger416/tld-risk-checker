@@ -108,7 +108,7 @@ export function buildPrompt(report: TLDRiskReport): string {
     : '  None identified.';
 
   const recLines = report.recommendations.length > 0
-    ? report.recommendations.map(r => `  - ${r}`).join('\n')
+    ? report.recommendations.map(r => `  [${r.severity}] ${r.text}`).join('\n')
     : '  No specific recommendations.';
 
   const verdict = computeVerdict(report);

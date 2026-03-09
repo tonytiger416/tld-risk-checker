@@ -108,5 +108,5 @@ export interface TLDRiskReport {
   categories: CategoryResult[];
   similarTLDs: SimilarTLD[];
   topFlags: RiskFlag[];
-  recommendations: string[];
+  recommendations: { text: string; severity: RiskLevel }[];
 }

@@ -140,12 +140,18 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
           <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-4">
             <h3 className="text-[10px] font-mono font-bold text-[#7ab8e0] tracking-[0.2em] uppercase mb-3">Key Actions</h3>
             <div className="space-y-2.5">
-              {report.recommendations.map((rec, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <span className="text-[#0a84ff] font-mono text-sm mt-0.5 flex-shrink-0">→</span>
-                  <span className="text-sm text-[#d8eeff] flex-1 leading-snug">{rec}</span>
-                </div>
-              ))}
+              {report.recommendations.map((rec, i) => {
+                const arrowColor =
+                  rec.severity === 'HIGH'   ? 'text-[#ff453a]' :
+                  rec.severity === 'MEDIUM' ? 'text-[#ff9f0a]' :
+                  'text-[#0a84ff]';
+                return (
+                  <div key={i} className="flex items-start gap-3">
+                    <span className={`${arrowColor} font-mono text-sm mt-0.5 flex-shrink-0`}>→</span>
+                    <span className="text-sm text-[#d8eeff] flex-1 leading-snug">{rec.text}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

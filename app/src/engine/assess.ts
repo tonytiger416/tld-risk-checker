@@ -97,32 +97,31 @@ export function assess(raw: string, appType: AppType = 'open'): TLDRiskReport {
     .sort((a, b) => levelOrder[b.severity] - levelOrder[a.severity])
     .slice(0, 5);
 
-  const recommendations: string[] = [];
+  const recommendations: { text: string; severity: RiskLevel }[] = [];
 
   if (isHardBlocked) {
-    recommendations.push('⛔ HARD BLOCKED — no viable path to delegation exists for this string. Do not spend resources on this application.');
+    recommendations.push({ text: '⛔ HARD BLOCKED — no viable path to delegation exists for this string. Do not spend resources on this application.', severity: 'HIGH' });
   }
 
   const highFlags = allFlags.filter(f => f.severity === 'HIGH');
-  if (highFlags.length > 0 && !isHardBlocked) {
-    recommendations.push(`Resolve ${highFlags.length} HIGH severity issue(s) before considering an application.`);
-  }
+  const seenRecs = new Set<string>();
   highFlags.forEach(f => {
-    if (!recommendations.includes(f.recommendation)) recommendations.push(f.recommendation);
+    const text = `${f.title} — ${f.recommendation}`;
+    if (!seenRecs.has(text)) { seenRecs.add(text); recommendations.push({ text, severity: 'HIGH' }); }
   });
 
   const medFlags = allFlags.filter(f => f.severity === 'MEDIUM');
-  if (medFlags.length > 0 && highFlags.length === 0) {
-    recommendations.push(`Review ${medFlags.length} MEDIUM risk concern(s) with qualified ICANN legal/technical counsel.`);
+  if (highFlags.length === 0) {
     medFlags.slice(0, 3).forEach(f => {
-      if (!recommendations.includes(f.recommendation)) recommendations.push(f.recommendation);
+      const text = `${f.title} — ${f.recommendation}`;
+      if (!seenRecs.has(text)) { seenRecs.add(text); recommendations.push({ text, severity: 'MEDIUM' }); }
     });
   }
 
   if (highFlags.length === 0 && medFlags.length === 0) {
-    recommendations.push('Low risk profile. Proceed with professional trademark search and full legal due diligence before filing.');
-    recommendations.push('Verify against the ICANN Name Collision Observatory: https://newgtldprogram-nco.icann.org/');
-    recommendations.push('Engage a qualified ICANN consultant to review your complete application before submission.');
+    recommendations.push({ text: 'Low risk profile. Proceed with professional trademark search and full legal due diligence before filing.', severity: 'LOW' });
+    recommendations.push({ text: 'Verify against the ICANN Name Collision Observatory: https://newgtldprogram-nco.icann.org/', severity: 'LOW' });
+    recommendations.push({ text: 'Engage a qualified ICANN consultant to review your complete application before submission.', severity: 'LOW' });
   }
 
   return {
@@ -140,6 +139,6 @@ export function assess(raw: string, appType: AppType = 'open'): TLDRiskReport {
     categories,
     similarTLDs,
     topFlags,
-    recommendations: [...new Set(recommendations)],
+    recommendations,
   };
 }
