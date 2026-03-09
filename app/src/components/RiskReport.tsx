@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 import type { TLDRiskReport, RiskLevel } from '../engine/types';
 import { APPLICATION_RISK_CATEGORIES } from '../engine/types';
-import { RiskBadge } from './RiskBadge';
 import { RiskCategoryCard } from './RiskCategoryCard';
 import { AIAnalysisPanel } from './AIAnalysisPanel';
 import type { ObjectionSignals, ObjectionSeverity } from './AIAnalysisPanel';
@@ -136,23 +135,20 @@ export function RiskReport({ report }: { report: TLDRiskReport }) {
           onObjectionSignals={setObjectionSignals}
         />
 
-        {/* Top Issues */}
-        {(() => {
-          const keyFlags = report.topFlags.filter(f => f.severity === 'HIGH' || f.severity === 'MEDIUM');
-          return keyFlags.length > 0 ? (
-            <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-4">
-              <h3 className="text-[10px] font-mono font-bold text-[#7ab8e0] tracking-[0.2em] uppercase mb-3">Top Issues</h3>
-              <div className="space-y-2.5">
-                {keyFlags.map(flag => (
-                  <div key={flag.code} className="flex items-start gap-3">
-                    <RiskBadge level={flag.severity} />
-                    <span className="text-sm text-[#d8eeff] flex-1 leading-snug">{flag.title}</span>
-                  </div>
-                ))}
-              </div>
+        {/* Key Actions */}
+        {report.recommendations.length > 0 && (
+          <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-4">
+            <h3 className="text-[10px] font-mono font-bold text-[#7ab8e0] tracking-[0.2em] uppercase mb-3">Key Actions</h3>
+            <div className="space-y-2.5">
+              {report.recommendations.map((rec, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <span className="text-[#0a84ff] font-mono text-sm mt-0.5 flex-shrink-0">→</span>
+                  <span className="text-sm text-[#d8eeff] flex-1 leading-snug">{rec}</span>
+                </div>
+              ))}
             </div>
-          ) : null;
-        })()}
+          </div>
+        )}
 
         {/* Similar TLDs */}
         {report.similarTLDs.length > 0 && (
