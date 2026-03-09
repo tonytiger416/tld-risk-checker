@@ -63,8 +63,8 @@ export const PRICE_RECORDS: PriceRecord[] = [
   },
   {
     tld: 'tech', semanticClass: 'tech_generic', mechanism: 'auction',
-    priceMn: 6.76, approx: true, buyer: 'Radix', year: 2015, applicants: 8,
-    notes: 'strong post-delegation performance; Radix portfolio anchor',
+    priceMn: 6.76, buyer: 'Radix (Dot Tech LLC)', year: 2014, applicants: 6,
+    notes: 'confirmed ICANN auction Sep 2014; strong post-delegation performance; Radix portfolio anchor',
   },
   {
     tld: 'digital', semanticClass: 'tech_generic', mechanism: 'auction',
@@ -167,6 +167,36 @@ export const PRICE_RECORDS: PriceRecord[] = [
     tld: 'hotel', semanticClass: 'dictionary_word_premium', mechanism: 'private',
     buyer: 'Booking Holdings / NH Hotel Group consortium', year: 2015, applicants: 9,
     notes: 'largest 2012 contention set by number of applicants that resolved via private agreement',
+  },
+  {
+    tld: 'hotels', semanticClass: 'dictionary_word_premium', mechanism: 'auction',
+    priceMn: 2.2, buyer: 'Booking.com B.V.', year: 2015, applicants: 3,
+    notes: 'confirmed ICANN auction Nov 2015; Booking.com secured plural travel vertical string',
+  },
+  {
+    tld: 'realty', semanticClass: 'dictionary_word_premium', mechanism: 'auction',
+    priceMn: 5.59, buyer: 'Fegistry LLC', year: 2014, applicants: 3,
+    notes: 'confirmed ICANN auction Oct 2014; real estate professional vertical',
+  },
+  {
+    tld: 'buy', semanticClass: 'dictionary_word_premium', mechanism: 'auction',
+    priceMn: 4.59, buyer: 'Amazon EU S.à r.l.', year: 2014, applicants: 5,
+    notes: 'confirmed ICANN auction Sep 2014 at $4,588,888; Amazon e-commerce namespace acquisition',
+  },
+  {
+    tld: 'baby', semanticClass: 'lifestyle_social', mechanism: 'auction',
+    priceMn: 3.09, buyer: 'Johnson & Johnson Services Inc.', year: 2014, applicants: 3,
+    notes: 'confirmed ICANN auction Dec 2014 at $3,088,888; brand operator won over portfolio registries',
+  },
+  {
+    tld: 'spot', semanticClass: 'short_premium_generic', mechanism: 'auction',
+    priceMn: 2.2, buyer: 'Amazon EU S.à r.l.', year: 2014, applicants: 3,
+    notes: 'confirmed ICANN auction Oct 2014; Amazon strategic acquisition of 4-char generic',
+  },
+  {
+    tld: 'salon', semanticClass: 'lifestyle_social', mechanism: 'auction',
+    priceMn: 5.1, buyer: 'Outer Orchard LLC', year: 2014, applicants: 4,
+    notes: 'confirmed ICANN auction Oct 2014 at $5,100,575; beauty/lifestyle vertical; specialist operator won',
   },
   {
     tld: 'travel', semanticClass: 'dictionary_word_premium', mechanism: 'private',
@@ -370,9 +400,9 @@ export const PRICE_RECORDS: PriceRecord[] = [
     notes: 'uncontested niche application',
   },
   {
-    tld: 'vip', semanticClass: 'lifestyle_social', mechanism: 'single',
-    buyer: 'Minds + Machines', year: 2014, applicants: 1,
-    notes: 'uncontested lifestyle string',
+    tld: 'vip', semanticClass: 'lifestyle_social', mechanism: 'auction',
+    priceMn: 3.0, buyer: 'Minds + Machines Group Limited', year: 2014, applicants: 2,
+    notes: 'confirmed ICANN auction Sep 2014 at $3,000,888; Minds + Machines beat one other applicant',
   },
   {
     tld: 'yoga', semanticClass: 'lifestyle_social', mechanism: 'single',
