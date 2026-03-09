@@ -22,26 +22,29 @@ The user is a non-developer. Keep explanations simple and jargon-free.
 │   └── src/
 │       ├── engine/
 │       │   ├── types.ts               ← RiskFlag, CategoryResult, TLDRiskReport
+│       │   │                             recommendations: { text, severity }[]
 │       │   ├── index.ts               ← main assessTLD() entry point
 │       │   ├── checks/                ← 10 check modules
 │       │   │   ├── reserved.ts
 │       │   │   ├── similarity.ts
 │       │   │   ├── geographic.ts
 │       │   │   ├── collision.ts
-│       │   │   ├── trademark.ts
+│       │   │   ├── trademark.ts       ← exact + prefix + near-miss (Levenshtein) + sensitive + stock exchange
 │       │   │   ├── objection.ts
 │       │   │   ├── regulated.ts
 │       │   │   ├── idn.ts
-│       │   │   ├── contention.ts      ← string contention scoring + stat chips
+│       │   │   ├── contention.ts      ← contention scoring; length premium gated on semantic signals
 │       │   │   └── evaluation.ts
 │       │   └── data/
 │       │       ├── existing-tlds.ts   ← 1,436 IANA TLDs
 │       │       ├── countries.ts       ← 8,514 country names, 250 alpha2, 247 capitals
 │       │       ├── string-context.ts  ← semantic classification (12 classes)
-│       │       ├── gtld-prices.ts     ← 80+ 2012-round price records + getComparables()
+│       │       ├── gtld-prices.ts     ← 80+ price records; era field ('2012'|'2026_outlook'); getComparables()
 │       │       ├── contention2012.ts  ← 2012 contention outcomes map
 │       │       ├── demand.ts          ← commercial value + search popularity maps
-│       │       ├── brands.ts
+│       │       │                         includes tech abbreviations: auth, api, dev, sdk, cdn, dns, ssl, vpn
+│       │       │                         includes 2026 outlook: web3, defi, fintech, ml, saas, etc.
+│       │       ├── brands.ts          ← WELL_KNOWN_BRANDS + NEAR_MISS_BRANDS + SENSITIVE_STRINGS + STOCK_EXCHANGES
 │       │       ├── collision.ts
 │       │       ├── confusables.ts
 │       │       ├── geographic.ts
@@ -52,8 +55,9 @@ The user is a non-developer. Keep explanations simple and jargon-free.
 │       │       └── reserved-names.ts
 │       ├── lib/
 │       │   └── claude.ts              ← AI prompt builder + streaming + verdict logic
+│       │                                 buildPrompt() filters to HIGH/MEDIUM flags only (materialFlags)
 │       └── components/
-│           ├── AIAnalysisPanel.tsx    ← AI output parser + chip rendering
+│           ├── AIAnalysisPanel.tsx    ← progressive streaming render; parses AI output in real-time
 │           ├── RiskCategoryCard.tsx   ← expandable flag cards
 │           └── ...
 ```
@@ -81,8 +85,11 @@ Every assessment produces two independent scores:
 ### AI Verdict
 The verdict (`STRONG APPLY` / `APPLY WITH STRATEGY` / `HIGH RISK – PROCEED WITH CAUTION` / `DO NOT APPLY`) is computed deterministically by `computeVerdict()` in `claude.ts` from engine scores. The AI is given this verdict and must use it exactly — it only explains the reasoning, never chooses the verdict.
 
+### AI Output — Real-Time Streaming
+`AIAnalysisPanel.tsx` parses the AI output progressively on every streamed chunk. The structured UI renders in real-time as Claude writes it — no buffering, no snap from raw text to formatted view. The verdict badge shows immediately (engine-derived). A blinking cursor tracks the active section.
+
 ### Stat Chips (👥 💰 🏢)
-Emoji stat chips appear **only** in the AI-generated Competitive Landscape section (`AIAnalysisPanel.tsx`). They are **not** rendered inside the expandable contention flag cards (`RiskCategoryCard.tsx`).
+Emoji stat chips appear **only** in the AI-generated Competitive Landscape section (`AIAnalysisPanel.tsx`).
 
 Chip value priority chain:
 1. AI-parsed values from `## COMPETITIVE STATS` structured output section
@@ -96,8 +103,6 @@ Claude outputs exactly four sections in order:
 3. `## COMPETITIVE STATS` — exactly three lines: `APPLICANTS:`, `BUDGET:`, `OPERATORS:`
 4. `## OBJECTION SIGNALS` — exactly four lines: `GAC:`, `LPI:`, `COMMUNITY:`, `LRO:`
 
-Citations section removed — AGB/precedent refs are cited inline in the RECOMMENDATION text instead.
-
 ### AI Persona & Tone
 The expert is a trusted strategic advisor, not a risk auditor. The RECOMMENDATION must:
 - Lead with the commercial/strategic opportunity of the string
@@ -105,6 +110,7 @@ The expert is a trusted strategic advisor, not a risk auditor. The RECOMMENDATIO
 - Cite AGB sections and 2012 precedents only where they add weight — not on every sentence
 - Use plain, confident language; explain any ICANN jargon in context
 - Give one concrete tactical action as the closing advice
+- **Never reference internal engine scores, signal levels, or the scoring system** — speak as an expert, not as a wrapper around a system
 
 `parseAnalysis()` in `AIAnalysisPanel.tsx` splits on these headings:
 ```
@@ -112,14 +118,23 @@ The expert is a trusted strategic advisor, not a risk auditor. The RECOMMENDATIO
 /##\s*COMPETITIVE STATS\s*([\s\S]*?)(?=##\s*OBJECTION SIGNALS|$)/i
 ```
 
-### Semantic Classification System (Phase 1–3)
+### Competitive Demand Scoring — Length Premium Gating
+The length premium in `contention.ts` (CON-006) is **gated on semantic signals**. A short string only gets a full MEDIUM/HIGH severity length bonus if at least one other signal also fires (commercial value, search popularity, or 2012 contention history). An opaque 4-char string like `.hsgs` with no other signals gets a LOW-severity scarcity note with low estimates ($50K–$200K, 1–2 applicants) — not the same treatment as a semantically meaningful string like `.auth`.
+
+### Trademark Check — Near-Miss Detection
+`trademark.ts` now has four layers:
+1. **Exact match** against `WELL_KNOWN_BRANDS` → HIGH severity (TM-001)
+2. **Prefix match** — string starts with a known brand → MEDIUM (TM-002)
+3. **Near-miss / typosquat** — Levenshtein edit distance == 1 from `NEAR_MISS_BRANDS` (coined terms only) → MEDIUM (TM-NEAR). Catches `.nke` (nike), `.googl` (google), `.amazn` (amazon). Generic English word brands excluded to avoid false positives.
+4. **Sensitive strings + stock exchanges** → HIGH (TM-003, TM-004)
+
+### Semantic Classification System
 Implemented in `string-context.ts` + `gtld-prices.ts`:
 - `classifyString(s)` → 12 semantic classes with description, buyerProfile, regulatoryNote
 - `getComparables(s, class)` → top 5 price records scored by semantic match + length affinity
 - `buildPrompt()` injects `STRING CONTEXT` and `STRING COMPARABLES` blocks into every AI prompt
+- `2026_outlook` price records get +30 scoring bonus to surface above 2012 actuals
 - AI is instructed to use comparables as calibration anchors, not generic length tiers
-
-This ensures `.usd` (currency_code) gets financial/sovereign comparables, while `.lik` (lifestyle_social) gets lifestyle/consumer comparables — different buyer profiles, different auction estimates.
 
 ### Objection Coverage
 Every AI recommendation must explicitly cover all four objection mechanisms:
@@ -127,6 +142,9 @@ Every AI recommendation must explicitly cover all four objection mechanisms:
 - (b) LPI objection under AGB §3.5.2
 - (c) Community Objection under AGB §3.5.4
 - (d) LRO from trademark holders
+
+### AI Prompt Flag Filtering
+`buildPrompt()` sends only `materialFlags` (HIGH and MEDIUM severity) to the AI. LOW and CLEAR flags are suppressed with a count note. This prevents noise from drowning the actionable signals.
 
 ## Common Tasks
 
@@ -142,7 +160,13 @@ Re-run the Python fetch commands used during the original build against `https:/
 Fetch from `https://raw.githubusercontent.com/mledoze/countries/master/countries.json` and regenerate `countries.ts`.
 
 ### Updating gTLD price records
-Edit `app/src/engine/data/gtld-prices.ts` — add new `PriceRecord` entries to `PRICE_RECORDS`. The `getComparables()` scoring weights are at the bottom of that file.
+Edit `app/src/engine/data/gtld-prices.ts` — add new `PriceRecord` entries to `PRICE_RECORDS`. Use `era: '2026_outlook'` for forward estimates. The `getComparables()` scoring weights are at the bottom of that file.
+
+### Adding brands to near-miss detection
+Add coined-term brand names to `NEAR_MISS_BRANDS` in `app/src/engine/data/brands.ts`. Only include non-dictionary coined terms — avoid common English words that would cause false positives.
+
+### Adding commercial value signals
+Edit `COMMERCIAL_VALUE` or `SEARCH_POPULARITY` maps in `app/src/engine/data/demand.ts`. Higher tier = more points = higher competitive demand score.
 
 ## Style Conventions
 - Deep navy dark palette — no light mode
@@ -150,5 +174,5 @@ Edit `app/src/engine/data/gtld-prices.ts` — add new `PriceRecord` entries to `
 - Tailwind CSS v4 only — no `@apply`, no `tailwind.config.js`
 - TypeScript strict mode — no `any`
 - Keep components focused; avoid over-engineering
-- `max_tokens: 1300` for Claude API calls (citations removed, 4 sections only)
+- `max_tokens: 1300` for Claude API calls (4 sections only)
 - Model: `claude-sonnet-4-6`
