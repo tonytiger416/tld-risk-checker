@@ -9,4 +9,15 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react':    ['react', 'react-dom'],
+          'vendor-recharts': ['recharts'],
+          'vendor-anthropic': ['@anthropic-ai/sdk'],
+        },
+      },
+    },
+  },
 })
