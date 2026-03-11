@@ -58,9 +58,10 @@ export function assess(raw: string, appType: AppType = 'open'): TLDRiskReport {
   ].map(normalizeCategoryLevel);
 
   // Hard blockers — no path forward regardless of resources
-  const isHardBlocked = categories.some(
-    c => BLOCKER_CATEGORIES.has(c.category) && c.level === 'HIGH'
-  );
+  // GEO-001 = alpha-2 country code: reserved by ICANN for ccTLDs, not available for gTLD applications
+  const isHardBlocked =
+    categories.some(c => BLOCKER_CATEGORIES.has(c.category) && c.level === 'HIGH') ||
+    categories.some(c => c.category === 'GEOGRAPHIC_NAMES' && c.flags.some(f => f.code === 'GEO-001'));
 
   // ---- Application Risk score ----
   // Anchored to the single worst category finding, with a small additive bonus
