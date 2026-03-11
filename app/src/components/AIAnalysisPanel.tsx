@@ -218,19 +218,8 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
     );
   }
 
-  const isStreaming = genState === 'generating';
-  const parsed = parseAnalysis(displayText);
-  // Verdict is always derived from the engine — never from Claude's text
-  const verdict = computeVerdict(report);
-  const verdictStyle = VERDICT_STYLE[verdict];
-
-  // Cursor blinks at the end of whatever section is currently streaming
-  const cursor = isStreaming
-    ? <span className="inline-block w-0.5 h-3.5 bg-[#3a7ab8] ml-0.5 animate-pulse align-text-bottom" />
-    : null;
-
-  // Show initial loading dots before any text arrives
-  if (isStreaming && !displayText) {
+  // Show loading state for the entire generation phase — only render structured UI when done
+  if (genState === 'generating') {
     return (
       <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-4">
         <div className="flex items-center gap-2.5">
@@ -245,6 +234,11 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
     );
   }
 
+  const parsed = parseAnalysis(displayText);
+  // Verdict is always derived from the engine — never from Claude's text
+  const verdict = computeVerdict(report);
+  const verdictStyle = VERDICT_STYLE[verdict];
+
   return (
     <div className="space-y-3">
 
@@ -252,10 +246,7 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
       <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-5">
         <div className="flex items-center justify-between mb-4">
           <span className="text-[10px] font-mono font-bold text-[#7ab8e0] tracking-[0.2em] uppercase">AI Recommendation</span>
-          {isStreaming
-            ? <span className="inline-flex gap-1">{[0,150,300].map(d => <span key={d} className="w-1 h-1 rounded-full bg-[#3a7ab8] animate-bounce" style={{ animationDelay: `${d}ms` }} />)}</span>
-            : <button onClick={() => { startedRef.current = false; doGenerate(); }} className="text-[11px] font-mono text-[#5a98c8] hover:text-[#90c8f0] transition-colors" title="Regenerate">↻ regenerate</button>
-          }
+          <button onClick={() => { startedRef.current = false; doGenerate(); }} className="text-[11px] font-mono text-[#5a98c8] hover:text-[#90c8f0] transition-colors" title="Regenerate">↻ regenerate</button>
         </div>
 
         <div className={`inline-flex items-center gap-2.5 px-4 py-2 rounded border ${verdictStyle.border} mb-4`}>
@@ -268,7 +259,6 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
         {parsed.recommendationBody && (
           <p className="text-sm text-[#d8eeff] leading-relaxed">
             {parsed.recommendationBody}
-            {isStreaming && !parsed.competitiveLandscape && cursor}
           </p>
         )}
       </div>
@@ -311,7 +301,6 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
 
           <p className="text-sm text-[#d8eeff] leading-relaxed">
             {parsed.competitiveLandscape}
-            {isStreaming && cursor}
           </p>
         </div>
       )}
