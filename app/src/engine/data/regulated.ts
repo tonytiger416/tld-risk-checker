@@ -5,8 +5,9 @@ export const HIGHLY_REGULATED: Set<string> = new Set([
   'investments', 'lifeinsurance', 'loans', 'mortgage', 'mutuelle',
   'spreadbetting', 'trading', 'fund', 'capital',
   // Health & medical
-  'clinic', 'dds', 'dentist', 'doctor', 'health', 'hospital',
-  'medical', 'pharmacy', 'surgery', 'healthcare',
+  'clinic', 'dds', 'dentist', 'doc', 'docs', 'doctor', 'health', 'hospital',
+  'lab', 'labs', 'med', 'meds', 'medical', 'pharmacy', 'pharm', 'rx',
+  'surgery', 'healthcare', 'vet', 'vets',
   // Legal
   'abogado', 'attorney', 'avocats', 'cpa', 'jurist', 'law',
   'lawyer', 'legal', 'notary', 'rechtsanwalt',
@@ -34,7 +35,7 @@ export const REGULATED_SECTOR_KEYWORDS: Array<{ sector: string; pattern: RegExp;
   },
   {
     sector: 'Healthcare',
-    pattern: /^(health|healthcare|medical|medicine|medic|pharmacy|pharma|pharmaceutical|doctor|doctors|hospital|hospitals|clinic|clinics|dental|dentist|dentistry|surgery|surgical|therapy|therapist|nursing|nurse|physiotherapy|radiology|oncology|cardiology|pediatric|dermatology|psychiatry|rehab|rehabilitation)$/,
+    pattern: /^(health|healthcare|medical|medicine|medic|med|meds|pharmacy|pharma|pharmaceutical|pharm|rx|doctor|doctors|doc|docs|hospital|hospitals|clinic|clinics|dental|dentist|dentistry|surgery|surgical|therapy|therapist|nursing|nurse|physiotherapy|radiology|oncology|cardiology|pediatric|dermatology|psychiatry|rehab|rehabilitation|lab|labs|vet|vets)$/,
     note: 'Requires compliance with healthcare regulations and consumer protection policies',
   },
   {
