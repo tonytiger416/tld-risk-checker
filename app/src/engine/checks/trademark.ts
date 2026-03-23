@@ -1,5 +1,5 @@
 import type { CategoryResult, RiskFlag } from '../types';
-import { WELL_KNOWN_BRANDS, NEAR_MISS_BRANDS, SENSITIVE_STRINGS, STOCK_EXCHANGES } from '../data/brands';
+import { WELL_KNOWN_BRANDS, NEAR_MISS_BRANDS, SENSITIVE_STRINGS, STOCK_EXCHANGES, CORPORATE_PRODUCT_STRINGS } from '../data/brands';
 
 // Levenshtein edit distance — used for near-miss trademark detection
 function levenshtein(a: string, b: string): number {
@@ -111,7 +111,24 @@ export function checkTrademark(s: string, appType: 'open' | 'brand' = 'open'): C
     }
   }
 
-  // 5. Stock exchange / financial market identifier
+  // 5. Corporate product string — file format or product name owned by a specific company
+  // Only fires when not already flagged by TM-001/TM-002 (avoid double-flagging .microsoft, .adobe etc.)
+  const alreadyFlaggedProduct = flags.some(f => f.code === 'TM-001' || f.code === 'TM-002');
+  if (!alreadyFlaggedProduct) {
+    const owner = CORPORATE_PRODUCT_STRINGS.get(s);
+    if (owner) {
+      flags.push({
+        code: 'TM-005',
+        severity: 'HIGH',
+        title: `".${s}" is a product name or file format extension owned by ${owner}`,
+        detail: `".${s}" is strongly associated with ${owner} as a product name or proprietary file format. ${owner} holds registered trademarks covering this string and would almost certainly file a Legal Rights Objection (LRO) against a third-party TLD application. File format extensions in particular have been actively defended by their corporate owners in ICANN proceedings.`,
+        guidebookRef: 'AGB Section 3.5.3, pp. 121–124; AGB Section 4.2, pp. 196–199',
+        recommendation: `Do not apply for this string unless you are ${owner} or have explicit written authorisation. An LRO from ${owner} would almost certainly succeed.`,
+      });
+    }
+  }
+
+  // 6. Stock exchange / financial market identifier
   if (STOCK_EXCHANGES.has(s)) {
     flags.push({
       code: 'TM-004',
@@ -123,7 +140,7 @@ export function checkTrademark(s: string, appType: 'open' | 'brand' = 'open'): C
     });
   }
 
-  // 6. TMCH reminder — always shown when no other flags (regardless of app type)
+  // 7. TMCH reminder — always shown when no other flags (regardless of app type)
   const hasMeaningfulFlags = flags.some(f => f.severity === 'HIGH' || f.severity === 'MEDIUM');
   if (!hasMeaningfulFlags) {
     flags.push({

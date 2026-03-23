@@ -179,6 +179,70 @@ export const SENSITIVE_STRINGS: string[] = [
   'abuse', 'trafficking', 'slavery',
 ];
 
+// ---------------------------------------------------------------------------
+// Corporate product strings — file format extensions and product names
+// that are strongly associated with a specific company and would likely
+// trigger an LRO from that company if applied for as a TLD.
+// Map format: string → owning company name (for display in flag detail)
+// ---------------------------------------------------------------------------
+export const CORPORATE_PRODUCT_STRINGS: Map<string, string> = new Map([
+  // Microsoft — file format extensions
+  ['doc',   'Microsoft'],
+  ['docx',  'Microsoft'],
+  ['xls',   'Microsoft'],
+  ['xlsx',  'Microsoft'],
+  ['ppt',   'Microsoft'],
+  ['pptx',  'Microsoft'],
+  // Microsoft — product names
+  ['outlook',  'Microsoft'],
+  ['azure',    'Microsoft'],
+  ['bing',     'Microsoft'],
+  ['xbox',     'Microsoft'],
+  ['skype',    'Microsoft'],
+  ['onedrive', 'Microsoft'],
+  ['sharepoint','Microsoft'],
+  ['msn',      'Microsoft'],
+
+  // Adobe — file format extensions
+  ['pdf',   'Adobe'],
+  ['psd',   'Adobe'],
+  ['indd',  'Adobe'],
+  // Adobe — product names
+  ['acrobat',    'Adobe'],
+  ['photoshop',  'Adobe'],
+  ['illustrator','Adobe'],
+  ['premiere',   'Adobe'],
+  ['lightroom',  'Adobe'],
+  ['indesign',   'Adobe'],
+  ['figma',      'Adobe'],
+
+  // Apple — file format extensions
+  ['mov',  'Apple'],
+  ['ipa',  'Apple'],
+  ['dmg',  'Apple'],
+  // Apple — product/service names
+  ['icloud',   'Apple'],
+  ['itunes',   'Apple'],
+  ['facetime', 'Apple'],
+  ['siri',     'Apple'],
+  ['macos',    'Apple'],
+  ['appstore', 'Apple'],
+  ['airplay',  'Apple'],
+  ['airdrop',  'Apple'],
+
+  // Google — file format / platform
+  ['apk',        'Google'],
+  ['android',    'Google'],
+  ['gmail',      'Google'],
+  ['chrome',     'Google'],
+  ['chromebook', 'Google'],
+  ['chromecast', 'Google'],
+  ['playstore',  'Google'],
+  ['workspace',  'Google'],
+  ['pixel',      'Google'],
+  ['assistant',  'Google'],
+]);
+
 // Stock exchanges and financial market identifiers
 // These strings warrant specific trademark scrutiny when used as TLDs
 export const STOCK_EXCHANGES: Set<string> = new Set([
