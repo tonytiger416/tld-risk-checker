@@ -57,14 +57,6 @@
     .flags-wrap { margin-top: 5px; }
     .flag-pill { font-size: 10px; padding: 1px 5px; border-radius: 3px; display: inline-block; margin: 1px; border: 1px solid; }
     .flag-clear { font-size: 10px; color: #32d74b; }
-    .filtered-section { margin-top: 40px; }
-    .filtered-section h2 { font-size: 16px; color: #556677; margin-bottom: 12px; }
-    .filtered-table { background: #0a1220; border: 1px solid #1e2a3a; border-radius: 8px; overflow: hidden; }
-    .filtered-table table { width: 100%; border-collapse: collapse; }
-    .filtered-table th { padding: 8px 10px; font-size: 11px; color: #4da6ff; text-transform: uppercase; letter-spacing: 0.05em; background: #0d1a2e; border-bottom: 1px solid #1e2a3a; text-align: left; cursor: default; }
-    .filt-name { padding: 6px 10px; font-family: monospace; color: #ff453a; }
-    .filt-reason { padding: 6px 10px; font-size: 12px; color: #556677; }
-    .filtered-table tbody tr { border-bottom: 1px solid #131d2c; }
     .footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #1e2a3a; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #334455; flex-wrap: wrap; gap: 12px; }
     @media print { body { background: white; color: black; } .container { max-width: none; padding: 20px; } table { font-size: 11px; } .table-wrap { border: 1px solid #ccc; } thead tr { background: #f0f0f0 !important; } thead th { cursor: default; } .sort-arrow { display: none; } }
   </style>
@@ -1104,97 +1096,6 @@
     <td class="cell-rationale"><div class="rationale-text">Multi-market appeal across several verticals. Short, meaningful word with broad commercial applicability.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".doc" is a product name or file format extension owned by Microsoft</span> <span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".doc" is classified as a highly regulated TLD string</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".doc" is a high-demand generic string — contention likely</span></div></td>
   </tr></tbody>
     </table>
-  </div>
-  <div class="filtered-section">
-    <h2>Filtered Out by Engine (85 strings — already delegated, reserved, or blocked)</h2>
-    <div class="filtered-table"><table>
-      <thead><tr><th>String</th><th>Reason</th></tr></thead>
-      <tbody><tr><td class="filt-name">.pay</td><td class="filt-reason">".pay" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.web</td><td class="filt-reason">".web" was awarded in the 2012 ICANN round and has not been delegated</td></tr>
-<tr><td class="filt-name">.inc</td><td class="filt-reason">".inc" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.run</td><td class="filt-reason">".run" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.bio</td><td class="filt-reason">".bio" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.vet</td><td class="filt-reason">".vet" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.ceo</td><td class="filt-reason">".ceo" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.cpa</td><td class="filt-reason">".cpa" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.med</td><td class="filt-reason">".med" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.bot</td><td class="filt-reason">".bot" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.bid</td><td class="filt-reason">".bid" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.fit</td><td class="filt-reason">".fit" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.eat</td><td class="filt-reason">".eat" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.fan</td><td class="filt-reason">".fan" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.now</td><td class="filt-reason">".now" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.rx</td><td class="filt-reason">Two-letter ASCII strings are reserved for country codes (ccTLDs)</td></tr>
-<tr><td class="filt-name">.home</td><td class="filt-reason">".home" is a reserved or blocked string</td></tr>
-<tr><td class="filt-name">.data</td><td class="filt-reason">".data" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.mail</td><td class="filt-reason">".mail" is a reserved or blocked string</td></tr>
-<tr><td class="filt-name">.search</td><td class="filt-reason">".search" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.spa</td><td class="filt-reason">".spa" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.tax</td><td class="filt-reason">".tax" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.eco</td><td class="filt-reason">".eco" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.ngo</td><td class="filt-reason">".ngo" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.pub</td><td class="filt-reason">".pub" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.bet</td><td class="filt-reason">".bet" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.win</td><td class="filt-reason">".win" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.sky</td><td class="filt-reason">".sky" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.wed</td><td class="filt-reason">".wed" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.mba</td><td class="filt-reason">".mba" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.fund</td><td class="filt-reason">".fund" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.trade</td><td class="filt-reason">".trade" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.cash</td><td class="filt-reason">".cash" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.deal</td><td class="filt-reason">".deal" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.corp</td><td class="filt-reason">".corp" is a reserved or blocked string</td></tr>
-<tr><td class="filt-name">.llc</td><td class="filt-reason">".llc" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.dental</td><td class="filt-reason">".dental" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.clinic</td><td class="filt-reason">".clinic" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.vision</td><td class="filt-reason">".vision" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.rent</td><td class="filt-reason">".rent" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.lease</td><td class="filt-reason">".lease" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.land</td><td class="filt-reason">".land" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.mortgage</td><td class="filt-reason">".mortgage" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.dns</td><td class="filt-reason">".dns" is a reserved or blocked string</td></tr>
-<tr><td class="filt-name">.forum</td><td class="filt-reason">".forum" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.talk</td><td class="filt-reason">".talk" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.wine</td><td class="filt-reason">".wine" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.yoga</td><td class="filt-reason">".yoga" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.school</td><td class="filt-reason">".school" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.meet</td><td class="filt-reason">".meet" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.call</td><td class="filt-reason">".call" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.safe</td><td class="filt-reason">".safe" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.zero</td><td class="filt-reason">".zero" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.next</td><td class="filt-reason">".next" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.open</td><td class="filt-reason">".open" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.local</td><td class="filt-reason">".local" is a reserved or blocked string</td></tr>
-<tr><td class="filt-name">.build</td><td class="filt-reason">".build" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.root</td><td class="filt-reason">".root" is a reserved or blocked string</td></tr>
-<tr><td class="filt-name">.mint</td><td class="filt-reason">".mint" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.bond</td><td class="filt-reason">".bond" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.insure</td><td class="filt-reason">".insure" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.rehab</td><td class="filt-reason">".rehab" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.coach</td><td class="filt-reason">".coach" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.broker</td><td class="filt-reason">".broker" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.energy</td><td class="filt-reason">".energy" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.solar</td><td class="filt-reason">".solar" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.stream</td><td class="filt-reason">".stream" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.sport</td><td class="filt-reason">".sport" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.music</td><td class="filt-reason">".music" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.save</td><td class="filt-reason">".save" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.loan</td><td class="filt-reason">".loan" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.surgery</td><td class="filt-reason">".surgery" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.team</td><td class="filt-reason">".team" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.group</td><td class="filt-reason">".group" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.studio</td><td class="filt-reason">".studio" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.design</td><td class="filt-reason">".design" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.media</td><td class="filt-reason">".media" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.press</td><td class="filt-reason">".press" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.photo</td><td class="filt-reason">".photo" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.video</td><td class="filt-reason">".video" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.review</td><td class="filt-reason">".review" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.compare</td><td class="filt-reason">".compare" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.guide</td><td class="filt-reason">".guide" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.report</td><td class="filt-reason">".report" already exists in the root zone</td></tr>
-<tr><td class="filt-name">.analytics</td><td class="filt-reason">".analytics" already exists in the root zone</td></tr></tbody>
-    </table></div>
   </div>
   <div class="footer">
     <span>Generated by the ICANN Risk Engine v1.1 — Expert picks curated for the ICANN 2026 new gTLD round</span>
