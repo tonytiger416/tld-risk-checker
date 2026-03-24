@@ -66,11 +66,20 @@ export function checkCollision(s: string): CategoryResult {
 
   const highFlags = flags.filter(f => f.severity === 'HIGH');
   const medFlags = flags.filter(f => f.severity === 'MEDIUM');
-  const score = highFlags.length > 0 ? 95 : medFlags.length > 0 ? 55 : 0;
+  const lowFlags = flags.filter(f => f.severity === 'LOW');
+
+  // Score by worst flag severity. HIGH = near-blocker (deferred/critical),
+  // MEDIUM = manageable with COA (enterprise DNS leakage), LOW = minor.
+  // Medium collision is a real concern but not an application risk comparable
+  // to trademark or regulation issues — it requires a COA, not a rejection.
+  const score = highFlags.length > 0 ? 95
+    : medFlags.length > 0 ? 35
+    : lowFlags.length > 0 ? 15
+    : 0;
 
   return {
     category: 'DNS_COLLISION',
-    level: score >= 80 ? 'HIGH' : score >= 40 ? 'MEDIUM' : score > 0 ? 'LOW' : 'CLEAR',
+    level: score >= 80 ? 'HIGH' : score >= 30 ? 'MEDIUM' : score > 0 ? 'LOW' : 'CLEAR',
     score,
     flags: flags.filter(f => f.severity !== 'CLEAR'),
     summary: score === 0
