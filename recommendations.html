@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ICANN 2026 — Expert TLD Portfolio</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #070d18; color: #c8d8e8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 40px 24px; }
+
+    /* Header */
+    .header { margin-bottom: 40px; }
+    .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .badge { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: #4da6ff; background: #001a2e; border: 1px solid #1e4060; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; }
+    .date { font-size: 12px; color: #334455; }
+    h1 { font-size: 32px; font-weight: 800; color: #e8f0ff; margin: 12px 0 8px; letter-spacing: -0.02em; }
+    .subtitle { font-size: 15px; color: #6677aa; margin-bottom: 24px; }
+
+    /* Stats row */
+    .stats { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+    .stat { background: #0d1a2e; border: 1px solid #1e2a3a; border-radius: 8px; padding: 14px 20px; min-width: 120px; }
+    .stat-value { font-size: 24px; font-weight: 800; color: #e8f0ff; }
+    .stat-label { font-size: 11px; color: #556677; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat.gold .stat-value { color: #f5c842; }
+    .stat.blue .stat-value { color: #4da6ff; }
+    .stat.purple .stat-value { color: #bf5af2; }
+
+    /* Sector chips */
+    .sector-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+    .sector-chip { font-size: 11px; color: #8899aa; background: #0d1a2e; border: 1px solid #1e2a3a; border-radius: 20px; padding: 4px 12px; }
+    .sector-chip strong { color: #e8f0ff; margin-left: 4px; }
+
+    /* Legend */
+    .legend { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #556677; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* Table */
+    .table-wrap { background: #0a1220; border: 1px solid #1e2a3a; border-radius: 10px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: #0d1a2e; }
+    thead th { padding: 10px 8px; text-align: left; font-size: 11px; font-weight: 700; color: #4da6ff; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 2px solid #1e2a3a; cursor: pointer; user-select: none; white-space: nowrap; }
+    thead th:hover { color: #7fc4ff; }
+    thead th .sort-arrow { font-size: 10px; margin-left: 4px; opacity: 0.4; }
+    thead th.sorted .sort-arrow { opacity: 1; }
+    thead th:first-child { text-align: center; }
+    tbody tr { transition: background 0.15s; border-bottom: 1px solid #1e2a3a; }
+    tbody tr:hover { background: #0d1a2e; }
+
+    /* Table cells */
+    .cell-rank { padding: 10px 8px; text-align: center; color: #556677; font-size: 12px; font-weight: 600; }
+    .cell-tier { padding: 10px 8px; text-align: center; }
+    .tier-badge { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; border: 1px solid; white-space: nowrap; }
+    .cell-string { padding: 10px 8px; }
+    .string-name { font-family: monospace; font-size: 15px; font-weight: 700; color: #e8f0ff; display: flex; align-items: center; gap: 6px; }
+    .star { font-size: 11px; color: #f5c842; }
+    .string-cat { font-size: 11px; color: #556677; margin-top: 2px; }
+    .cell-opp { padding: 10px 8px; min-width: 120px; }
+    .opp-bar { display: flex; align-items: center; gap: 6px; cursor: help; }
+    .opp-track { flex: 1; height: 6px; background: #1e2a3a; border-radius: 3px; overflow: hidden; }
+    .opp-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+    .opp-val { font-size: 11px; color: #8899aa; min-width: 24px; text-align: right; }
+    .cell-risk, .cell-comp { padding: 10px 8px; text-align: center; }
+    .risk-label { font-size: 11px; font-weight: 600; }
+    .cell-apps { padding: 10px 8px; text-align: center; font-size: 11px; color: #8899aa; }
+    .cell-rationale { padding: 10px 8px; max-width: 360px; }
+    .rationale-text { font-size: 12px; color: #aab8cc; line-height: 1.5; }
+    .flags-wrap { margin-top: 5px; }
+    .flag-pill { font-size: 10px; padding: 1px 5px; border-radius: 3px; display: inline-block; margin: 1px; border: 1px solid; }
+    .flag-clear { font-size: 10px; color: #32d74b; }
+
+    /* Filtered section */
+    .filtered-section { margin-top: 40px; }
+    .filtered-section h2 { font-size: 16px; color: #556677; margin-bottom: 12px; }
+    .filtered-table { background: #0a1220; border: 1px solid #1e2a3a; border-radius: 8px; overflow: hidden; }
+    .filtered-table table { width: 100%; border-collapse: collapse; }
+    .filtered-table th { padding: 8px 10px; font-size: 11px; color: #4da6ff; text-transform: uppercase; letter-spacing: 0.05em; background: #0d1a2e; border-bottom: 1px solid #1e2a3a; text-align: left; cursor: default; }
+    .filt-name { padding: 6px 10px; font-family: monospace; color: #ff453a; }
+    .filt-reason { padding: 6px 10px; font-size: 12px; color: #556677; }
+    .filtered-table tbody tr { border-bottom: 1px solid #131d2c; }
+
+    /* Footer */
+    .footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #1e2a3a; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #334455; flex-wrap: wrap; gap: 12px; }
+
+    /* Print */
+    @media print {
+      body { background: white; color: black; }
+      .container { max-width: none; padding: 20px; }
+      table { font-size: 11px; }
+      .table-wrap { border: 1px solid #ccc; }
+      thead tr { background: #f0f0f0 !important; }
+      thead th { cursor: default; }
+      .sort-arrow { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-top">
+      <span class="badge">ICANN 2026 New gTLD Round</span>
+      <span class="date">March 24, 2026</span>
+    </div>
+    <h1>Expert TLD Portfolio</h1>
+    <p class="subtitle">Top 100 strings ranked by application survivability and competitive demand — evaluated against the ICANN risk engine.</p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value">185</div>
+        <div class="stat-label">Strings Analyzed</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">100</div>
+        <div class="stat-label">Passed Engine</div>
+      </div>
+      <div class="stat gold">
+        <div class="stat-value">41</div>
+        <div class="stat-label">T1 Ultra Premium</div>
+      </div>
+      <div class="stat blue">
+        <div class="stat-value">48</div>
+        <div class="stat-label">T2 Strong Commercial</div>
+      </div>
+      <div class="stat purple">
+        <div class="stat-value">11</div>
+        <div class="stat-label">T3 Emerging</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" style="color:#f5c842">15 &#9733;</div>
+        <div class="stat-label">3-Letter Premium</div>
+      </div>
+    </div>
+
+    <div class="sector-row">
+      <span class="sector-chip">Technology <strong>24</strong></span><span class="sector-chip">Multi <strong>23</strong></span><span class="sector-chip">Finance <strong>15</strong></span><span class="sector-chip">Legal <strong>7</strong></span><span class="sector-chip">AI <strong>6</strong></span><span class="sector-chip">Travel <strong>4</strong></span><span class="sector-chip">Crypto <strong>3</strong></span><span class="sector-chip">Media <strong>3</strong></span>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#32d74b"></div>CLEAR / LOW risk or competition</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ff9f0a"></div>MEDIUM risk or competition</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ff453a"></div>HIGH risk or competition</div>
+    <div class="legend-item"><span style="color:#f5c842;font-size:12px">&#9733;</span>&nbsp;3-letter premium string</div>
+  </div>
+
+  <div class="table-wrap">
+    <table id="mainTable">
+      <thead>
+        <tr>
+          <th data-col="rank" data-type="num" class="sorted" style="width:36px"><span class="sort-arrow">&#9650;</span> #</th>
+          <th data-col="tier" data-type="tier" style="width:80px">Tier <span class="sort-arrow">&#9650;</span></th>
+          <th data-col="name" data-type="str">String <span class="sort-arrow">&#9650;</span></th>
+          <th data-col="opp" data-type="num" style="width:150px">Opportunity <span class="sort-arrow">&#9650;</span></th>
+          <th data-col="risk" data-type="num" style="width:80px;text-align:center">App Risk <span class="sort-arrow">&#9650;</span></th>
+          <th data-col="comp" data-type="num" style="width:90px;text-align:center">Competition <span class="sort-arrow">&#9650;</span></th>
+          <th data-col="apps" data-type="num" style="width:70px;text-align:center">Est. Apps <span class="sort-arrow">&#9650;</span></th>
+          <th style="cursor:default">Expert Rationale</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr data-rank="1" data-tier="T1" data-name=".gym" data-category="Multi" data-opp="100" data-risk="0" data-comp="3" data-apps="6">
+    <td class="cell-rank">1</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.gym <span class="star" title="3-letter premium">&#9733;</span></div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">6</td>
+    <td class="cell-rationale"><div class="rationale-text">Multi-market appeal across several verticals. Short, meaningful word with broad commercial applicability.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".gym" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".gym" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".gym" is a high search-interest concept</span></div></td>
+  </tr>
+<tr data-rank="2" data-tier="T1" data-name=".air" data-category="Multi" data-opp="100" data-risk="0" data-comp="3" data-apps="6">
+    <td class="cell-rank">2</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.air <span class="star" title="3-letter premium">&#9733;</span></div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">6</td>
+    <td class="cell-rationale"><div class="rationale-text">Multi-market appeal across several verticals. Short, meaningful word with broad commercial applicability.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".air" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".air" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".air" is a short premium string (3 characters)</span></div></td>
+  </tr>
+<tr data-rank="3" data-tier="T1" data-name=".pod" data-category="Multi" data-opp="100" data-risk="0" data-comp="3" data-apps="6">
+    <td class="cell-rank">3</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.pod <span class="star" title="3-letter premium">&#9733;</span></div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">6</td>
+    <td class="cell-rationale"><div class="rationale-text">Multi-market appeal across several verticals. Short, meaningful word with broad commercial applicability.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".pod" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".pod" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".pod" is a short premium string (3 characters)</span></div></td>
+  </tr>
+<tr data-rank="4" data-tier="T1" data-name=".defi" data-category="Finance" data-opp="100" data-risk="0" data-comp="3" data-apps="5">
+    <td class="cell-rank">4</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.defi</div><div class="string-cat">Finance</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">5</td>
+    <td class="cell-rationale"><div class="rationale-text">Decentralized finance protocols. The DeFi ecosystem manages $50B+ in assets — authoritative TLD identity is essential for protocol legitimacy.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".defi" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".defi" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".defi" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="5" data-tier="T1" data-name=".trip" data-category="Travel" data-opp="100" data-risk="0" data-comp="3" data-apps="3">
+    <td class="cell-rank">5</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.trip</div><div class="string-cat">Travel</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Travel and hospitality — trip services. The global travel market is $1.8T+ and increasingly digital-first.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".trip" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".trip" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".trip" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="6" data-tier="T1" data-name=".dao" data-category="Multi" data-opp="100" data-risk="0" data-comp="3" data-apps="6">
+    <td class="cell-rank">6</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.dao <span class="star" title="3-letter premium">&#9733;</span></div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">6</td>
+    <td class="cell-rationale"><div class="rationale-text">Decentralized autonomous organizations. The canonical identity for crypto-native governance. As DAOs mature, authoritative identity becomes essential for legitimacy.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".dao" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".dao" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".dao" is a short premium string (3 characters)</span></div></td>
+  </tr>
+<tr data-rank="7" data-tier="T1" data-name=".gen" data-category="AI" data-opp="100" data-risk="0" data-comp="3" data-apps="6">
+    <td class="cell-rank">7</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.gen <span class="star" title="3-letter premium">&#9733;</span></div><div class="string-cat">AI</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">6</td>
+    <td class="cell-rationale"><div class="rationale-text">AI and machine learning gen technology. Breakout 2025/2026 category with massive venture investment and enterprise adoption.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".gen" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".gen" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".gen" is a short premium string (3 characters)</span></div></td>
+  </tr>
+<tr data-rank="8" data-tier="T1" data-name=".ops" data-category="Multi" data-opp="100" data-risk="0" data-comp="3" data-apps="6">
+    <td class="cell-rank">8</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.ops <span class="star" title="3-letter premium">&#9733;</span></div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">6</td>
+    <td class="cell-rationale"><div class="rationale-text">Multi-market appeal across several verticals. Short, meaningful word with broad commercial applicability.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".ops" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".ops" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".ops" is a short premium string (3 characters)</span></div></td>
+  </tr>
+<tr data-rank="9" data-tier="T1" data-name=".ipo" data-category="Multi" data-opp="100" data-risk="0" data-comp="3" data-apps="6">
+    <td class="cell-rank">9</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.ipo <span class="star" title="3-letter premium">&#9733;</span></div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">6</td>
+    <td class="cell-rationale"><div class="rationale-text">Multi-market appeal across several verticals. Short, meaningful word with broad commercial applicability.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".ipo" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".ipo" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".ipo" is a short premium string (3 characters)</span></div></td>
+  </tr>
+<tr data-rank="10" data-tier="T1" data-name=".esg" data-category="Multi" data-opp="100" data-risk="0" data-comp="3" data-apps="6">
+    <td class="cell-rank">10</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.esg <span class="star" title="3-letter premium">&#9733;</span></div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">6</td>
+    <td class="cell-rationale"><div class="rationale-text">Multi-market appeal across several verticals. Short, meaningful word with broad commercial applicability.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".esg" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".esg" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".esg" is a short premium string (3 characters)</span></div></td>
+  </tr>
+<tr data-rank="11" data-tier="T1" data-name=".wire" data-category="Finance" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">11</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.wire</div><div class="string-cat">Finance</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Financial services and wire-related products. High-value registrant base with strong willingness to pay for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".wire" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".wire" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".wire" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="12" data-tier="T1" data-name=".seed" data-category="Finance" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">12</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.seed</div><div class="string-cat">Finance</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Financial services and seed-related products. High-value registrant base with strong willingness to pay for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".seed" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".seed" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".seed" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="13" data-tier="T1" data-name=".gate" data-category="Finance" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">13</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.gate</div><div class="string-cat">Finance</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Financial services and gate-related products. High-value registrant base with strong willingness to pay for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".gate" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".gate" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".gate" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="14" data-tier="T1" data-name=".swap" data-category="Crypto" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">14</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.swap</div><div class="string-cat">Crypto</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Crypto and Web3 swap infrastructure. Essential primitive in the decentralized ecosystem — authoritative identity drives trust and adoption.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".swap" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".swap" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".swap" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="15" data-tier="T1" data-name=".agent" data-category="AI" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">15</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.agent</div><div class="string-cat">AI</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">AI agents are the breakout category of 2025/2026. Every major tech company is building agentic AI — the namespace opportunity is enormous.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".agent" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".agent" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="16" data-tier="T1" data-name=".stack" data-category="Technology" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">16</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.stack</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and stack-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".stack" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".stack" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="17" data-tier="T1" data-name=".hire" data-category="Multi" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">17</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.hire</div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Multi-market appeal across several verticals. Short, meaningful word with broad commercial applicability.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".hire" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".hire" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".hire" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="18" data-tier="T1" data-name=".model" data-category="AI" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">18</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.model</div><div class="string-cat">AI</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">AI/ML models are the core asset of the AI industry. Every company training or deploying models needs authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".model" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".model" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="19" data-tier="T1" data-name=".chef" data-category="Food" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">19</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.chef</div><div class="string-cat">Food</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Culinary and chef-related services. Food industry registrants command premium prices for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".chef" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".chef" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".chef" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="20" data-tier="T1" data-name=".token" data-category="Crypto" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">20</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.token</div><div class="string-cat">Crypto</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Crypto tokens are the fundamental primitive of Web3. Every blockchain project issues tokens — authoritative identity is essential.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".token" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".token" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="21" data-tier="T1" data-name=".lock" data-category="Security" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">21</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.lock</div><div class="string-cat">Security</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Cybersecurity and lock-related services. The $200B+ security market demands authoritative identity for trust and verification.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".lock" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".lock" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".lock" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="22" data-tier="T1" data-name=".wallet" data-category="Finance" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">22</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.wallet</div><div class="string-cat">Finance</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Crypto wallets, digital wallets, fintech payments. The digital wallet market is $8T+ and growing as cash declines globally.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".wallet" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".wallet" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="23" data-tier="T1" data-name=".sync" data-category="Technology" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">23</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.sync</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and sync-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".sync" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".sync" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".sync" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="24" data-tier="T1" data-name=".firm" data-category="Multi" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">24</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.firm</div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Multi-market appeal across several verticals. Short, meaningful word with broad commercial applicability.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".firm" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".firm" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".firm" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="25" data-tier="T1" data-name=".flow" data-category="Technology" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">25</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.flow</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and flow-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".flow" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".flow" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".flow" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="26" data-tier="T1" data-name=".edge" data-category="Technology" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">26</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.edge</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and edge-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".edge" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".edge" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".edge" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="27" data-tier="T1" data-name=".base" data-category="Technology" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">27</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.base</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and base-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".base" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".base" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".base" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="28" data-tier="T1" data-name=".yield" data-category="Finance" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">28</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.yield</div><div class="string-cat">Finance</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Financial services and yield-related products. High-value registrant base with strong willingness to pay for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".yield" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".yield" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="29" data-tier="T1" data-name=".asset" data-category="Finance" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">29</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.asset</div><div class="string-cat">Finance</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Financial services and asset-related products. High-value registrant base with strong willingness to pay for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".asset" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".asset" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="30" data-tier="T1" data-name=".cover" data-category="Insurance" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">30</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.cover</div><div class="string-cat">Insurance</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Insurance and cover-related services. High-value regulated vertical with premium registrant base.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".cover" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".cover" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="31" data-tier="T1" data-name=".grid" data-category="Technology" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">31</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.grid</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and grid-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".grid" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".grid" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".grid" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="32" data-tier="T1" data-name=".cast" data-category="Media" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">32</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.cast</div><div class="string-cat">Media</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Media and cast-related content. Creator economy and digital media drive strong demand for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".cast" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".cast" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".cast" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="33" data-tier="T1" data-name=".sign" data-category="Legal" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">33</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.sign</div><div class="string-cat">Legal</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Legal services and sign-related processes. Professional services vertical with high willingness to pay for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".sign" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".sign" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".sign" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="34" data-tier="T1" data-name=".stay" data-category="Travel" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">34</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.stay</div><div class="string-cat">Travel</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Travel and hospitality — stay services. The global travel market is $1.8T+ and increasingly digital-first.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".stay" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".stay" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".stay" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="35" data-tier="T1" data-name=".stake" data-category="Crypto" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">35</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.stake</div><div class="string-cat">Crypto</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Crypto and Web3 stake infrastructure. Essential primitive in the decentralized ecosystem — authoritative identity drives trust and adoption.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".stake" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".stake" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="36" data-tier="T1" data-name=".vault" data-category="Security" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">36</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.vault</div><div class="string-cat">Security</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Password vaults, secret management, secure storage. The cybersecurity market is $200B+ — .vault is the natural namespace for secure infrastructure.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".vault" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".vault" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="37" data-tier="T1" data-name=".platform" data-category="Technology" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">37</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.platform</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Platform-as-a-service, marketplace platforms, developer platforms. The platform economy is a multi-trillion-dollar market.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".platform" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".platform" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="38" data-tier="T1" data-name=".mesh" data-category="Technology" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">38</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.mesh</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and mesh-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".mesh" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".mesh" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".mesh" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="39" data-tier="T1" data-name=".pipe" data-category="Technology" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">39</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.pipe</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and pipe-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".pipe" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".pipe" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".pipe" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="40" data-tier="T1" data-name=".repo" data-category="Technology" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">40</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.repo</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and repo-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".repo" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".repo" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".repo" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="41" data-tier="T1" data-name=".earn" data-category="Finance" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">41</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#f5c842;color:#f5c842;background:#2a1f00">T1</span></td>
+    <td class="cell-string"><div class="string-name">.earn</div><div class="string-cat">Finance</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Financial services and earn-related products. High-value registrant base with strong willingness to pay for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".earn" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".earn" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".earn" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="42" data-tier="T2" data-name=".price" data-category="Finance" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">42</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.price</div><div class="string-cat">Finance</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Financial services and price-related products. High-value registrant base with strong willingness to pay for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".price" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".price" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="43" data-tier="T2" data-name=".voice" data-category="Media" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">43</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.voice</div><div class="string-cat">Media</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Media and voice-related content. Creator economy and digital media drive strong demand for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".voice" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".voice" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="44" data-tier="T2" data-name=".learn" data-category="Education" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">44</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.learn</div><div class="string-cat">Education</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Education and learn-related platforms. The global e-learning market is $200B+ and accelerating.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".learn" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".learn" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="45" data-tier="T2" data-name=".judge" data-category="Legal" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">45</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.judge</div><div class="string-cat">Legal</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Legal services and judge-related processes. Professional services vertical with high willingness to pay for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".judge" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".judge" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="46" data-tier="T2" data-name=".compute" data-category="Technology" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">46</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.compute</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and compute-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".compute" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".compute" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="47" data-tier="T2" data-name=".quote" data-category="Finance" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">47</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.quote</div><div class="string-cat">Finance</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Financial services and quote-related products. High-value registrant base with strong willingness to pay for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".quote" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".quote" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="48" data-tier="T2" data-name=".chain" data-category="Technology" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">48</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.chain</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and chain-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".chain" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".chain" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="49" data-tier="T2" data-name=".pilot" data-category="Multi" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">49</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.pilot</div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Multi-market appeal across several verticals. Short, meaningful word with broad commercial applicability.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".pilot" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".pilot" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="50" data-tier="T2" data-name=".cargo" data-category="Logistics" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">50</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.cargo</div><div class="string-cat">Logistics</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Logistics and cargo-related services. Global supply chain management is a $15B+ software market.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".cargo" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".cargo" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="51" data-tier="T2" data-name=".fleet" data-category="Logistics" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">51</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.fleet</div><div class="string-cat">Logistics</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Logistics and fleet-related services. Global supply chain management is a $15B+ software market.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".fleet" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".fleet" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="52" data-tier="T2" data-name=".prompt" data-category="AI" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">52</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.prompt</div><div class="string-cat">AI</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">AI and machine learning prompt technology. Breakout 2025/2026 category with massive venture investment and enterprise adoption.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".prompt" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".prompt" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="53" data-tier="T2" data-name=".contract" data-category="Legal" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">53</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.contract</div><div class="string-cat">Legal</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Legal services and contract-related processes. Professional services vertical with high willingness to pay for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".contract" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".contract" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="54" data-tier="T2" data-name=".tutor" data-category="Education" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">54</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.tutor</div><div class="string-cat">Education</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Education and tutor-related platforms. The global e-learning market is $200B+ and accelerating.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".tutor" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".tutor" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="55" data-tier="T2" data-name=".resort" data-category="Travel" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">55</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.resort</div><div class="string-cat">Travel</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Travel and hospitality — resort services. The global travel market is $1.8T+ and increasingly digital-first.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".resort" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".resort" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="56" data-tier="T2" data-name=".inbox" data-category="Multi" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">56</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.inbox</div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Multi-market appeal across several verticals. Short, meaningful word with broad commercial applicability.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".inbox" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".inbox" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="57" data-tier="T2" data-name=".spend" data-category="Finance" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">57</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.spend</div><div class="string-cat">Finance</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Financial services and spend-related products. High-value registrant base with strong willingness to pay for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".spend" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".spend" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="58" data-tier="T2" data-name=".debug" data-category="Technology" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">58</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.debug</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and debug-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".debug" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".debug" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="59" data-tier="T2" data-name=".deploy" data-category="Technology" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">59</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.deploy</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and deploy-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".deploy" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".deploy" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="60" data-tier="T2" data-name=".consult" data-category="Multi" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">60</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.consult</div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Multi-market appeal across several verticals. Short, meaningful word with broad commercial applicability.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".consult" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".consult" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="61" data-tier="T2" data-name=".address" data-category="Multi" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">61</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.address</div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Multi-market appeal across several verticals. Short, meaningful word with broad commercial applicability.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".address" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".address" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="62" data-tier="T2" data-name=".mentor" data-category="Multi" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">62</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.mentor</div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Multi-market appeal across several verticals. Short, meaningful word with broad commercial applicability.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".mentor" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".mentor" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="63" data-tier="T2" data-name=".freight" data-category="Logistics" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">63</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.freight</div><div class="string-cat">Logistics</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Logistics and freight-related services. Global supply chain management is a $15B+ software market.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".freight" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".freight" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="64" data-tier="T2" data-name=".neural" data-category="AI" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">64</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.neural</div><div class="string-cat">AI</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">AI and machine learning neural technology. Breakout 2025/2026 category with massive venture investment and enterprise adoption.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".neural" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".neural" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="65" data-tier="T2" data-name=".vector" data-category="AI" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">65</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.vector</div><div class="string-cat">AI</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">AI and machine learning vector technology. Breakout 2025/2026 category with massive venture investment and enterprise adoption.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".vector" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".vector" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="66" data-tier="T2" data-name=".quantum" data-category="Technology" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">66</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.quantum</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and quantum-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".quantum" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".quantum" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="67" data-tier="T2" data-name=".compliance" data-category="Legal" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">67</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.compliance</div><div class="string-cat">Legal</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Legal services and compliance-related processes. Professional services vertical with high willingness to pay for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".compliance" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".compliance" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="68" data-tier="T2" data-name=".runtime" data-category="Technology" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">68</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.runtime</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and runtime-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".runtime" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".runtime" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="69" data-tier="T2" data-name=".protocol" data-category="Technology" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">69</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.protocol</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and protocol-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".protocol" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".protocol" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="70" data-tier="T2" data-name=".bridge" data-category="Technology" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">70</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.bridge</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and bridge-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".bridge" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".bridge" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="71" data-tier="T2" data-name=".signal" data-category="Technology" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">71</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.signal</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and signal-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".signal" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".signal" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="72" data-tier="T2" data-name=".survey" data-category="Multi" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">72</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.survey</div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Multi-market appeal across several verticals. Short, meaningful word with broad commercial applicability.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".survey" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".survey" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="73" data-tier="T2" data-name=".ssl" data-category="Multi" data-opp="100" data-risk="0" data-comp="3" data-apps="6">
+    <td class="cell-rank">73</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.ssl <span class="star" title="3-letter premium">&#9733;</span></div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">6</td>
+    <td class="cell-rationale"><div class="rationale-text">SSL/TLS certificates are the backbone of internet security. Every website needs SSL — an authoritative .ssl namespace serves the $5B+ certificate market.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".ssl" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".ssl" is a short premium string (3 characters)</span></div></td>
+  </tr>
+<tr data-rank="74" data-tier="T2" data-name=".podcast" data-category="Media" data-opp="100" data-risk="0" data-comp="2" data-apps="3">
+    <td class="cell-rank">74</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.podcast</div><div class="string-cat">Media</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Podcasting is a $25B+ market with 500M+ listeners globally. An authoritative .podcast TLD gives creators instant credibility.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".podcast" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="75" data-tier="T2" data-name=".wellness" data-category="Health" data-opp="100" data-risk="0" data-comp="2" data-apps="2">
+    <td class="cell-rank">75</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.wellness</div><div class="string-cat">Health</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Excellent — minimal application risk"><div class="opp-track"><div class="opp-fill" style="width:100%;background:#32d74b"></div></div><span class="opp-val">100</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">CLEAR</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Healthcare and wellness-related services. Regulated, high-value vertical with strong demand for authoritative professional identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".wellness" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="76" data-tier="T2" data-name=".lend" data-category="Finance" data-opp="80" data-risk="1" data-comp="3" data-apps="5">
+    <td class="cell-rank">76</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.lend</div><div class="string-cat">Finance</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Strong — low application risk"><div class="opp-track"><div class="opp-fill" style="width:80%;background:#32d74b"></div></div><span class="opp-val">80</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">LOW</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">5</td>
+    <td class="cell-rationale"><div class="rationale-text">Financial services and lend-related products. High-value registrant base with strong willingness to pay for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".lend" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".lend" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".lend" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="77" data-tier="T2" data-name=".core" data-category="Technology" data-opp="80" data-risk="1" data-comp="2" data-apps="3">
+    <td class="cell-rank">77</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.core</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Strong — low application risk"><div class="opp-track"><div class="opp-fill" style="width:80%;background:#32d74b"></div></div><span class="opp-val">80</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#32d74b">LOW</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and core-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".core" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".core" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".core" is a short premium string (4 characters)</span></div></td>
+  </tr>
+<tr data-rank="78" data-tier="T2" data-name=".maps" data-category="Multi" data-opp="55" data-risk="2" data-comp="3" data-apps="3">
+    <td class="cell-rank">78</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.maps</div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Caution — significant risk factors"><div class="opp-track"><div class="opp-fill" style="width:55%;background:#ff9f0a"></div></div><span class="opp-val">55</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Navigation, mapping, GIS. Google Maps alone has 1B+ monthly users. An authoritative .maps namespace serves the entire location services industry.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">Singular/plural variant of existing TLD ".map"</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".maps" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".maps" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="79" data-tier="T2" data-name=".code" data-category="Technology" data-opp="55" data-risk="2" data-comp="3" data-apps="3">
+    <td class="cell-rank">79</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.code</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Caution — significant risk factors"><div class="opp-track"><div class="opp-fill" style="width:55%;background:#ff9f0a"></div></div><span class="opp-val">55</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Source code, coding education, developer identity. GitHub has 100M+ developers — .code is the natural namespace for the developer ecosystem.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">Singular/plural variant of existing TLD ".codes"</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".code" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".code" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="80" data-tier="T2" data-name=".equity" data-category="Finance" data-opp="55" data-risk="2" data-comp="3" data-apps="5">
+    <td class="cell-rank">80</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.equity</div><div class="string-cat">Finance</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Caution — significant risk factors"><div class="opp-track"><div class="opp-fill" style="width:55%;background:#ff9f0a"></div></div><span class="opp-val">55</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">5</td>
+    <td class="cell-rationale"><div class="rationale-text">Private equity, stock equity, home equity. The global equity market is $100T+ — ultra-high-value registrant base.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".equity" appears to be in the regulated "Financial Services" sector</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".equity" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".equity" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="81" data-tier="T2" data-name=".wealth" data-category="Finance" data-opp="55" data-risk="2" data-comp="3" data-apps="5">
+    <td class="cell-rank">81</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.wealth</div><div class="string-cat">Finance</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Caution — significant risk factors"><div class="opp-track"><div class="opp-fill" style="width:55%;background:#ff9f0a"></div></div><span class="opp-val">55</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">5</td>
+    <td class="cell-rationale"><div class="rationale-text">Financial services and wealth-related products. High-value registrant base with strong willingness to pay for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".wealth" appears to be in the regulated "Financial Services" sector</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".wealth" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".wealth" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="82" data-tier="T2" data-name=".claim" data-category="Insurance" data-opp="55" data-risk="2" data-comp="2" data-apps="3">
+    <td class="cell-rank">82</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.claim</div><div class="string-cat">Insurance</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Caution — significant risk factors"><div class="opp-track"><div class="opp-fill" style="width:55%;background:#ff9f0a"></div></div><span class="opp-val">55</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Insurance and claim-related services. High-value regulated vertical with premium registrant base.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">Singular/plural variant of existing TLD ".claims"</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".claim" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".claim" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="83" data-tier="T2" data-name=".nurse" data-category="Health" data-opp="55" data-risk="2" data-comp="2" data-apps="3">
+    <td class="cell-rank">83</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.nurse</div><div class="string-cat">Health</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Caution — significant risk factors"><div class="opp-track"><div class="opp-fill" style="width:55%;background:#ff9f0a"></div></div><span class="opp-val">55</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Healthcare and nurse-related services. Regulated, high-value vertical with strong demand for authoritative professional identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".nurse" appears to be in the regulated "Healthcare" sector</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".nurse" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".nurse" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="84" data-tier="T2" data-name=".tour" data-category="Travel" data-opp="55" data-risk="2" data-comp="2" data-apps="3">
+    <td class="cell-rank">84</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.tour</div><div class="string-cat">Travel</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Caution — significant risk factors"><div class="opp-track"><div class="opp-fill" style="width:55%;background:#ff9f0a"></div></div><span class="opp-val">55</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Travel and hospitality — tour services. The global travel market is $1.8T+ and increasingly digital-first.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">Singular/plural variant of existing TLD ".tours"</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".tour" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".tour" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="85" data-tier="T2" data-name=".therapy" data-category="Health" data-opp="55" data-risk="2" data-comp="2" data-apps="3">
+    <td class="cell-rank">85</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.therapy</div><div class="string-cat">Health</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Caution — significant risk factors"><div class="opp-track"><div class="opp-fill" style="width:55%;background:#ff9f0a"></div></div><span class="opp-val">55</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Healthcare and therapy-related services. Regulated, high-value vertical with strong demand for authoritative professional identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".therapy" appears to be in the regulated "Healthcare" sector</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".therapy" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".therapy" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="86" data-tier="T2" data-name=".court" data-category="Legal" data-opp="55" data-risk="2" data-comp="2" data-apps="2">
+    <td class="cell-rank">86</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.court</div><div class="string-cat">Legal</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Caution — significant risk factors"><div class="opp-track"><div class="opp-fill" style="width:55%;background:#ff9f0a"></div></div><span class="opp-val">55</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Legal services and court-related processes. Professional services vertical with high willingness to pay for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".court" appears to be in the regulated "Legal Services" sector</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".court" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".court" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="87" data-tier="T3" data-name=".recipe" data-category="Food" data-opp="55" data-risk="2" data-comp="2" data-apps="2">
+    <td class="cell-rank">87</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#bf5af2;color:#bf5af2;background:#1a0030">T3</span></td>
+    <td class="cell-string"><div class="string-name">.recipe</div><div class="string-cat">Food</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Caution — significant risk factors"><div class="opp-track"><div class="opp-fill" style="width:55%;background:#ff9f0a"></div></div><span class="opp-val">55</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Culinary and recipe-related services. Food industry registrants command premium prices for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">Singular/plural variant of existing TLD ".recipes"</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".recipe" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".recipe" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="88" data-tier="T3" data-name=".course" data-category="Education" data-opp="55" data-risk="2" data-comp="2" data-apps="2">
+    <td class="cell-rank">88</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#bf5af2;color:#bf5af2;background:#1a0030">T3</span></td>
+    <td class="cell-string"><div class="string-name">.course</div><div class="string-cat">Education</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Caution — significant risk factors"><div class="opp-track"><div class="opp-fill" style="width:55%;background:#ff9f0a"></div></div><span class="opp-val">55</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Education and course-related platforms. The global e-learning market is $200B+ and accelerating.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">Singular/plural variant of existing TLD ".courses"</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".course" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".course" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="89" data-tier="T3" data-name=".audit" data-category="Legal" data-opp="50" data-risk="2" data-comp="2" data-apps="2">
+    <td class="cell-rank">89</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#bf5af2;color:#bf5af2;background:#1a0030">T3</span></td>
+    <td class="cell-string"><div class="string-name">.audit</div><div class="string-cat">Legal</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Caution — significant risk factors"><div class="opp-track"><div class="opp-fill" style="width:50%;background:#ff9f0a"></div></div><span class="opp-val">50</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Legal services and audit-related processes. Professional services vertical with high willingness to pay for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".audit" starts with the well-known brand "audi"</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".audit" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".audit" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="90" data-tier="T2" data-name=".key" data-category="Multi" data-opp="45" data-risk="2" data-comp="3" data-apps="6">
+    <td class="cell-rank">90</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.key <span class="star" title="3-letter premium">&#9733;</span></div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Caution — significant risk factors"><div class="opp-track"><div class="opp-fill" style="width:45%;background:#ff453a"></div></div><span class="opp-val">45</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">6</td>
+    <td class="cell-rationale"><div class="rationale-text">Encryption keys, API keys, access management — core security infrastructure. Multi-market appeal across cybersecurity ($200B+) and real estate.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".key" has DNS collision risk — common in private namespaces</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".key" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".key" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="91" data-tier="T2" data-name=".hub" data-category="Multi" data-opp="45" data-risk="2" data-comp="3" data-apps="6">
+    <td class="cell-rank">91</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.hub <span class="star" title="3-letter premium">&#9733;</span></div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Caution — significant risk factors"><div class="opp-track"><div class="opp-fill" style="width:45%;background:#ff453a"></div></div><span class="opp-val">45</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">6</td>
+    <td class="cell-rationale"><div class="rationale-text">GitHub, hub-and-spoke networks, community hubs. Multi-market appeal with strong brand precedent.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".hub" has DNS collision risk — common in private namespaces</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".hub" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".hub" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="92" data-tier="T2" data-name=".node" data-category="Technology" data-opp="45" data-risk="2" data-comp="3" data-apps="3">
+    <td class="cell-rank">92</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#4da6ff;color:#4da6ff;background:#001a2e">T2</span></td>
+    <td class="cell-string"><div class="string-name">.node</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Caution — significant risk factors"><div class="opp-track"><div class="opp-fill" style="width:45%;background:#ff453a"></div></div><span class="opp-val">45</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Node.js runtime, blockchain nodes, network nodes. Multi-market appeal across developer tooling and distributed systems.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".node" has DNS collision risk — common in private namespaces</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".node" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".node" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="93" data-tier="T3" data-name=".cache" data-category="Technology" data-opp="45" data-risk="2" data-comp="2" data-apps="2">
+    <td class="cell-rank">93</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#bf5af2;color:#bf5af2;background:#1a0030">T3</span></td>
+    <td class="cell-string"><div class="string-name">.cache</div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Caution — significant risk factors"><div class="opp-track"><div class="opp-fill" style="width:45%;background:#ff453a"></div></div><span class="opp-val">45</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Technology infrastructure and cache-related services. Core building block of the modern tech stack with broad developer and enterprise appeal.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".cache" has DNS collision risk — common in private namespaces</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".cache" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".cache" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="94" data-tier="T3" data-name=".api" data-category="Technology" data-opp="45" data-risk="2" data-comp="3" data-apps="6">
+    <td class="cell-rank">94</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#bf5af2;color:#bf5af2;background:#1a0030">T3</span></td>
+    <td class="cell-string"><div class="string-name">.api <span class="star" title="3-letter premium">&#9733;</span></div><div class="string-cat">Technology</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Caution — significant risk factors"><div class="opp-track"><div class="opp-fill" style="width:45%;background:#ff453a"></div></div><span class="opp-val">45</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">6</td>
+    <td class="cell-rationale"><div class="rationale-text">Connective tissue of the modern internet. Every SaaS company, developer tool, and integration platform has an API. product.api replaces api.product.com for millions of developer-facing businesses.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".api" has DNS collision risk — common in private namespaces</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".api" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".api" is a short premium string (3 characters)</span></div></td>
+  </tr>
+<tr data-rank="95" data-tier="T3" data-name=".vpn" data-category="Multi" data-opp="45" data-risk="2" data-comp="3" data-apps="6">
+    <td class="cell-rank">95</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#bf5af2;color:#bf5af2;background:#1a0030">T3</span></td>
+    <td class="cell-string"><div class="string-name">.vpn <span class="star" title="3-letter premium">&#9733;</span></div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="Caution — significant risk factors"><div class="opp-track"><div class="opp-fill" style="width:45%;background:#ff453a"></div></div><span class="opp-val">45</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">6</td>
+    <td class="cell-rationale"><div class="rationale-text">Virtual private networks — $75B+ market with massive consumer and enterprise demand. Privacy concerns drive sustained growth.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".vpn" has DNS collision risk — common in private namespaces</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".vpn" is a high commercial-value keyword</span> <span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".vpn" is a short premium string (3 characters)</span></div></td>
+  </tr>
+<tr data-rank="96" data-tier="T3" data-name=".lab" data-category="Multi" data-opp="15" data-risk="3" data-comp="3" data-apps="6">
+    <td class="cell-rank">96</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#bf5af2;color:#bf5af2;background:#1a0030">T3</span></td>
+    <td class="cell-string"><div class="string-name">.lab <span class="star" title="3-letter premium">&#9733;</span></div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="High Risk — major obstacles likely"><div class="opp-track"><div class="opp-fill" style="width:15%;background:#ff453a"></div></div><span class="opp-val">15</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">6</td>
+    <td class="cell-rationale"><div class="rationale-text">Laboratories — medical, dental, research, innovation. Multi-vertical appeal with high-value professional registrants.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".lab" is classified as a highly regulated TLD string</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".lab" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".lab" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="97" data-tier="T3" data-name=".invest" data-category="Finance" data-opp="15" data-risk="3" data-comp="3" data-apps="5">
+    <td class="cell-rank">97</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#bf5af2;color:#bf5af2;background:#1a0030">T3</span></td>
+    <td class="cell-string"><div class="string-name">.invest</div><div class="string-cat">Finance</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="High Risk — major obstacles likely"><div class="opp-track"><div class="opp-fill" style="width:15%;background:#ff453a"></div></div><span class="opp-val">15</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">5</td>
+    <td class="cell-rationale"><div class="rationale-text">Investment management, retail investing, venture capital. The global investment management market is $100T+ AUM.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".invest" is classified as a highly regulated TLD string</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".invest" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".invest" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="98" data-tier="T3" data-name=".labs" data-category="Multi" data-opp="15" data-risk="3" data-comp="2" data-apps="3">
+    <td class="cell-rank">98</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#bf5af2;color:#bf5af2;background:#1a0030">T3</span></td>
+    <td class="cell-string"><div class="string-name">.labs</div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="High Risk — major obstacles likely"><div class="opp-track"><div class="opp-fill" style="width:15%;background:#ff453a"></div></div><span class="opp-val">15</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">3</td>
+    <td class="cell-rationale"><div class="rationale-text">Multi-market appeal across several verticals. Short, meaningful word with broad commercial applicability.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".labs" is classified as a highly regulated TLD string</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".labs" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".labs" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="99" data-tier="T3" data-name=".notary" data-category="Legal" data-opp="15" data-risk="3" data-comp="2" data-apps="2">
+    <td class="cell-rank">99</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#bf5af2;color:#bf5af2;background:#1a0030">T3</span></td>
+    <td class="cell-string"><div class="string-name">.notary</div><div class="string-cat">Legal</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="High Risk — major obstacles likely"><div class="opp-track"><div class="opp-fill" style="width:15%;background:#ff453a"></div></div><span class="opp-val">15</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff9f0a">MEDIUM</span></td>
+    <td class="cell-apps">2</td>
+    <td class="cell-rationale"><div class="rationale-text">Legal services and notary-related processes. Professional services vertical with high willingness to pay for authoritative identity.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".notary" is classified as a highly regulated TLD string</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".notary" is a high-demand generic string — contention likely</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".notary" is a high commercial-value keyword</span></div></td>
+  </tr>
+<tr data-rank="100" data-tier="T3" data-name=".doc" data-category="Multi" data-opp="7" data-risk="3" data-comp="3" data-apps="6">
+    <td class="cell-rank">100</td>
+    <td class="cell-tier"><span class="tier-badge" style="border-color:#bf5af2;color:#bf5af2;background:#1a0030">T3</span></td>
+    <td class="cell-string"><div class="string-name">.doc <span class="star" title="3-letter premium">&#9733;</span></div><div class="string-cat">Multi</div></td>
+    <td class="cell-opp"><div class="opp-bar" title="High Risk — major obstacles likely"><div class="opp-track"><div class="opp-fill" style="width:7%;background:#ff453a"></div></div><span class="opp-val">7</span></div></td>
+    <td class="cell-risk"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-comp"><span class="risk-label" style="color:#ff453a">HIGH</span></td>
+    <td class="cell-apps">6</td>
+    <td class="cell-rationale"><div class="rationale-text">Multi-market appeal across several verticals. Short, meaningful word with broad commercial applicability.</div><div class="flags-wrap"><span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".doc" is a product name or file format extension owned by Microsoft</span> <span class="flag-pill" style="color:#ff453a;border-color:#ff453a33;background:#2a0000">".doc" is classified as a highly regulated TLD string</span> <span class="flag-pill" style="color:#ff9f0a;border-color:#ff9f0a33;background:#2a1a00">".doc" is a high-demand generic string — contention likely</span></div></td>
+  </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="filtered-section">
+    <h2>Filtered Out by Engine (85 strings — already delegated, reserved, or blocked)</h2>
+    <div class="filtered-table">
+      <table>
+        <thead><tr><th>String</th><th>Reason</th></tr></thead>
+        <tbody><tr><td class="filt-name">.pay</td><td class="filt-reason">".pay" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.web</td><td class="filt-reason">".web" was awarded in the 2012 ICANN round and has not been delegated</td></tr>
+<tr><td class="filt-name">.inc</td><td class="filt-reason">".inc" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.run</td><td class="filt-reason">".run" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.bio</td><td class="filt-reason">".bio" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.vet</td><td class="filt-reason">".vet" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.ceo</td><td class="filt-reason">".ceo" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.cpa</td><td class="filt-reason">".cpa" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.med</td><td class="filt-reason">".med" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.bot</td><td class="filt-reason">".bot" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.bid</td><td class="filt-reason">".bid" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.fit</td><td class="filt-reason">".fit" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.eat</td><td class="filt-reason">".eat" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.fan</td><td class="filt-reason">".fan" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.now</td><td class="filt-reason">".now" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.rx</td><td class="filt-reason">Two-letter ASCII strings are reserved for country codes (ccTLDs)</td></tr>
+<tr><td class="filt-name">.home</td><td class="filt-reason">".home" is a reserved or blocked string</td></tr>
+<tr><td class="filt-name">.data</td><td class="filt-reason">".data" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.mail</td><td class="filt-reason">".mail" is a reserved or blocked string</td></tr>
+<tr><td class="filt-name">.search</td><td class="filt-reason">".search" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.spa</td><td class="filt-reason">".spa" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.tax</td><td class="filt-reason">".tax" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.eco</td><td class="filt-reason">".eco" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.ngo</td><td class="filt-reason">".ngo" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.pub</td><td class="filt-reason">".pub" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.bet</td><td class="filt-reason">".bet" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.win</td><td class="filt-reason">".win" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.sky</td><td class="filt-reason">".sky" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.wed</td><td class="filt-reason">".wed" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.mba</td><td class="filt-reason">".mba" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.fund</td><td class="filt-reason">".fund" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.trade</td><td class="filt-reason">".trade" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.cash</td><td class="filt-reason">".cash" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.deal</td><td class="filt-reason">".deal" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.corp</td><td class="filt-reason">".corp" is a reserved or blocked string</td></tr>
+<tr><td class="filt-name">.llc</td><td class="filt-reason">".llc" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.dental</td><td class="filt-reason">".dental" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.clinic</td><td class="filt-reason">".clinic" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.vision</td><td class="filt-reason">".vision" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.rent</td><td class="filt-reason">".rent" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.lease</td><td class="filt-reason">".lease" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.land</td><td class="filt-reason">".land" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.mortgage</td><td class="filt-reason">".mortgage" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.dns</td><td class="filt-reason">".dns" is a reserved or blocked string</td></tr>
+<tr><td class="filt-name">.forum</td><td class="filt-reason">".forum" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.talk</td><td class="filt-reason">".talk" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.wine</td><td class="filt-reason">".wine" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.yoga</td><td class="filt-reason">".yoga" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.school</td><td class="filt-reason">".school" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.meet</td><td class="filt-reason">".meet" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.call</td><td class="filt-reason">".call" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.safe</td><td class="filt-reason">".safe" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.zero</td><td class="filt-reason">".zero" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.next</td><td class="filt-reason">".next" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.open</td><td class="filt-reason">".open" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.local</td><td class="filt-reason">".local" is a reserved or blocked string</td></tr>
+<tr><td class="filt-name">.build</td><td class="filt-reason">".build" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.root</td><td class="filt-reason">".root" is a reserved or blocked string</td></tr>
+<tr><td class="filt-name">.mint</td><td class="filt-reason">".mint" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.bond</td><td class="filt-reason">".bond" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.insure</td><td class="filt-reason">".insure" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.rehab</td><td class="filt-reason">".rehab" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.coach</td><td class="filt-reason">".coach" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.broker</td><td class="filt-reason">".broker" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.energy</td><td class="filt-reason">".energy" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.solar</td><td class="filt-reason">".solar" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.stream</td><td class="filt-reason">".stream" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.sport</td><td class="filt-reason">".sport" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.music</td><td class="filt-reason">".music" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.save</td><td class="filt-reason">".save" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.loan</td><td class="filt-reason">".loan" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.surgery</td><td class="filt-reason">".surgery" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.team</td><td class="filt-reason">".team" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.group</td><td class="filt-reason">".group" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.studio</td><td class="filt-reason">".studio" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.design</td><td class="filt-reason">".design" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.media</td><td class="filt-reason">".media" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.press</td><td class="filt-reason">".press" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.photo</td><td class="filt-reason">".photo" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.video</td><td class="filt-reason">".video" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.review</td><td class="filt-reason">".review" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.compare</td><td class="filt-reason">".compare" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.guide</td><td class="filt-reason">".guide" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.report</td><td class="filt-reason">".report" already exists in the root zone</td></tr>
+<tr><td class="filt-name">.analytics</td><td class="filt-reason">".analytics" already exists in the root zone</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Generated by the ICANN Risk Engine v1.1 — Expert picks curated for the ICANN 2026 new gTLD round</span>
+    <span>Not legal advice — For strategic planning purposes only</span>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  const table = document.getElementById('mainTable');
+  const thead = table.querySelector('thead');
+  const tbody = table.querySelector('tbody');
+  const headers = thead.querySelectorAll('th[data-col]');
+  let currentCol = 'rank';
+  let ascending = true;
+
+  const tierOrder = { 'T1': 1, 'T2': 2, 'T3': 3 };
+
+  function sortTable(col, type) {
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    rows.sort((a, b) => {
+      let va, vb;
+      if (type === 'str') {
+        va = a.dataset[col] || '';
+        vb = b.dataset[col] || '';
+        return ascending ? va.localeCompare(vb) : vb.localeCompare(va);
+      } else if (type === 'tier') {
+        va = tierOrder[a.dataset[col]] || 9;
+        vb = tierOrder[b.dataset[col]] || 9;
+      } else {
+        va = parseFloat(a.dataset[col]) || 0;
+        vb = parseFloat(b.dataset[col]) || 0;
+      }
+      return ascending ? va - vb : vb - va;
+    });
+    rows.forEach(r => tbody.appendChild(r));
+  }
+
+  headers.forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.col;
+      const type = th.dataset.type;
+      if (currentCol === col) {
+        ascending = !ascending;
+      } else {
+        currentCol = col;
+        ascending = (col === 'rank' || col === 'name' || col === 'risk') ? true : false;
+      }
+      headers.forEach(h => {
+        h.classList.remove('sorted');
+        h.querySelector('.sort-arrow').innerHTML = '&#9650;';
+      });
+      th.classList.add('sorted');
+      th.querySelector('.sort-arrow').innerHTML = ascending ? '&#9650;' : '&#9660;';
+      sortTable(col, type);
+    });
+  });
+})();
+</script>
+</body>
+</html>
