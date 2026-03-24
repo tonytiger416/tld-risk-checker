@@ -71,6 +71,43 @@ const HIGH_CONTENTION_STRINGS = new Set([
   'singles', 'solar', 'repair', 'shoes', 'holiday', 'guru', 'expert',
   'careers', 'productions', 'limited', 'tips', 'town', 'voyage', 'wtf',
   'works', 'black', 'red', 'blue', 'pink', 'page',
+  // 2026 high-demand strings — portfolio operators will target these
+  // Short premium generics (3-4 char meaningful words)
+  'key', 'air', 'gym', 'pod', 'doc', 'gen', 'lab', 'hub', 'ops',
+  'code', 'node', 'maps', 'trip', 'swap', 'firm', 'hire', 'flow',
+  'edge', 'core', 'base', 'lock', 'wire', 'cast', 'earn', 'sign',
+  'grid', 'seed', 'stay', 'tour', 'chef', 'lend', 'sync', 'pipe',
+  'repo', 'gate', 'labs', 'mesh',
+  // Crypto & Web3 — high-value 2026 categories
+  'token', 'stake', 'vault', 'wallet', 'chain', 'defi', 'dao',
+  // AI — breakout 2025/2026 category, portfolio operators will compete
+  'agent', 'model', 'prompt', 'neural', 'vector',
+  // Finance — high-value registrant verticals
+  'equity', 'wealth', 'asset', 'yield', 'quote', 'price', 'spend', 'ipo', 'esg',
+  // Developer & cloud — growing infrastructure market
+  'stack', 'deploy', 'cache', 'debug', 'compute', 'platform', 'runtime',
+  'protocol', 'bridge', 'signal', 'quantum',
+  // Professional services & healthcare
+  'nurse', 'therapy', 'claim', 'cover', 'audit', 'compliance', 'notary',
+  'contract', 'court', 'judge', 'mentor', 'consult',
+  // Travel, education, logistics
+  'resort', 'learn', 'tutor', 'course', 'cargo', 'freight', 'fleet',
+  // Communications, media, multi-market
+  'voice', 'inbox', 'recipe', 'pilot', 'address', 'survey',
+  // Short action verbs — high commercial intent words portfolio operators will target
+  'buy', 'sell', 'deal', 'save', 'plan', 'help', 'link', 'send',
+  'move', 'grow', 'lead', 'fix', 'fly', 'make',
+  // Finance — additional high-value strings
+  'bond', 'gold', 'stock', 'coin', 'hedge', 'shares', 'profit', 'dividend',
+  // Tech/infrastructure — additional coverage
+  'git', 'sql', 'iot', 'gpu', 'proxy', 'backup', 'pixel', 'render', 'driver',
+  // Emerging tech — 2025/2026 breakout categories
+  'ev', 'ar', 'vr', 'xr', 'llm',
+  // Lifestyle, services, identity
+  'pet', 'farm', 'diet', 'fish', 'taxi', 'ski', 'drug',
+  'logo', 'name', 'brand', 'trend', 'safe', 'fast', 'risk',
+  // Real estate
+  'condo', 'villa', 'loft', 'flat',
 ]);
 
 // Strings applied for in 2012 by multiple parties — strongest historical contention signal
@@ -244,13 +281,49 @@ export function checkContention(s: string): CategoryResult {
     });
   }
 
+  // ---- Common English word fallback -------------------------------------
+  // The demand/contention datasets are allowlists. Any real English word NOT
+  // explicitly listed would get zero signals — the same treatment as a random
+  // acronym like ".xqzf". This fallback catches recognisable words that
+  // slipped through the allowlists and gives them a baseline MEDIUM score.
+  //
+  // Heuristic: a string is likely a common English word if it is 3–8 chars,
+  // all-alpha, contains at least one vowel (not an opaque acronym like "xqz"),
+  // and follows pronounceable letter patterns (has consonant-vowel alternation).
+  const isAllAlpha = /^[a-z]+$/.test(s);
+  const hasVowel = /[aeiouy]/.test(s);
+  const hasConsonant = /[bcdfghjklmnpqrstvwxz]/.test(s);
+  const isPronounceable = hasVowel && hasConsonant;
+  // Reject strings that look like acronyms: all consonants, or no vowel patterns
+  const looksLikeWord = isAllAlpha && isPronounceable && s.length >= 3 && s.length <= 10;
+  const hasAnySignal = in2012 || inHighContention || commercialPoints > 0 || searchPoints > 0;
+
+  if (looksLikeWord && !hasAnySignal) {
+    // This is likely a real word the allowlists missed — give it a baseline
+    const wordPoints = s.length <= 4 ? 12 : s.length <= 6 ? 8 : 5;
+    score += wordPoints;
+    flags.push({
+      code: 'CON-008',
+      severity: 'MEDIUM',
+      title: `".${s}" is a recognisable English word — expect portfolio operator interest`,
+      detail: `".${s}" is a common, pronounceable word that registry portfolio operators systematically target. Even without specific contention history, real English words consistently attract more competing applications than opaque or coined strings. Professional operators like Identity Digital, Radix, and GMO Registry run keyword-based acquisition strategies that flag short, meaningful words automatically.`,
+      guidebookRef: 'AGB Section 5, pp. 130–170',
+      recommendation: 'Budget for at least one competing application. Short, meaningful English words are prime targets for portfolio operators — prepare a contention resolution strategy.',
+      stats: [
+        { emoji: '👥', label: 'Expected applicants', value: s.length <= 4 ? '2–5 est.' : '1–3 est.' },
+        { emoji: '💰', label: 'Auction reserve', value: s.length <= 4 ? '$500K – $3M est.' : '$200K – $1M est.' },
+        { emoji: '🏢', label: 'Likely operators', value: 'Portfolio operators (keyword strategy)' },
+      ],
+    });
+  }
+
   // ---- String length premium -------------------------------------------
   // Short strings command higher demand — BUT only when the string also has
   // real semantic/market signals. A 4-char opaque acronym like ".hsgs" attracts
   // far less interest than a 4-char semantic string like ".auth" or ".auth".
   // Without any other signal, length alone only adds a small scarcity note at LOW.
   const len = s.length;
-  const hasSemanticSignal = in2012 || inHighContention || commercialPoints > 0 || searchPoints > 0;
+  const hasSemanticSignal = in2012 || inHighContention || commercialPoints > 0 || searchPoints > 0 || (looksLikeWord && !hasAnySignal);
 
   if (len <= 5) {
     if (hasSemanticSignal) {
