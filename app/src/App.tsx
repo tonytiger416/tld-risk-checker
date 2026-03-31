@@ -1,5 +1,4 @@
-import { useState, useRef } from 'react';
-import { assess, normalizeString } from './engine/assess';
+import { useState, useRef, useCallback } from 'react';
 import type { TLDRiskReport } from './engine/types';
 import { RiskReport } from './components/RiskReport';
 import { RiskBadge } from './components/RiskBadge';
@@ -32,9 +31,10 @@ export default function App() {
   }
 
   function removeTag(tag: string) {
+    const norm = tag.trim().toLowerCase().replace(/^\.+/, '');
     setTags(prev => prev.filter(t => t !== tag));
-    setReports(prev => prev.filter(r => r.normalized !== normalizeString(tag)));
-    if (activeReport === normalizeString(tag)) setActiveReport(null);
+    setReports(prev => prev.filter(r => r.normalized !== norm));
+    if (activeReport === norm) setActiveReport(null);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -48,15 +48,15 @@ export default function App() {
     e.preventDefault(); addTag(e.clipboardData.getData('text'));
   }
 
-  async function runAssessment() {
+  const runAssessment = useCallback(async () => {
     if (tags.length === 0) { setError('Enter at least one TLD string.'); return; }
     setLoading(true); setError(''); setReports([]); setActiveReport(null);
-    await new Promise(r => setTimeout(r, 50));
+    const { assess } = await import('./engine/assess');
     const results = tags.map(t => assess(t, 'open'));
     setReports(results);
     setActiveReport(results[0].normalized);
     setLoading(false);
-  }
+  }, [tags]);
 
   const activeReportData = reports.find(r => r.normalized === activeReport);
 
