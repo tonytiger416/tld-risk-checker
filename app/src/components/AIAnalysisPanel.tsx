@@ -218,8 +218,14 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
     );
   }
 
-  // Show loading state for the entire generation phase — only render structured UI when done
-  if (genState === 'generating') {
+  const isStreaming = genState === 'generating';
+  const parsed = parseAnalysis(displayText);
+  // Verdict is always derived from the engine — never from Claude's text
+  const verdict = computeVerdict(report);
+  const verdictStyle = VERDICT_STYLE[verdict];
+
+  // Show loading indicator before any text arrives
+  if (isStreaming && !displayText) {
     return (
       <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-4">
         <div className="flex items-center gap-2.5">
@@ -234,19 +240,17 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
     );
   }
 
-  const parsed = parseAnalysis(displayText);
-  // Verdict is always derived from the engine — never from Claude's text
-  const verdict = computeVerdict(report);
-  const verdictStyle = VERDICT_STYLE[verdict];
-
   return (
     <div className="space-y-3">
 
       {/* Recommendation */}
       <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-5">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-[10px] font-mono font-bold text-[#7ab8e0] tracking-[0.2em] uppercase">AI Recommendation</span>
-          <button onClick={() => { startedRef.current = false; doGenerate(); }} className="text-[11px] font-mono text-[#5a98c8] hover:text-[#90c8f0] transition-colors" title="Regenerate">↻ regenerate</button>
+          <span className="text-[10px] font-mono font-bold text-[#7ab8e0] tracking-[0.2em] uppercase">
+            AI Recommendation
+            {isStreaming && <span className="ml-2 text-[#3a7ab8] animate-pulse">streaming...</span>}
+          </span>
+          {!isStreaming && <button onClick={() => { startedRef.current = false; doGenerate(); }} className="text-[11px] font-mono text-[#5a98c8] hover:text-[#90c8f0] transition-colors" title="Regenerate">↻ regenerate</button>}
         </div>
 
         <div className={`inline-flex items-center gap-2.5 px-4 py-2 rounded border ${verdictStyle.border} mb-4`}>
@@ -256,9 +260,10 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
           </span>
         </div>
 
-        {parsed.recommendationBody && (
+        {(parsed.recommendationBody || isStreaming) && (
           <p className="text-sm text-[#d8eeff] leading-relaxed">
             {parsed.recommendationBody}
+            {isStreaming && !parsed.competitiveLandscape && <span className="inline-block w-1.5 h-4 bg-[#3a7ab8] animate-pulse align-middle ml-0.5" />}
           </p>
         )}
       </div>
@@ -301,6 +306,7 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
 
           <p className="text-sm text-[#d8eeff] leading-relaxed">
             {parsed.competitiveLandscape}
+            {isStreaming && parsed.competitiveLandscape && <span className="inline-block w-1.5 h-4 bg-[#3a7ab8] animate-pulse align-middle ml-0.5" />}
           </p>
         </div>
       )}
