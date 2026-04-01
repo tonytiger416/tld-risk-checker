@@ -218,8 +218,14 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
     );
   }
 
-  // Show loading state for the entire generation phase — only render structured UI when done
-  if (genState === 'generating') {
+  const isGenerating = genState === 'generating';
+  const parsed = parseAnalysis(displayText);
+  // Verdict is always derived from the engine — never from Claude's text
+  const verdict = computeVerdict(report);
+  const verdictStyle = VERDICT_STYLE[verdict];
+
+  // Show loading dots only when no text has arrived yet
+  if (isGenerating && !displayText) {
     return (
       <div className="bg-[#071830] border border-[#0e2a4a] rounded-lg p-4">
         <div className="flex items-center gap-2.5">
@@ -233,11 +239,6 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
       </div>
     );
   }
-
-  const parsed = parseAnalysis(displayText);
-  // Verdict is always derived from the engine — never from Claude's text
-  const verdict = computeVerdict(report);
-  const verdictStyle = VERDICT_STYLE[verdict];
 
   return (
     <div className="space-y-3">
@@ -256,9 +257,12 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
           </span>
         </div>
 
-        {parsed.recommendationBody && (
+        {(parsed.recommendationBody || isGenerating) && (
           <p className="text-sm text-[#d8eeff] leading-relaxed">
             {parsed.recommendationBody}
+            {isGenerating && !parsed.competitiveLandscape && (
+              <span className="inline-block w-1.5 h-4 bg-[#3a7ab8] ml-0.5 align-text-bottom animate-pulse" />
+            )}
           </p>
         )}
       </div>
@@ -301,6 +305,9 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
 
           <p className="text-sm text-[#d8eeff] leading-relaxed">
             {parsed.competitiveLandscape}
+            {isGenerating && parsed.competitiveLandscape && !parsed.objectionSignals && (
+              <span className="inline-block w-1.5 h-4 bg-[#3a7ab8] ml-0.5 align-text-bottom animate-pulse" />
+            )}
           </p>
         </div>
       )}
