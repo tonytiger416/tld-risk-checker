@@ -1,18 +1,25 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import type { TLDRiskReport } from './engine/types';
 import { RiskReport } from './components/RiskReport';
 import { RiskBadge } from './components/RiskBadge';
 
 const MAX_STRINGS = 5;
 
+function getUrlTlds(): string[] {
+  const params = new URLSearchParams(window.location.search);
+  const raw = params.get('tld') || '';
+  return raw.split(/[\s,]+/).map(s => s.trim().replace(/^\.+/, '').toLowerCase()).filter(Boolean).slice(0, MAX_STRINGS);
+}
+
 export default function App() {
   const [inputValue, setInputValue] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>(getUrlTlds);
   const [reports, setReports] = useState<TLDRiskReport[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeReport, setActiveReport] = useState<string | null>(null);
   const [error, setError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const autoRan = useRef(false);
 
   function addTag(raw: string) {
     const parts = raw.split(/[\s,\n]+/).map(s => s.trim().replace(/^\.+/, '').toLowerCase()).filter(Boolean);
@@ -57,6 +64,13 @@ export default function App() {
     setActiveReport(results[0].normalized);
     setLoading(false);
   }, [tags]);
+
+  useEffect(() => {
+    if (tags.length > 0 && !autoRan.current) {
+      autoRan.current = true;
+      runAssessment();
+    }
+  }, [runAssessment]);
 
   const activeReportData = reports.find(r => r.normalized === activeReport);
 
