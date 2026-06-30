@@ -31,8 +31,9 @@ const CPE_HIGH_RISK = new Set([
 // NOTE: strings already covered by regulated.ts are excluded here.
 const GAC_EARLY_WARNING_RISK = new Set([
   // Electoral / governmental
-  'vote', 'voting', 'election', 'elections', 'parliament', 'government',
-  'gov', 'democracy', 'republican', 'democrat',
+  'vote', 'voting', 'election', 'elections', 'elect', 'electoral',
+  'ballot', 'ballots', 'referendum', 'suffrage',
+  'parliament', 'government', 'gov', 'democracy', 'republican', 'democrat',
   // Defence & security
   'military', 'army', 'navy', 'airforce', 'police', 'security',
   'intelligence', 'nuclear', 'weapons', 'arms', 'gun', 'guns', 'ammo',
