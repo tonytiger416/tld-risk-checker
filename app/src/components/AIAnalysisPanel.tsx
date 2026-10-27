@@ -132,7 +132,7 @@ function parseAnalysis(raw: string): ParsedAnalysis {
 
 function friendlyError(err: Error): string {
   const msg = err.message;
-  if (msg === 'NO_KEY') return 'AI analysis not configured — add VITE_CLAUDE_API_KEY in project settings.';
+  if (msg === 'NO_KEY') return 'AI analysis not configured — add ANTHROPIC_API_KEY in Vercel project settings.';
   if (msg.includes('401') || msg.includes('authentication')) return 'Invalid API key.';
   if (msg.includes('429') || msg.includes('rate')) return 'Rate limit — wait a moment and retry.';
   if (msg.includes('529') || msg.includes('overload')) return 'Claude is busy — retry in a few seconds.';
@@ -150,8 +150,6 @@ interface Props {
 type GenState = 'generating' | 'done' | 'error';
 
 export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjectionSignals }: Props) {
-  const hasApiKey = !!(import.meta.env.VITE_CLAUDE_API_KEY as string | undefined);
-
   const [genState, setGenState] = useState<GenState>(cachedText ? 'done' : 'generating');
   const [displayText, setDisplayText] = useState(cachedText);
   const [errorMsg, setErrorMsg] = useState('');
@@ -174,7 +172,6 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
 
   useEffect(() => {
     if (cachedText) return;
-    if (!hasApiKey) return;
     if (startedRef.current) return;
     startedRef.current = true;
     doGenerate();
@@ -187,17 +184,6 @@ export function AIAnalysisPanel({ report, cachedText, onCacheUpdate, onObjection
     if (parsed.objectionSignals) onObjectionSignals(parsed.objectionSignals);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [genState]);
-
-  if (!hasApiKey) {
-    return (
-      <div className="border border-dashed border-[#0e2a4a] rounded-lg px-5 py-6 text-center">
-        <p className="text-sm font-mono text-[#6a9ec0]">AI analysis not configured</p>
-        <p className="text-xs text-[#4a88b8] mt-1">
-          Add <code className="font-mono text-[#70b8ff]">VITE_CLAUDE_API_KEY</code> in project settings → redeploy.
-        </p>
-      </div>
-    );
-  }
 
   if (genState === 'error') {
     return (

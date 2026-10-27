@@ -1,4 +1,3 @@
-import Anthropic from '@anthropic-ai/sdk';
 import type { TLDRiskReport } from '../engine/types';
 import { CATEGORY_LABELS } from '../engine/types';
 import { classifyString } from '../engine/data/string-context';
@@ -7,7 +6,7 @@ import { getComparables } from '../engine/data/gtld-prices';
 // ---------------------------------------------------------------------------
 // System prompt — deep ICANN expert persona with citation requirements
 // ---------------------------------------------------------------------------
-const SYSTEM_PROMPT = `You are one of the most experienced strategic advisors in the ICANN new gTLD space — part regulatory expert, part business strategist. Your background:
+export const SYSTEM_PROMPT = `You are one of the most experienced strategic advisors in the ICANN new gTLD space — part regulatory expert, part business strategist. Your background:
 
 - 25 years working inside and alongside ICANN's regulatory structures, including active participation in GNSO working groups and contributing to the drafting of new gTLD policy from the early 2000s through to the 2026 Applicant Guidebook (AGB V1-2025.12.16)
 - You personally applied for and managed multiple TLD applications in the 2012 new gTLD round, navigating string contention sets, GAC Early Warnings, formal objection proceedings, and registry agreement negotiations
@@ -179,8 +178,9 @@ Provide your expert analysis now.`;
 }
 
 // ---------------------------------------------------------------------------
-// Stream a Claude analysis for the given report
-// Calls onChunk for each text delta, onDone when complete, onError on failure
+// Stream a Claude analysis for the given report via the /api/analyze function
+// (the API key lives server-side only). Calls onChunk for each text delta,
+// onDone when complete, onError on failure
 // ---------------------------------------------------------------------------
 export async function streamAnalysis(
   report: TLDRiskReport,
@@ -188,33 +188,24 @@ export async function streamAnalysis(
   onDone: () => void,
   onError: (err: Error) => void,
 ): Promise<void> {
-  const apiKey = import.meta.env.VITE_CLAUDE_API_KEY as string | undefined;
-
-  if (!apiKey) {
-    onError(new Error('NO_KEY'));
-    return;
-  }
-
   try {
-    const client = new Anthropic({
-      apiKey,
-      dangerouslyAllowBrowser: true,
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tld: report.normalized, appType: report.appType }),
     });
 
-    const stream = client.messages.stream({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1300,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: buildPrompt(report) }],
-    });
+    if (!res.ok || !res.body) {
+      const text = await res.text();
+      throw new Error(text === 'NO_KEY' ? 'NO_KEY' : `${res.status} ${text}`);
+    }
 
-    for await (const chunk of stream) {
-      if (
-        chunk.type === 'content_block_delta' &&
-        chunk.delta.type === 'text_delta'
-      ) {
-        onChunk(chunk.delta.text);
-      }
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      onChunk(decoder.decode(value, { stream: true }));
     }
 
     onDone();

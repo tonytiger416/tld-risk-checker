@@ -9,8 +9,11 @@ The user is a non-developer. Keep explanations simple and jargon-free.
 ## Tech Stack
 - Vite + React + TypeScript + Tailwind CSS v4 (`@tailwindcss/vite` plugin — no `tailwind.config.js`)
 - Recharts for radar chart
-- Anthropic SDK for streaming AI analysis (client-side, `dangerouslyAllowBrowser: true`)
-- No backend — all logic runs client-side
+- Anthropic SDK for streaming AI analysis — **server-side only**, in the Vercel function `api/analyze.ts`
+  (key: `ANTHROPIC_API_KEY`, set in Vercel). The browser sends only `{ tld, appType }`; the function re-runs
+  `assess()` and builds the prompt itself. Never call Claude from `app/src` and never use a `VITE_*` name for a
+  secret: Vite inlines every `VITE_*` var into the public JS bundle (this leaked a live key in Oct 2026).
+- All other logic runs client-side
 
 ## Project Structure
 ```
